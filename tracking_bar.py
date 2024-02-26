@@ -9,7 +9,7 @@ barCount := barCount + 1
 
 // 檢查是否為第二個條形，並捕獲其收盤價
 var float secondClose = na
-if (barCount == 500)
+if (barCount == 2)
     secondClose := close
     label.new(bar_index, secondClose, text="Second Close: " + str.tostring(secondClose), style=label.style_cross, color=color.blue, size=size.normal)
 
