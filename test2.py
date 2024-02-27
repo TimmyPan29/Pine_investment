@@ -34,7 +34,7 @@ if (barCount == 2)
     close_SBU := close_SBU>close_SBD? close_SBU:close_SBD
     close_SBD := close_SBU>close_SBD? close_SBD:close_SBU
 if (barCount == 3)
-    state :=1 /////////
+    state :=1 
     Buff_close3 := close
     slope1 := Buff_close2-Buff_close1>0? 1:-1
     slope2 := Buff_close3-Buff_close2>0? 1:-1
@@ -76,16 +76,16 @@ if(state==1 and barCount>3) //從第四點開始
         state := 3
     if(barstate.islast)
         state := 4
-    else
-        state := 1
 if(state==2)
     if(slope1!=slope2) 
         Buff_key2 := Buff_close2
         if(Buff_key2>Buff_key1) //代表上破
             close_SBU := Buff_key2
+            close_SBD := Buff_key1
             isbreakSBU := false
         else //下破
-            close_SBD := Buff_key1
+            close_SBD := Buff_key2
+            close_SBU := Buff_key1
             isbreakSBD := false
         Buff_key1 := Buff_key2
         Buff_key2 := na
@@ -99,6 +99,8 @@ if(state==3)
         Buff_key1 := Buff_key1
     state := 1
 if(state==4)
-    label.new(bar_index, close, text="Last Close: " + str.tostring(close), style=label.style_label_down, color=color.red, yloc=yloc.price)
-    line.new(x1=barCount, y1=close_SBU, x2=barCount + 100, y2=close_SBU, width=2, color=color.blue)
-    line.new(x1=barCount, y1=close_SBD, x2=barCount + 100, y2=close_SBD, width=2, color=color.blue)
+    line.new(x1=barCount-100, y1=close_SBU, x2=barCount + 100, y2=close_SBU, width=2, color=color.purple)
+    line.new(x1=barCount-100, y1=close_SBD, x2=barCount + 100, y2=close_SBD, width=2, color=color.purple)
+    line.new(x1=barCount-100, y1=Buff_key2, x2=barCount + 100, y2=Buff_key2, width=2, color=color.yellow)
+
+    
