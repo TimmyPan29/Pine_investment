@@ -15,3 +15,11 @@ ine.new(x1=barCount-100, y1=close_SBU, x2=barCount + 100, y2=close_SBU, width=2,
     line.new(x1=barCount-100, y1=close_SBD, x2=barCount + 100, y2=close_SBD, width=2, color=color.purple)
     line.new(x1=barCount-100, y1=Buff_close2, x2=barCount + 100, y2=Buff_close2, width=2, color=color.yellow)
     line.new(x1=barCount-100, y1=Buff_key1, x2=barCount + 100, y2=Buff_key1, width=2, color=color.orange)
+    
+    if(na(mylabel)==false)
+            label.delete(mylabel)
+        mylabel := label.new(bar_index, high, "Close is above Open", color=color.green)
+        
+    if (na(myLine) == false)
+            line.delete(myLine)
+        myLine := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.red, style=line.style_solid)
