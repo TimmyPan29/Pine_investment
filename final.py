@@ -28,6 +28,8 @@ var line myLine = na
 var label mylabel  = na
 var line myLine2 = na
 var label mylabel2  = na
+var label label_SBU = na
+var label label_SBD = na
 barCount := barCount+1
 
 ////**初始條件
@@ -69,7 +71,7 @@ if (barCount == 3)
 //  *state3 : state2的反
 //  *state4 : end並畫圖
 //  *破的轉點一律叫key2，缺少突破的控制訊號
-//  *支撐被破之後 SBU要馬上跟上，而在嚴格遞減的情況下，此時的SBD不可以長出來
+//  *支撐被破之後 SBU要馬上跟上，而在嚴格遞減的情況下，此時的SBD不可以長出來 
 //  *//   
 
 if(state==1 and barCount>3) //從第四點開始
@@ -110,7 +112,7 @@ if(state==2)
             close_SBD := na
         Buff_key2 := na
     state := 1
-    if(barCount==Number_bar)                               
+    if(barstate.islast)                               
         state := 4
 
 if(state==3)
@@ -119,13 +121,13 @@ if(state==3)
     else
         Buff_key1 := Buff_key1
     state := 1
-    if(barCount==Number_bar)                                
+    if(barstate.islast)                                
         state := 4
 
 if(state==4)
     if(na(mylabel)==false)
         label.delete(mylabel)
-    mylabel := label.new(bar_index, low, text="k bar: " + str.tostring(bar_index+1), color=color.green) 
+    mylabel := label.new(x=bar_index, y=low, text="k bar: " + str.tostring(bar_index+1),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.green,style = label.style_arrowup) 
     if (na(myLine) == false)
         line.delete(myLine)
     myLine := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.red, style=line.style_solid)
@@ -135,6 +137,13 @@ if(state==4)
     //line.new(x1=1-100, y1=Buff_close2, x2=1 + 100, y2=Buff_close2, width=2, color=color.yellow)
     //line.new(x1=1-100, y1=Buff_key1, x2=1 + 100, y2=Buff_key1, width=2, color=color.orange)
     //line.new(x1=1-100, y1=Buff_close3, x2=1 + 100, y2=Buff_close3, width=2, color=color.black)
+
+    if(na(label_SBU)==false)
+        label.delete(label_SBU)
+    label_SBU := label.new(x=bar_index, y=close_SBU, text="SBU: " + str.tostring(close_SBU), xloc = xloc.bar_index,yloc=yloc.price,color=color.red) 
+
+    if(na(label_SBD)==false)
+        label.delete(label_SBD)
+    label_SBD := label.new(x=bar_index, y=close_SBD, text="SBD: " + str.tostring(close_SBD), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up) 
     state := na
 
-    

@@ -28,6 +28,8 @@ var line myLine = na
 var label mylabel  = na
 var line myLine2 = na
 var label mylabel2  = na
+var label label_SBU = na
+var label label_SBD = na
 barCount := barCount+1
 
 ////**初始條件
@@ -69,7 +71,7 @@ if (barCount == 3)
 //  *state3 : state2的反
 //  *state4 : end並畫圖
 //  *破的轉點一律叫key2，缺少突破的控制訊號
-//  *支撐被破之後 SBU要馬上跟上，而在嚴格遞減的情況下，此時的SBD不可以長出來
+//  *支撐被破之後 SBU要馬上跟上，而在嚴格遞減的情況下，此時的SBD不可以長出來 反之亦然，壓力也是同樣處理方式
 //  *//   
 
 if(state==1 and barCount>3) //從第四點開始
@@ -130,9 +132,17 @@ if(state==4)
         line.delete(myLine)
     myLine := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.red, style=line.style_solid)
 
+    if(na(label_SBU)==false)
+        label.delete(label_SBU)
+    label_SBU := label.new(bar_index+1, low, text="SBU: " + str.tostring(close_SBU), color=color.black) 
+
+    if(na(label_SBD)==false)
+        label.delete(label_SBD)
+    label_SBD := label.new(bar_index+1, low, text="SBD: " + str.tostring(close_SBD), color=color.black) 
+
     line.new(x1=bar_index-100, y1=close_SBU, x2=bar_index +100, y2=close_SBU, width=2, color=color.purple)
     line.new(x1=bar_index-100, y1=close_SBD, x2=bar_index +100, y2=close_SBD, width=2, color=color.purple)
-    line.new(x1=1-100, y1=Buff_close2, x2=1 + 100, y2=Buff_close2, width=2, color=color.yellow)
+    //line.new(x1=1-100, y1=Buff_close2, x2=1 + 100, y2=Buff_close2, width=2, color=color.yellow)
     //line.new(x1=1-100, y1=Buff_key1, x2=1 + 100, y2=Buff_key1, width=2, color=color.orange)
     //line.new(x1=1-100, y1=Buff_close3, x2=1 + 100, y2=Buff_close3, width=2, color=color.black)
     state := na

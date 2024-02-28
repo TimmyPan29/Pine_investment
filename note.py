@@ -36,3 +36,10 @@ if(state==4)
     //line.new(x1=1-100, y1=Buff_key1, x2=1 + 100, y2=Buff_key1, width=2, color=color.orange)
     //line.new(x1=1-100, y1=Buff_close3, x2=1 + 100, y2=Buff_close3, width=2, color=color.black)
     state := na
+
+//**待增加事項
+  *新增 Multi-Timeframe 
+  *自通判斷當前時區
+  *把他能多功一次畫很多級別
+  **//
+    
