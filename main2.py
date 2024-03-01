@@ -77,7 +77,7 @@ if(state==1 and barCount>2) //從第三點開始
     else
         state := 3
     if(na(close_SBU) or na(close_SBD))
-        state :=4
+        state := 4
 
 if(state==2)
     if(slope1!=slope2)
@@ -110,11 +110,11 @@ if(state==4)
     if(slope1!=slope2)
         Buff_key2 := Buff_close2
         index_key2 := barCount-1
-        if(isbreakSBU)
+        if(na(isbreakSBU))
             close_SBU := Buff_key2
             index_SBU := index_key2
             isbreakSBU := false
-        if(isbreakSBD)
+        if(na(isbreakSBD))
             close_SBD := Buff_key2
             index_SBD := index_key2
             isbreakSBD := false
