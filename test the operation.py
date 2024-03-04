@@ -5,7 +5,7 @@ indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 //  *自定義參數
 //  *//
 
-var int Number_bar = 9
+var int Number_bar = 4
 
 ////**變數
 //  *注意刷新sbd sbu後各項變數要初始化
@@ -34,7 +34,9 @@ var label mylabel2  = na
 var label label_SBU = na
 var label label_SBD = na
 var label test = na
+
 var int testint = 0
+var string teststr = na
 
 barCount := barCount+1
 
@@ -43,15 +45,20 @@ barCount := barCount+1
 //  *// 
 
 if (barCount == 1)
-    close_SBU := close
     Buff_close1 := close //Buff_close1 is generated first
-    Buff_key1 := Buff_close1
     index_key1 := barCount-1
+    Buff_key1 := Buff_close1
 if (barCount == 2)
-    close_SBD := close
     Buff_close2 := close
-    close_SBU := close_SBU>close_SBD? close_SBU:close_SBD
-    close_SBD := close_SBU>close_SBD? close_SBD:close_SBU
+    index_key2 := barCount-1
+    close_SBU := Buff_close2>Buff_close1? Buff_close2:Buff_close1
+    close_SBD := Buff_close2<Buff_close1? Buff_close2:Buff_close1
+    if(Buff_close2 - Buff_close1 >0)
+        index_SBD := index_key1
+        index_SBU := barCount-1
+    else
+        index_SBU := index_key1
+        index_SBD := barCount-1
     state := 1
 
 ////**向上突破 向下突破 待在空間中 三種情況
@@ -66,53 +73,60 @@ if (barCount == 2)
 //  *//   
 
 if(state==1 and barCount>2) //從第三點開始
-    isbreakSBU := close>close_SBU? true : false
-    isbreakSBD := close<close_SBD? true : false
-    Buff_close1 := Buff_close2
-    Buff_close2 := Buff_close3
+    isbreakSBU := na(close_SBU)? na : close>close_SBU? true : false
+    isbreakSBD := na(close_SBD)? na : close<close_SBD? true : false
+    if(not na(Buff_close3))
+        Buff_close1 := Buff_close2
+        Buff_close2 := Buff_close3
+    else
+        Buff_close1 := Buff_close1
+        Buff_close2 := Buff_close2
     Buff_close3 := close
-    slope1 := slope2
+    slope1 := Buff_close2-Buff_close1>0? 1:-1
     slope2 := Buff_close3-Buff_close2>0? 1:-1  
     //test := label.new(bar_index,close,text= "hello world")
-    if(isbreakSBU or isbreakSBD)
-        state := 2
     if((not na(close_SBD)) and (not na(close_SBU)))
         state := 3
+    if(isbreakSBU or isbreakSBD)
+        state := 2
     if(na(close_SBU) or na(close_SBD))
         state := 4
-        testint := 6
 
 if(state==2)
-    testint := 2
+    
     if(slope1!=slope2)
         Buff_key1 := Buff_close2
         index_key1 := barCount-2
     //else //Buff_key1維持原樣
     if(isbreakSBU)
+
         close_SBU := na
         isbreakSBU := na
         close_SBD := Buff_key1
         index_SBD := index_key1
     if(isbreakSBD)
+
         close_SBD := na
         isbreakSBD := na
         close_SBU := Buff_key1
         index_SBU := index_key1
     state := 1
-    if(barstate.islast)                               
+    if(barCount==Number_bar)                               
         state := 5
 
 if(state==3)
+    
     if(slope1!=slope2)
         Buff_key1 := Buff_close2
         index_key1 := barCount-2
     else
         Buff_key1 := Buff_key1
     state := 1
-    if(barstate.islast)                                
+    if(barCount==Number_bar)                                
         state := 5
 
 if(state==4)
+
     if(slope1!=slope2)
         Buff_key2 := Buff_close2
         index_key2 := barCount-2
@@ -134,29 +148,27 @@ if(state==4)
         close_SBD := na
         isbreakSBD := na
     state := 1
-    if(barstate.islast)                                
+    if(barCount==Number_bar)                                
         state := 5
 
 if(state==5)
     if((not na(close_SBU)) and na(close_SBD)) // ⎻⎻📉
         index_SBU := index_key1
         index_SBD := na
-        testint := 1
     if((not na(close_SBD)) and na(close_SBU)) // __📈
         index_SBD := index_key1
         index_SBU := na
-        testint := 2
 
     if(na(mylabel)==false)
         label.delete(mylabel)
-    mylabel := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(testint),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+    mylabel := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
     if (na(myLine) == false)
         line.delete(myLine)
     myLine := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
 
     line.new(x1=index_SBU, y1=close_SBU, x2=index_SBU +100, y2=close_SBU, width=2, color=color.black)
     line.new(x1=index_SBD, y1=close_SBD, x2=index_SBD +100, y2=close_SBD, width=2, color=color.black)
-    line.new(x1=index_key1, y1=Buff_close2, x2=index_key1 +1, y2=Buff_close2, width=2, color=color.yellow)
+    //line.new(x1=bar_index-1, y1=Buff_close2, x2=bar_index, y2=Buff_close2, width=2, color=color.yellow)
     //line.new(x1=1-100, y1=Buff_key1, x2=1 + 100, y2=Buff_key1, width=2, color=color.orange)
     //line.new(x1=1-100, y1=Buff_close3, x2=1 + 100, y2=Buff_close3, width=2, color=color.black)
 
