@@ -84,3 +84,7 @@ plotcandle(openPrice, highPrice, lowPrice, closePrice, title="K-Bar")
 
 //getyear
 currentYear = year(time)
+
+//tonumber
+currentperiod = timeframe.period
+currentperiod_div4 = str.tostring(str.tonumber(currentperiod)/4)

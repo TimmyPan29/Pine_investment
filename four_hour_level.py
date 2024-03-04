@@ -4,13 +4,14 @@ indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 ////**參數
 //  *自定義參數
 //  *//
-
+currentperiod = timeframe.period
+currentperiod_div4 = str.tostring(str.tonumber(currentperiod)/4)
+currentYear = year(time)
 var int Number_bar = 3
 
 ////**4over4變數區
 //  *注意刷新sbd sbu後各項變數要初始化
 //  *//
-
 var int BarCount = 0
 var int slope1_4over4 = 0
 var int slope2_4over4 = 0
@@ -104,10 +105,10 @@ var line Line_Bar_3over4 = na
 var label Label_Bar_3over4  = na
 var label Label_SBU_3over4 = na
 var label Label_SBD_3over4 = na
+
 ////**測試變數區
 //  *
 //  *//
-
 var label test = na
 var int testint = 0
 var string teststr = na
@@ -115,14 +116,14 @@ var string teststr = na
 ////**初始條件
 //  *先處理前三個點,初始化SBD SBU
 //  *// 
-ReqClose = request.security_lower_tf(syminfo.tickerid, "60", close)
+ReqClose = request.security_lower_tf(syminfo.tickerid, {currentperiod}, close)
 close_1over4 = array.get(ReqClose,0)
 close_2over4 = array.get(ReqClose,1)
 close_3over4 = array.get(ReqClose,2)
 close_4over4 = array.get(ReqClose,3)
 
 BarCount := BarCount+1
-
+if(currentYear>2009)
 if (BarCount == 1)
     Buff_close1_4over4 := close //Buff_close1_4over4 is generated first
     index_key1_4over4 := BarCount-1
