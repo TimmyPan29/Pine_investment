@@ -51,7 +51,36 @@ if(state==4)
   *週期大的壓力比週期小的壓力強
   *週期大的支撐比週期小的支撐強
   *找到4H的bound的之後 找4H+1min or +2min 的基礎
+  *大週期切小週期來分析 最後匯入小週期的ｋ線 
   **//
 
-  
+close_1over4 = array.get(Reqclose, 0)
+close_2over4 = array.get(Reqclose, 1)
+close_3over4 = array.get(Reqclose, 2)
+
+//@version=5
+indicator("`request.security_lower_tf()` Example", overlay = true)
+
+// If the current chart timeframe is set to 120 minutes, then the `arrayClose` array will contain two 'close' values from the 60 minute timeframe for each bar.
+arrClose = request.security_lower_tf(syminfo.tickerid, "60", close)
+
+if bar_index == last_bar_index - 1
+    label.new(last_bar_index-1, high, str.tostring(arrClose))
+    firstPrice = array.get(arrClose, 1)
+    label.new(last_bar_index-1, high-500, str.tostring(firstPrice),style=label.style_triangledown,color = color.green)
     
+//@version=5
+indicator("My Kbar Example", overlay=true)
+
+// 请求特定周期的开、高、低、收价格
+timeframe = "D" // 例如，使用日周期
+openPrice = request.security(syminfo.tickerid, timeframe, open)
+highPrice = request.security(syminfo.tickerid, timeframe, high)
+lowPrice = request.security(syminfo.tickerid, timeframe, low)
+closePrice = request.security(syminfo.tickerid, timeframe, close)
+
+// 绘制K线图
+plotcandle(openPrice, highPrice, lowPrice, closePrice, title="K-Bar")
+
+//getyear
+currentYear = year(time)

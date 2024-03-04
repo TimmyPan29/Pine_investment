@@ -5,7 +5,7 @@ indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 //  *自定義參數
 //  *//
 
-var int Number_bar = 53
+var int Number_bar = 3
 
 ////**變數
 //  *注意刷新sbd sbu後各項變數要初始化
@@ -162,14 +162,14 @@ if(state==5)
 
     if(na(mylabel)==false)
         label.delete(mylabel)
-    mylabel := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(Buff_key1)+",,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+    mylabel := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
     if (na(myLine) == false)
         line.delete(myLine)
     myLine := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
 
     line.new(x1=index_SBU, y1=close_SBU, x2=index_SBU +100, y2=close_SBU, width=2, color=color.black)
     line.new(x1=index_SBD, y1=close_SBD, x2=index_SBD +100, y2=close_SBD, width=2, color=color.black)
-    line.new(x1=bar_index-1, y1=Buff_close2, x2=bar_index, y2=Buff_close2, width=2, color=color.yellow)
+    //line.new(x1=bar_index-1, y1=Buff_close2, x2=bar_index, y2=Buff_close2, width=2, color=color.yellow)
     //line.new(x1=1-100, y1=Buff_key1, x2=1 + 100, y2=Buff_key1, width=2, color=color.orange)
     //line.new(x1=1-100, y1=Buff_close3, x2=1 + 100, y2=Buff_close3, width=2, color=color.black)
 
