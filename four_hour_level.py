@@ -170,7 +170,7 @@ if(GoGoFlag and SizeFlag)
 
 //initial2 at 4over4        
     if (BarCount == BarCountBuff+1)
-        Buff_close2_4over4 := close
+        Buff_close2_4over4 := close_4over4 ////////////////////
         index_key2_4over4 := BarCount-1
         close_SBU_4over4 := Buff_close2_4over4>Buff_close1_4over4? Buff_close2_4over4:Buff_close1_4over4
         close_SBD_4over4 := Buff_close2_4over4<Buff_close1_4over4? Buff_close2_4over4:Buff_close1_4over4
@@ -205,7 +205,7 @@ if(GoGoFlag and SizeFlag)
         else
             Buff_close1_4over4 := Buff_close1_4over4
             Buff_close2_4over4 := Buff_close2_4over4
-        Buff_close3_4over4 := close 
+        Buff_close3_4over4 := close_4over4////////////////////////////// 
         slope1_4over4 := Buff_close2_4over4-Buff_close1_4over4>0? 1:-1
         slope2_4over4 := Buff_close3_4over4-Buff_close2_4over4>0? 1:-1  
         if((not na(close_SBD_4over4)) and (not na(close_SBU_4over4)))
@@ -263,7 +263,7 @@ if(GoGoFlag and SizeFlag)
     if(state_3over4==2)        
         if(slope1_3over4!=slope2_3over4)
             Buff_key1_3over4 := Buff_close2_3over4
-            index_key1_3over4 := BarCount-2
+            index_key1_3over4 := BarCount-2  //////有些bar會被跳過 要怎麼處理?
         //else //Buff_key1 keep origin
         if(isbreakSBU_3over4)
 
