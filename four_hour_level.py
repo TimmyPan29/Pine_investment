@@ -294,7 +294,7 @@ if(GoGoFlag and SizeFlag)
             state_4over4 := 5
 
 //state3 3over4
-    if(state_4over4==3)
+    if(state_3over4==3)
         if(slope1_3over4!=slope2_3over4)
             Buff_key1_3over4 := Buff_close2_3over4
             index_key1_3over4 := BarCount-2
