@@ -263,7 +263,7 @@ if(GoGoFlag and SizeFlag)
     if(state_3over4==2)        
         if(slope1_3over4!=slope2_3over4)
             Buff_key1_3over4 := Buff_close2_3over4
-            index_key1_3over4 := BarCount-2  //////有些bar會被跳過 要怎麼處理?
+            index_key1_3over4 := BarCount-2  //////有些bar會被跳過 要怎麼處理?, index_SBD_3over4怪怪的
         //else //Buff_key1 keep origin
         if(isbreakSBU_3over4)
 
