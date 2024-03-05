@@ -143,7 +143,7 @@ BarCount := BarCount+1
 ReqClose = request.security_lower_tf(syminfo.tickerid,currentperiod_div4,close)
 SizeFlag := array.size(ReqClose)==4? true : false
 
-if(currentYear==2024 and currentMon==1 and currentDay>=1 and na(GoGoFlag))
+if(currentYear==2024 and currentMon==3 and currentDay>=1 and na(GoGoFlag))
     BarCountBuff := BarCount
     GoGoFlag := true
 if(GoGoFlag and SizeFlag)
@@ -170,7 +170,7 @@ if(GoGoFlag and SizeFlag)
 
 //initial2 at 4over4        
     if (BarCount == BarCountBuff+1)
-        Buff_close2_4over4 := close
+        Buff_close2_4over4 := close_4over4 ////////////////////
         index_key2_4over4 := BarCount-1
         close_SBU_4over4 := Buff_close2_4over4>Buff_close1_4over4? Buff_close2_4over4:Buff_close1_4over4
         close_SBD_4over4 := Buff_close2_4over4<Buff_close1_4over4? Buff_close2_4over4:Buff_close1_4over4
@@ -205,7 +205,7 @@ if(GoGoFlag and SizeFlag)
         else
             Buff_close1_4over4 := Buff_close1_4over4
             Buff_close2_4over4 := Buff_close2_4over4
-        Buff_close3_4over4 := close 
+        Buff_close3_4over4 := close_4over4////////////////////////////// 
         slope1_4over4 := Buff_close2_4over4-Buff_close1_4over4>0? 1:-1
         slope2_4over4 := Buff_close3_4over4-Buff_close2_4over4>0? 1:-1  
         if((not na(close_SBD_4over4)) and (not na(close_SBU_4over4)))
@@ -294,7 +294,7 @@ if(GoGoFlag and SizeFlag)
             state_4over4 := 5
 
 //state3 3over4
-    if(state_4over4==3)
+    if(state_3over4==3)
         if(slope1_3over4!=slope2_3over4)
             Buff_key1_3over4 := Buff_close2_3over4
             index_key1_3over4 := BarCount-2
@@ -378,7 +378,7 @@ if(GoGoFlag and SizeFlag)
 //common
         if(na(Label_Bar_4over4)==false)
             label.delete(Label_Bar_4over4)
-        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(testint)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(state_3over4)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
         if (na(Line_Bar_4over4) == false)
             line.delete(Line_Bar_4over4)
         Line_Bar_4over4 := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
