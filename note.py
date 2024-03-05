@@ -52,6 +52,7 @@ if(state==4)
   *週期大的支撐比週期小的支撐強
   *找到4H的bound的之後 找4H+1min or +2min 的基礎
   *大週期切小週期來分析 最後匯入小週期的ｋ線 
+  *L388 L391需要註釋
   **//
 
 close_1over4 = array.get(Reqclose, 0)
