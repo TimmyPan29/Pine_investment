@@ -1,177 +1,424 @@
+////**向上突破 向下突破 待在空間中 三種情況
+//  *三種情況來寫判別式，且從第三根bar開始算，先滿足破，再滿足是否轉折點
+//  *state1 : 狀態控制 以close 以及有無破
+//  *state2 : 有界轉破變成沒界 
+//  *state3 : 有界維持 包在裡面
+//  *state4 : 沒界維持 或 沒界轉有界
+//  *state5 : end並畫圖
+//  *破的轉點一律叫key2，缺少突破的控制訊號
+//  *支撐被破之後 SBU要馬上跟上，而在嚴格遞減的情況下，此時的SBD不可以長出來 
+//  *//   
+////**初始條件
+//  *先處理前三個點,初始化SBD SBU
+//  *// 
+
 //@version=5
 indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 
 ////**參數
 //  *自定義參數
 //  *//
+currentperiod = timeframe.period
+currentperiod_div4 = str.tostring(str.tonumber(currentperiod)/4)
+currentYear = year(time)
+currentMon= month(time)
+currentDay= dayofmonth(time)
+var int Number_index = 29
 
-var int Number_bar = 9
-var string currenperiod = timeframe.period
-var string DcurrentPeriod = "1D"
-var string HcurrentPeriod = "60" 
-var string OneMincurrentPeriod = "1" 
-if(DcurrentPeriod==currenperiod)
-    DcurrentPeriod := timeframe.period
-if(HcurrentPeriod==currenperiod)
-    HcurrentPeriod := timeframe.period
-if(OneMincurrentPeriod==currenperiod)
-    OneMincurrentPeriod := timeframe.period
-
-////**變數
+////**4over4 variable
 //  *注意刷新sbd sbu後各項變數要初始化
 //  *//
-var int barCount = 0
-var int slope1 = 0
-var int slope2 = 0
-var int state = na
-var bool isbreakSBU = na
-var bool isbreakSBD = na
-var bool isbreak = na
-var float close_SBU= na
-var float close_SBD= na
-var float Buff_close1 = na
-var float Buff_close2 = na
-var float Buff_close3 = na
-var float Buff_key1 = na
-var float Buff_key2 = na
-var line OneMinLine1 = na
-var line OneMinLine2 = na
-var line OneMinLine3 = na
-var line HLine1 = na
-var line HLine2 = na
-var line HLine3 = na
+var int slope1_4over4 = 0
+var int slope2_4over4 = 0
+var int state_4over4 = na
+var int index_key1_4over4 = 0
+var int index_key2_4over4 = 0
+var int index_SBU_4over4 = na
+var int index_SBD_4over4 = na
+var bool isbreakSBU_4over4 = na
+var bool isbreakSBD_4over4 = na
+var float close_SBU_4over4= na
+var float close_SBD_4over4= na
+var float Buff_close1_4over4 = na
+var float Buff_close2_4over4 = na
+var float Buff_close3_4over4 = na
+var float Buff_key1_4over4 = na
+var float Buff_key2_4over4 = na
+var line Line_Bar_4over4 = na
+var label Label_Bar_4over4  = na
+var label Label_SBU_4over4 = na
+var label Label_SBD_4over4 = na
 
-var label OneMinLabel1  = na
-var label HLabel1  = na
+////**1over4 variable
+//  *注意刷新sbd sbu後各項變數要初始化
+//  *
+var int slope1_1over4 = 0
+var int slope2_1over4 = 0
+var int state_1over4 = na
+var int index_key1_1over4 = 0
+var int index_key2_1over4 = 0
+var int index_SBU_1over4 = na
+var int index_SBD_1over4 = na
+var bool isbreakSBU_1over4 = na
+var bool isbreakSBD_1over4 = na
+var float close_SBU_1over4= na
+var float close_SBD_1over4= na
+var float Buff_close1_1over4 = na
+var float Buff_close2_1over4 = na
+var float Buff_close3_1over4 = na
+var float Buff_key1_1over4 = na
+var float Buff_key2_1over4 = na
+var line Line_Bar_1over4 = na
+var label Label_Bar_1over4  = na
+var label Label_SBU_1over4 = na
+var label Label_SBD_1over4 = na
 
-var label OneMinlabel_SBU = na
-var label OneMinlabel_SBD = na
-var label Hlabel_SBU = na
-var label Hlabel_SBD = na
+////**2over4 variable
+//  *catch up the variable refreshment and initiation
+//  *
+var int slope1_2over4 = 0
+var int slope2_2over4 = 0
+var int state_2over4 = na
+var int index_key1_2over4 = 0
+var int index_key2_2over4 = 0
+var int index_SBU_2over4 = na
+var int index_SBD_2over4 = na
+var bool isbreakSBU_2over4 = na
+var bool isbreakSBD_2over4 = na
+var float close_SBU_2over4= na
+var float close_SBD_2over4= na
+var float Buff_close1_2over4 = na
+var float Buff_close2_2over4 = na
+var float Buff_close3_2over4 = na
+var float Buff_key1_2over4 = na
+var float Buff_key2_2over4 = na
+var line Line_Bar_2over4 = na
+var label Label_Bar_2over4  = na
+var label Label_SBU_2over4 = na
+var label Label_SBD_2over4 = na
 
-barCount := barCount+1
+////**3over4 variable
+//  *catch up the variable refreshment and initiation
+//  *
+var int slope1_3over4 = 0
+var int slope2_3over4 = 0
+var int state_3over4 = na
+var int index_key1_3over4 = 0
+var int index_key2_3over4 = 0
+var int index_SBU_3over4 = na
+var int index_SBD_3over4 = na
+var bool isbreakSBU_3over4 = na
+var bool isbreakSBD_3over4 = na
+var float close_SBU_3over4= na
+var float close_SBD_3over4= na
+var float Buff_close1_3over4 = na
+var float Buff_close2_3over4 = na
+var float Buff_close3_3over4 = na
+var float Buff_key1_3over4 = na
+var float Buff_key2_3over4 = na
+var line Line_Bar_3over4 = na
+var label Label_Bar_3over4  = na
+var label Label_SBU_3over4 = na
+var label Label_SBD_3over4 = na
 
-////**初始條件
-//  *先處理前三個點,初始化SBD SBU
+////**test variable
+//  *
+//  *//
+var label test = na
+var int testint = 0
+var string teststr = na
+
+////**common variable
+//  *
+//  *//
+var line line_start = na
+var label label_start  = na
+var int BarCountBuff = na
+var bool GoGoFlag = na
+var int BarCount = 0
+var float start_low = na
+var float start_high = na
+var bool SizeFlag = na
+BarCount := BarCount+1
+ReqClose = request.security_lower_tf(syminfo.tickerid,currentperiod_div4,close)
+SizeFlag := array.size(ReqClose)==4? true : false
+
+if(currentYear==2024 and currentMon==1 and currentDay>=1 and na(GoGoFlag))
+    BarCountBuff := BarCount
+    GoGoFlag := true
+if(GoGoFlag and SizeFlag)
+    close_1over4 = array.get(ReqClose,0)
+    close_2over4 = array.get(ReqClose,1)
+    close_3over4 = array.get(ReqClose,2)
+    close_4over4 = array.get(ReqClose,3)
+
+////** 4over4 and 3over4
+//  *
 //  *// 
+//initial1 at 4over4
+    if (BarCount == BarCountBuff)
+        Buff_close1_4over4 := close //Buff_close1_4over4 is generated first
+        index_key1_4over4 := BarCount-1
+        Buff_key1_4over4 := Buff_close1_4over4
+        start_low := low
+        start_high := high
 
-if (barCount == 1)
-    close_SBU := close
-    Buff_close1 := close //Buff_close1 is generated first
-if (barCount == 2)
-    close_SBD := close
-    Buff_close2 := close
-    close_SBU := close_SBU>close_SBD? close_SBU:close_SBD
-    close_SBD := close_SBU>close_SBD? close_SBD:close_SBU
-if (barCount == 3)
-    state :=1 
-    Buff_close3 := close
-    slope1 := Buff_close2-Buff_close1>0? 1:-1
-    slope2 := Buff_close3-Buff_close2>0? 1:-1
-    if(Buff_close3>close_SBU)
-        isbreakSBU := true
-        if(slope1!=slope2)
-            Buff_key1:=Buff_close2 //第一次轉折點出現
+//inital1 at 3over4        
+        Buff_close1_3over4 := close_3over4 //Buff_close1_3over4 is generated first
+        index_key1_3over4 := BarCount-1 //useless
+        Buff_key1_3over4 := Buff_close1_3over4
+
+//initial2 at 4over4        
+    if (BarCount == BarCountBuff+1)
+        Buff_close2_4over4 := close
+        index_key2_4over4 := BarCount-1
+        close_SBU_4over4 := Buff_close2_4over4>Buff_close1_4over4? Buff_close2_4over4:Buff_close1_4over4
+        close_SBD_4over4 := Buff_close2_4over4<Buff_close1_4over4? Buff_close2_4over4:Buff_close1_4over4
+        if(Buff_close2_4over4 - Buff_close1_4over4 >0)
+            index_SBD_4over4 := index_key1_4over4
+            index_SBU_4over4 := BarCount-1
         else
-            Buff_key1:=Buff_close1
-    if(Buff_close3<close_SBD)
-        isbreakSBD := true
-        if(slope1!=slope2)
-            Buff_key1:=Buff_close2 //第一次轉折點出現
+            index_SBU_4over4 := index_key1_4over4
+            index_SBD_4over4 := BarCount-1
+        state_4over4 := 1
+
+//initial2 at 3over4
+        Buff_close2_3over4 := close_3over4
+        index_key2_3over4 := BarCount-1
+        close_SBU_3over4 := Buff_close2_3over4>Buff_close1_3over4? Buff_close2_3over4:Buff_close1_3over4
+        close_SBD_3over4 := Buff_close2_3over4<Buff_close1_3over4? Buff_close2_3over4:Buff_close1_3over4
+        if(Buff_close2_3over4 - Buff_close1_3over4 >0)
+            index_SBD_3over4 := index_key1_3over4
+            index_SBU_3over4 := BarCount-1
         else
-            Buff_key1:=Buff_close1
-    else//包在裡面
-        if(slope1!=slope2)
-            Buff_key1:=Buff_close2 //第一次轉折點出現
+            index_SBU_3over4 := index_key1_3over4
+            index_SBD_3over4 := BarCount-1
+        state_3over4 := 1 
 
-////**向上突破 向下突破 待在空間中 三種情況
-//  *三種情況來寫判別式，且從第四根bar開始算，先滿足破，再滿足是否轉折點
-//  *state2 : Buff_close2有突破且isbreak有跳起來
-//  *state3 : state2的反
-//  *state4 : end並畫圖
-//  *破的轉點一律叫key2，缺少突破的控制訊號
-//  *支撐被破之後 SBU要馬上跟上，而在嚴格遞減的情況下，此時的SBD不可以長出來 
-//  *//   
+//state1 at 4over4
+    if(state_4over4==1 and BarCount>BarCountBuff+1) //從第三點開始
+        isbreakSBU_4over4 := na(close_SBU_4over4)? na : close>close_SBU_4over4? true : false
+        isbreakSBD_4over4 := na(close_SBD_4over4)? na : close<close_SBD_4over4? true : false
+        if(not na(Buff_close3_4over4))
+            Buff_close1_4over4 := Buff_close2_4over4
+            Buff_close2_4over4 := Buff_close3_4over4
+        else
+            Buff_close1_4over4 := Buff_close1_4over4
+            Buff_close2_4over4 := Buff_close2_4over4
+        Buff_close3_4over4 := close 
+        slope1_4over4 := Buff_close2_4over4-Buff_close1_4over4>0? 1:-1
+        slope2_4over4 := Buff_close3_4over4-Buff_close2_4over4>0? 1:-1  
+        if((not na(close_SBD_4over4)) and (not na(close_SBU_4over4)))
+            state_4over4 := 3
+        if(isbreakSBU_4over4 or isbreakSBD_4over4)
+            state_4over4 := 2
+        if(na(close_SBU_4over4) or na(close_SBD_4over4))
+            state_4over4 := 4
 
-if(state==1 and barCount>3) //從第四點開始
-    isbreakSBU := close>close_SBU? true : false
-    isbreakSBD := close<close_SBD? true : false
-    if(isbreakSBU or isbreakSBD)
-        isbreak := true
-    Buff_close1 := Buff_close2
-    Buff_close2 := Buff_close3
-    Buff_close3 := close
-    slope1 := slope2
-    slope2 := Buff_close3-Buff_close2>0? 1:-1
-    if(isbreak)
-        state := 2
-    else
-        state := 3
+//state1 at 3over4
+    if(state_3over4==1 and BarCount>BarCountBuff+1)
+        isbreakSBU_3over4 := na(close_SBU_3over4)? na : close>close_SBU_3over4? true : false
+        isbreakSBD_3over4 := na(close_SBD_3over4)? na : close<close_SBD_3over4? true : false
+        if(not na(Buff_close3_3over4))
+            Buff_close1_3over4 := Buff_close2_3over4
+            Buff_close2_3over4 := Buff_close3_3over4
+        else
+            Buff_close1_3over4 := Buff_close1_3over4
+            Buff_close2_3over4 := Buff_close2_3over4
+        Buff_close3_3over4 := close_3over4 //這裡close3ove4 改close就會跟4over4的index一樣了
+        slope1_3over4 := Buff_close2_3over4-Buff_close1_3over4>0? 1:-1
+        slope2_3over4 := Buff_close3_3over4-Buff_close2_3over4>0? 1:-1  
+        if((not na(close_SBD_3over4)) and (not na(close_SBU_3over4)))
+            state_3over4 := 3
+        if(isbreakSBU_3over4 or isbreakSBD_3over4)
+            state_3over4 := 2
+        if(na(close_SBU_3over4) or na(close_SBD_3over4))
+            state_3over4 := 4
 
-if(state==2)
-    if(slope1!=slope2) 
-        Buff_key2 := Buff_close2
-        if(Buff_key2>Buff_key1) //代表上破
-            close_SBU := Buff_key2
-            close_SBD := Buff_key1
-            isbreakSBU := na
-        else //下破
-            close_SBD := Buff_key2
-            close_SBU := Buff_key1
-            isbreakSBD := na
-        Buff_key1 := Buff_key2
-        Buff_key2 := na
-        isbreak := na
-    else
-        if(isbreakSBU)
-            close_SBD := Buff_key1
-            close_SBU := na
-        if(isbreakSBD)
-            close_SBU := Buff_key1
-            close_SBD := na
-        Buff_key2 := na
-    state := 1
-    if(barstate.islast)                               
-        state := 4
+//state2 4over4
+    if(state_4over4==2)
+        if(slope1_4over4!=slope2_4over4)
+            teststr := "im hereerere"
+            Buff_key1_4over4 := Buff_close2_4over4
+            index_key1_4over4 := BarCount-2
+        //else //Buff_key1 keep origin 
+        if(isbreakSBU_4over4)
 
-if(state==3)
-    if(slope1!=slope2)
-        Buff_key1 := Buff_close2
-    else
-        Buff_key1 := Buff_key1
-    state := 1
-    if(barstate.islast)                                
-        state := 4
+            close_SBU_4over4 := na
+            isbreakSBU_4over4 := na
+            close_SBD_4over4 := Buff_key1_4over4
+            index_SBD_4over4 := index_key1_4over4
+        if(isbreakSBD_4over4)
 
-if(state==4 and OneMincurrentPeriod==currenperiod) //1min
+            close_SBD_4over4 := na
+            isbreakSBD_4over4 := na
+            close_SBU_4over4 := Buff_key1_4over4
+            index_SBU_4over4 := index_key1_4over4
+        state_4over4 := 1
+        if(BarCount==BarCountBuff+Number_index)                               
+            state_4over4 := 5
+        testint := index_SBU_4over4
 
-    OneMinLabel1 := label.new(x=bar_index, y=low, text="k bar: " + str.tostring(bar_index+1),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+//state2 3over4
+    if(state_3over4==2)        
+        if(slope1_3over4!=slope2_3over4)
+            Buff_key1_3over4 := Buff_close2_3over4
+            index_key1_3over4 := BarCount-2
+        //else //Buff_key1 keep origin
+        if(isbreakSBU_3over4)
 
-    OneMinLine1 := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
+            close_SBU_3over4 := na
+            isbreakSBU_3over4 := na
+            close_SBD_3over4 := Buff_key1_3over4
+            index_SBD_3over4 := index_key1_3over4
+        if(isbreakSBD_3over4)
 
-    OneMinLine2 := line.new(x1=bar_index-1, y1=close_SBU, x2=bar_index +100, y2=close_SBU, width=2, color=color.black)
-    OneMinLine3 := line.new(x1=bar_index-1, y1=close_SBD, x2=bar_index +100, y2=close_SBD, width=2, color=color.black)
+            close_SBD_3over4 := na
+            isbreakSBD_3over4 := na
+            close_SBU_3over4 := Buff_key1_3over4
+            index_SBU_3over4 := index_key1_3over4
+        state_3over4 := 1
+        if(BarCount==BarCountBuff+Number_index)                               
+            state_3over4 := 5
 
-    OneMinlabel_SBU := label.new(x=bar_index, y=close_SBU, text=currenperiod+"SBU: " + str.tostring(close_SBU), xloc = xloc.bar_index,yloc=yloc.price,color=color.red) 
+//bug index here
+//state3 4over4
+    if(state_4over4==3)
+        if(slope1_4over4!=slope2_4over4)
+            Buff_key1_4over4 := Buff_close2_4over4
+            index_key1_4over4 := BarCount-2
+        else
+            Buff_key1_4over4 := Buff_key1_4over4
+        state_4over4 := 1
+        if(BarCount==BarCountBuff+Number_index)                                
+            state_4over4 := 5
 
-    OneMinlabel_SBD := label.new(x=bar_index, y=close_SBD, text="SBD: " + str.tostring(close_SBD), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up) 
-    state := na
+//state3 3over4
+    if(state_4over4==3)
+        if(slope1_3over4!=slope2_3over4)
+            Buff_key1_3over4 := Buff_close2_3over4
+            index_key1_3over4 := BarCount-2
+        else
+            Buff_key1_3over4 := Buff_key1_3over4
+        state_3over4 := 1
+        if(BarCount==BarCountBuff+Number_index)                                
+            state_3over4 := 5
+   
+//state4 4over4
+    if(state_4over4==4)
+        if(slope1_4over4!=slope2_4over4)
+            Buff_key2_4over4 := Buff_close2_4over4
+            index_key2_4over4 := BarCount-2
+            if(na(isbreakSBU_4over4))
+                close_SBU_4over4 := Buff_key2_4over4
+                index_SBU_4over4 := index_key2_4over4
+                isbreakSBU_4over4 := false
+            if(na(isbreakSBD_4over4))
+                close_SBD_4over4 := Buff_key2_4over4
+                index_SBD_4over4 := index_key2_4over4
+                isbreakSBD_4over4 := false
+            Buff_key1_4over4 := Buff_key2_4over4
+            index_key1_4over4 := index_key2_4over4
+        //else //沒事發生 繼續沒界
+        if(close>close_SBU_4over4)
+            close_SBU_4over4 := na
+            isbreakSBU_4over4 := na
+        if(close<close_SBD_4over4)
+            close_SBD_4over4 := na
+            isbreakSBD_4over4 := na
+        state_4over4 := 1
+        if(BarCount==BarCountBuff+Number_index)                                
+            state_4over4 := 5
+
+//state4 3over4
+    if(state_3over4==4)
+        if(slope1_3over4!=slope2_3over4)
+            Buff_key2_3over4 := Buff_close2_3over4
+            index_key2_3over4 := BarCount-2
+            if(na(isbreakSBU_3over4))
+                close_SBU_3over4 := Buff_key2_3over4
+                index_SBU_3over4 := index_key2_3over4
+                isbreakSBU_3over4 := false
+            if(na(isbreakSBD_3over4))
+                close_SBD_3over4 := Buff_key2_3over4
+                index_SBD_3over4 := index_key2_3over4
+                isbreakSBD_3over4 := false
+            Buff_key1_3over4 := Buff_key2_3over4
+            index_key1_3over4 := index_key2_3over4
+        //else //沒事發生 繼續沒界
+        if(close>close_SBU_3over4)
+            close_SBU_3over4 := na
+            isbreakSBU_3over4 := na
+        if(close<close_SBD_3over4)
+            close_SBD_3over4 := na
+            isbreakSBD_3over4 := na
+        state_3over4 := 1
+        if(BarCount==BarCountBuff+Number_index)                                
+            state_3over4 := 5
+
+////**state close_1over4
+//  *
+//  *
+//  *
+//  *
+//  *//
+
+////**plot on the chart
+//  *
+//  *//
     
+//state5 4over4
+    if(state_4over4==5)
+        if((not na(close_SBU_4over4)) and na(close_SBD_4over4)) // ⎻⎻📉
+            index_SBU_4over4 := index_key1_4over4
+            index_SBD_4over4 := na
+        if((not na(close_SBD_4over4)) and na(close_SBU_4over4)) // __📈
+            index_SBD_4over4 := index_key1_4over4
+            index_SBU_4over4 := na
+//common
+        if(na(Label_Bar_4over4)==false)
+            label.delete(Label_Bar_4over4)
+        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(testint)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+        if (na(Line_Bar_4over4) == false)
+            line.delete(Line_Bar_4over4)
+        Line_Bar_4over4 := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
 
-if(state==4 and HcurrentPeriod==currenperiod) //1H
+        if(na(label_start)==false)
+            label.delete(label_start)
+        label_start := label.new(x=BarCountBuff-1, y=start_low ,text="now start bar: " + str.tostring(BarCountBuff),yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+        if (na(line_start) == false)
+            line.delete(line_start)
+        line_start := line.new(x1=BarCountBuff-1, y1=start_low, x2=BarCountBuff-1, y2=start_high, width=1, color=color.black, style=line.style_solid)
+//common
+        line.new(x1=index_SBU_4over4, y1=close_SBU_4over4, x2=index_SBU_4over4 +100, y2=close_SBU_4over4, width=2, color=color.black)
+        line.new(x1=index_SBD_4over4, y1=close_SBD_4over4, x2=index_SBD_4over4 +100, y2=close_SBD_4over4, width=2, color=color.black)
 
-    HLabel1 := label.new(x=bar_index, y=low, text="k bar: " + str.tostring(bar_index+1),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+        if(na(Label_SBU_4over4)==false)
+            label.delete(Label_SBU_4over4)
+        Label_SBU_4over4 := label.new(x=index_SBU_4over4, y=close_SBU_4over4, text="SBU_4over4: " + str.tostring(close_SBU_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red) 
 
- 
-    HLine1 := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
+        if(na(Label_SBD_4over4)==false)
+            label.delete(Label_SBD_4over4)
+        Label_SBD_4over4 := label.new(x=index_SBD_4over4, y=close_SBD_4over4, text="SBD_4over4: " + str.tostring(close_SBD_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up) 
+        state_4over4 := na
 
-    HLine2 := line.new(x1=bar_index-1, y1=close_SBU, x2=bar_index +100, y2=close_SBU, width=2, color=color.black)
-    HLine3 := line.new(x1=bar_index-1, y1=close_SBD, x2=bar_index +100, y2=close_SBD, width=2, color=color.black)
-  
- 
-    Hlabel_SBU := label.new(x=bar_index, y=close_SBU, text=currenperiod+"SBU: " + str.tostring(close_SBU), xloc = xloc.bar_index,yloc=yloc.price,color=color.red) 
+//state5 3over4
+    if(state_3over4==5)
+        if((not na(close_SBU_3over4)) and na(close_SBD_3over4)) // ⎻⎻📉
+            index_SBU_3over4 := index_key1_3over4
+            index_SBD_3over4 := na
+        if((not na(close_SBD_3over4)) and na(close_SBU_3over4)) // __📈
+            index_SBD_3over4 := index_key1_3over4
+            index_SBU_3over4 := na
 
-  
-    Hlabel_SBD := label.new(x=bar_index, y=close_SBD, text="SBD: " + str.tostring(close_SBD), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up) 
-    state := na
+        line.new(x1=index_SBU_3over4, y1=close_SBU_3over4, x2=index_SBU_3over4 +100, y2=close_SBU_3over4, width=2, color=color.black)
+        line.new(x1=index_SBD_3over4, y1=close_SBD_3over4, x2=index_SBD_3over4 +100, y2=close_SBD_3over4, width=2, color=color.black)
+        
+        if(na(Label_SBU_3over4)==false)
+            label.delete(Label_SBU_3over4)
+        Label_SBU_3over4 := label.new(x=index_SBU_3over4, y=close_SBU_3over4, text="SBU_3over4: " + str.tostring(close_SBU_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange) 
 
+        if(na(Label_SBD_3over4)==false)
+            label.delete(Label_SBD_3over4)
+        Label_SBD_3over4 := label.new(x=index_SBD_3over4, y=close_SBD_3over4, text="SBD_3over4: " + str.tostring(close_SBD_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up) 
+        state_3over4 := na

@@ -22,7 +22,8 @@ currentperiod = timeframe.period
 currentperiod_div4 = str.tostring(str.tonumber(currentperiod)/4)
 currentYear = year(time)
 currentMon= month(time)
-var int Number_index = 6
+currentDay= dayofmonth(time)
+var int Number_index = 29
 
 ////**4over4 variable
 //  *注意刷新sbd sbu後各項變數要初始化
@@ -137,16 +138,19 @@ var bool GoGoFlag = na
 var int BarCount = 0
 var float start_low = na
 var float start_high = na
+var bool SizeFlag = na
 BarCount := BarCount+1
 ReqClose = request.security_lower_tf(syminfo.tickerid,currentperiod_div4,close)
-if(currentYear==2024 and currentMon==3 and na(GoGoFlag))
+SizeFlag := array.size(ReqClose)==4? true : false
+
+if(currentYear==2024 and currentMon==1 and currentDay>=1 and na(GoGoFlag))
     BarCountBuff := BarCount
     GoGoFlag := true
-if(GoGoFlag)
+if(GoGoFlag and SizeFlag)
     close_1over4 = array.get(ReqClose,0)
-    close_2over4 = array.get(ReqClose,0)
-    close_3over4 = array.get(ReqClose,0)
-    close_4over4 = array.get(ReqClose,0)
+    close_2over4 = array.get(ReqClose,1)
+    close_3over4 = array.get(ReqClose,2)
+    close_4over4 = array.get(ReqClose,3)
 
 ////** 4over4 and 3over4
 //  *
@@ -374,7 +378,7 @@ if(GoGoFlag)
 //common
         if(na(Label_Bar_4over4)==false)
             label.delete(Label_Bar_4over4)
-        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(testint)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(index_SBU_3over4)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
         if (na(Line_Bar_4over4) == false)
             line.delete(Line_Bar_4over4)
         Line_Bar_4over4 := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
@@ -386,16 +390,16 @@ if(GoGoFlag)
             line.delete(line_start)
         line_start := line.new(x1=BarCountBuff-1, y1=start_low, x2=BarCountBuff-1, y2=start_high, width=1, color=color.black, style=line.style_solid)
 //common
-        line.new(x1=index_SBU_4over4-1, y1=close_SBU_4over4, x2=index_SBU_4over4 +100, y2=close_SBU_4over4, width=2, color=color.black)
-        line.new(x1=index_SBD_4over4-1, y1=close_SBD_4over4, x2=index_SBD_4over4 +100, y2=close_SBD_4over4, width=2, color=color.black)
+        line.new(x1=index_SBU_4over4, y1=close_SBU_4over4, x2=index_SBU_4over4 +100, y2=close_SBU_4over4, width=2, color=color.black)
+        line.new(x1=index_SBD_4over4, y1=close_SBD_4over4, x2=index_SBD_4over4 +100, y2=close_SBD_4over4, width=2, color=color.black)
 
         if(na(Label_SBU_4over4)==false)
             label.delete(Label_SBU_4over4)
-        Label_SBU_4over4 := label.new(x=index_SBU_4over4-1, y=close_SBU_4over4, text="SBU_4over4: " + str.tostring(close_SBU_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red) 
+        Label_SBU_4over4 := label.new(x=index_SBU_4over4, y=close_SBU_4over4, text="SBU_4over4: " + str.tostring(close_SBU_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red) 
 
         if(na(Label_SBD_4over4)==false)
             label.delete(Label_SBD_4over4)
-        Label_SBD_4over4 := label.new(x=index_SBD_4over4-1, y=close_SBD_4over4, text="SBD_4over4: " + str.tostring(close_SBD_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up) 
+        Label_SBD_4over4 := label.new(x=index_SBD_4over4, y=close_SBD_4over4, text="SBD_4over4: " + str.tostring(close_SBD_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up) 
         state_4over4 := na
 
 //state5 3over4
@@ -407,14 +411,14 @@ if(GoGoFlag)
             index_SBD_3over4 := index_key1_3over4
             index_SBU_3over4 := na
 
-        line.new(x1=index_SBU_3over4-1, y1=close_SBU_3over4, x2=index_SBU_3over4 +100, y2=close_SBU_3over4, width=2, color=color.black)
-        line.new(x1=index_SBD_3over4-1, y1=close_SBD_3over4, x2=index_SBD_3over4 +100, y2=close_SBD_3over4, width=2, color=color.black)
+        line.new(x1=index_SBU_3over4, y1=close_SBU_3over4, x2=index_SBU_3over4 +100, y2=close_SBU_3over4, width=2, color=color.black)
+        line.new(x1=index_SBD_3over4, y1=close_SBD_3over4, x2=index_SBD_3over4 +100, y2=close_SBD_3over4, width=2, color=color.black)
         
         if(na(Label_SBU_3over4)==false)
             label.delete(Label_SBU_3over4)
-        Label_SBU_3over4 := label.new(x=index_SBU_3over4-1, y=close_SBU_3over4, text="SBU_3over4: " + str.tostring(close_SBU_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange) 
+        Label_SBU_3over4 := label.new(x=index_SBU_3over4, y=close_SBU_3over4, text="SBU_3over4: " + str.tostring(close_SBU_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange) 
 
         if(na(Label_SBD_3over4)==false)
             label.delete(Label_SBD_3over4)
-        Label_SBD_3over4 := label.new(x=index_SBD_3over4-1, y=close_SBD_3over4, text="SBD_3over4: " + str.tostring(close_SBD_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up) 
+        Label_SBD_3over4 := label.new(x=index_SBD_3over4, y=close_SBD_3over4, text="SBD_3over4: " + str.tostring(close_SBD_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up) 
         state_3over4 := na
