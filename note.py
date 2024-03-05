@@ -53,6 +53,8 @@ if(state==4)
   *找到4H的bound的之後 找4H+1min or +2min 的基礎
   *大週期切小週期來分析 最後匯入小週期的ｋ線 
   *L388 L391需要註釋
+  *舉例一分鐘周期線 3:20跑完1分鐘後到3:21,此時3:20的k bar才會長出來
+  *trading view如果以折線圖且收盤價來看 Kbar鉛直線對下來的叫做起跑線
   **//
 
 close_1over4 = array.get(Reqclose, 0)
