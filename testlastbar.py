@@ -24,6 +24,7 @@ currentYear = year(time)
 currentMon= month(time)
 currentDay= dayofmonth(time)
 var int Number_index = 29
+var int NumShift = 10
 
 ////**4over4 variable
 //  *注意刷新sbd sbu後各項變數要初始化
@@ -239,8 +240,9 @@ if(GoGoFlag and SizeFlag)
 
 //state2 4over4
     if(state_4over4==2)
+        
         if(slope1_4over4!=slope2_4over4)
-            teststr := "im hereerere"
+            
             Buff_key1_4over4 := Buff_close2_4over4
             index_key1_4over4 := BarCount-2
         //else //Buff_key1 keep origin 
@@ -257,9 +259,9 @@ if(GoGoFlag and SizeFlag)
             close_SBU_4over4 := Buff_key1_4over4
             index_SBU_4over4 := index_key1_4over4
         state_4over4 := 1
-        if(BarCount==last_bar_index)                               
+        if(BarCount==last_bar_index-NumShift)                               
             state_4over4 := 5
-        testint := index_SBU_4over4
+        
 
 //state2 3over4
     if(state_3over4==2)        
@@ -280,7 +282,7 @@ if(GoGoFlag and SizeFlag)
             close_SBU_3over4 := Buff_key1_3over4
             index_SBU_3over4 := index_key1_3over4
         state_3over4 := 1
-        if(BarCount==last_bar_index)                               
+        if(BarCount==last_bar_index-NumShift)                               
             state_3over4 := 5
 
 //bug index here
@@ -292,7 +294,7 @@ if(GoGoFlag and SizeFlag)
         else
             Buff_key1_4over4 := Buff_key1_4over4
         state_4over4 := 1
-        if(BarCount==last_bar_index)                                
+        if(BarCount==last_bar_index-NumShift)                                
             state_4over4 := 5
 
 //state3 3over4
@@ -303,12 +305,14 @@ if(GoGoFlag and SizeFlag)
         else
             Buff_key1_3over4 := Buff_key1_3over4
         state_3over4 := 1
-        if(BarCount==last_bar_index)                                
+        if(BarCount==last_bar_index-NumShift)                                
             state_3over4 := 5
    
 //state4 4over4
     if(state_4over4==4)
         if(slope1_4over4!=slope2_4over4)
+            testint := 9999
+            teststr := "im hereererewwwww"
             Buff_key2_4over4 := Buff_close2_4over4
             index_key2_4over4 := BarCount-2
             if(na(isbreakSBU_4over4))
@@ -329,7 +333,7 @@ if(GoGoFlag and SizeFlag)
             close_SBD_4over4 := na
             isbreakSBD_4over4 := na
         state_4over4 := 1
-        if(BarCount==last_bar_index)                                
+        if(BarCount==last_bar_index-NumShift)                                
             state_4over4 := 5
 
 //state4 3over4
@@ -355,7 +359,7 @@ if(GoGoFlag and SizeFlag)
             close_SBD_3over4 := na
             isbreakSBD_3over4 := na
         state_3over4 := 1
-        if(BarCount==last_bar_index)                                
+        if(BarCount==last_bar_index-NumShift)                                
             state_3over4 := 5
 
 ////**state close_1over4
@@ -380,7 +384,7 @@ if(GoGoFlag and SizeFlag)
 //common
         if(na(Label_Bar_4over4)==false)
             label.delete(Label_Bar_4over4)
-        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(arrayclose)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(testint)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
         if (na(Line_Bar_4over4) == false)
             line.delete(Line_Bar_4over4)
         Line_Bar_4over4 := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
