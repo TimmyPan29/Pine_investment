@@ -24,7 +24,7 @@ currentYear = year(time)
 currentMon= month(time)
 currentDay= dayofmonth(time)
 var int Number_index = 29
-var int NumShift = 10
+var int NumShift = 12
 
 ////**4over4 variable
 //  *注意刷新sbd sbu後各項變數要初始化
@@ -128,7 +128,7 @@ var label Label_SBD_3over4 = na
 var label test = na
 var int testint = 0
 var string teststr = na
-
+var bool testbool = na
 ////**common variable
 //  *
 //  *//
@@ -160,7 +160,7 @@ if(GoGoFlag and SizeFlag)
 //  *// 
 //initial1 at 4over4
     if (BarCount == BarCountBuff)
-        Buff_close1_4over4 := close //Buff_close1_4over4 is generated first
+        Buff_close1_4over4 := close_4over4 //Buff_close1_4over4 is generated first
         index_key1_4over4 := BarCount-1
         Buff_key1_4over4 := Buff_close1_4over4
         start_low := low
@@ -200,8 +200,8 @@ if(GoGoFlag and SizeFlag)
 
 //state1 at 4over4
     if(state_4over4==1 and BarCount>BarCountBuff+1) //從第三點開始
-        isbreakSBU_4over4 := na(close_SBU_4over4)? na : close>close_SBU_4over4? true : false
-        isbreakSBD_4over4 := na(close_SBD_4over4)? na : close<close_SBD_4over4? true : false
+        isbreakSBU_4over4 := na(close_SBU_4over4)? na : close_4over4>close_SBU_4over4? true : false
+        isbreakSBD_4over4 := na(close_SBD_4over4)? na : close_4over4<close_SBD_4over4? true : false
         if(not na(Buff_close3_4over4))
             Buff_close1_4over4 := Buff_close2_4over4
             Buff_close2_4over4 := Buff_close3_4over4
@@ -220,8 +220,8 @@ if(GoGoFlag and SizeFlag)
 
 //state1 at 3over4
     if(state_3over4==1 and BarCount>BarCountBuff+1)
-        isbreakSBU_3over4 := na(close_SBU_3over4)? na : close>close_SBU_3over4? true : false
-        isbreakSBD_3over4 := na(close_SBD_3over4)? na : close<close_SBD_3over4? true : false
+        isbreakSBU_3over4 := na(close_SBU_3over4)? na : close_3over4>close_SBU_3over4? true : false
+        isbreakSBD_3over4 := na(close_SBD_3over4)? na : close_3over4<close_SBD_3over4? true : false
         if(not na(Buff_close3_3over4))
             Buff_close1_3over4 := Buff_close2_3over4
             Buff_close2_3over4 := Buff_close3_3over4
@@ -311,8 +311,9 @@ if(GoGoFlag and SizeFlag)
 //state4 4over4
     if(state_4over4==4)
         if(slope1_4over4!=slope2_4over4)
-            testint := 9999
+            testint := 9999 
             teststr := "im hereererewwwww"
+            testbool := isbreakSBU_4over4 
             Buff_key2_4over4 := Buff_close2_4over4
             index_key2_4over4 := BarCount-2
             if(na(isbreakSBU_4over4))
@@ -326,10 +327,10 @@ if(GoGoFlag and SizeFlag)
             Buff_key1_4over4 := Buff_key2_4over4
             index_key1_4over4 := index_key2_4over4
         //else //沒事發生 繼續沒界
-        if(close>close_SBU_4over4)
+        if(close_4over4>close_SBU_4over4)
             close_SBU_4over4 := na
             isbreakSBU_4over4 := na
-        if(close<close_SBD_4over4)
+        if(close_4over4<close_SBD_4over4)
             close_SBD_4over4 := na
             isbreakSBD_4over4 := na
         state_4over4 := 1
@@ -352,10 +353,10 @@ if(GoGoFlag and SizeFlag)
             Buff_key1_3over4 := Buff_key2_3over4
             index_key1_3over4 := index_key2_3over4
         //else //沒事發生 繼續沒界
-        if(close>close_SBU_3over4)
+        if(close_3over4>close_SBU_3over4)
             close_SBU_3over4 := na
             isbreakSBU_3over4 := na
-        if(close<close_SBD_3over4)
+        if(close_3over4<close_SBD_3over4)
             close_SBD_3over4 := na
             isbreakSBD_3over4 := na
         state_3over4 := 1
@@ -384,7 +385,7 @@ if(GoGoFlag and SizeFlag)
 //common
         if(na(Label_Bar_4over4)==false)
             label.delete(Label_Bar_4over4)
-        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(testint)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(testint)+"\n,,teststr: "+str.tostring(teststr)+"\n,,testbool: "+str.tostring(testbool),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
         if (na(Line_Bar_4over4) == false)
             line.delete(Line_Bar_4over4)
         Line_Bar_4over4 := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
