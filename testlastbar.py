@@ -142,6 +142,9 @@ var bool SizeFlag = na
 BarCount := BarCount+1
 ReqClose = request.security_lower_tf(syminfo.tickerid,currentperiod_div4,close)
 SizeFlag := array.size(ReqClose)==4? true : false
+var array<float> arrayclose = na
+if(bar_index==last_bar_index-13)
+    arrayclose := ReqClose
 if(currentYear==2024 and currentMon==1 and currentDay>=1 and na(GoGoFlag))
     BarCountBuff := BarCount
     GoGoFlag := true

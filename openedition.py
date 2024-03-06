@@ -142,7 +142,8 @@ var bool SizeFlag = na
 BarCount := BarCount+1
 ReqClose = request.security_lower_tf(syminfo.tickerid,currentperiod_div4,close)
 SizeFlag := array.size(ReqClose)==4? true : false
-if(currentYear==2024 and currentMon==1 and currentDay>=1 and na(GoGoFlag))
+
+if(currentYear==2023 and currentMon==1 and currentDay>=1 and na(GoGoFlag))
     BarCountBuff := BarCount
     GoGoFlag := true
 if(GoGoFlag and SizeFlag)
@@ -377,7 +378,7 @@ if(GoGoFlag and SizeFlag)
 //common
         if(na(Label_Bar_4over4)==false)
             label.delete(Label_Bar_4over4)
-        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n,,testint: "+ str.tostring(arrayclose)+"\n,,teststr: "+str.tostring(teststr),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+        Label_Bar_4over4 := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
         if (na(Line_Bar_4over4) == false)
             line.delete(Line_Bar_4over4)
         Line_Bar_4over4 := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
