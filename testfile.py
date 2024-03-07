@@ -13,6 +13,6 @@ var int Number_bar = 7
 arrClose = request.security_lower_tf(syminfo.tickerid, currentperiod_div4, close)
 SizeFlag := array.size(arrClose)==4? true : false
 if bar_index == last_bar_index - buff1
-    label.new(last_bar_index-buff1, high, str.tostring(arrClose))
+    label.new(last_bar_index-buff1, high, str.tostring(arrClose),color = color.orange)
     firstPrice = array.get(arrClose, 1)
-    label.new(last_bar_index-buff1, low-2, str.tostring(SizeFlag),style=label.style_triangledown,color = color.green)
+    label.new(last_bar_index-buff1, low+3, str.tostring(SizeFlag),style=label.style_triangledown,color = color.green)
