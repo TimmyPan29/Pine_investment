@@ -57,8 +57,18 @@ if(state==4)
   *trading view如果以折線圖且收盤價來看 Kbar鉛直線對下來的叫做起跑線
   *也許我可以用一根Kbar長出來的時間當作計數器來做判斷式的依據
   *必須想一個辦法來做元素1,2,3的算法
+  *開3分鐘周期 OANDA會從5:03 or 6:03出來 取決夏令時間 夏令時間是三月第二個禮拜天開始
+  *開2,1分鐘周期 OANDA會從5:04 or 6:04出來 
+  *開4分鐘周期 OANDA會從5:04 or 6:04出來
+  *開30s周期 OANDA會從5:04:30 or 6:04:30出來 
+  *開5分鐘周期 OANDA會從5:00 or 6:00出來,跟其他週期有明顯差異
   **//
-
+  
+//**限制四倍週期之四條重疊線演算法
+  *
+  *
+  *
+  **//
 close_1over4 = array.get(Reqclose, 0)
 close_2over4 = array.get(Reqclose, 1)
 close_3over4 = array.get(Reqclose, 2)
