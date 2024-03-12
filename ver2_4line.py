@@ -86,7 +86,10 @@ var label Label_SBU_1over4 = na
 var label Label_SBD_1over4 = na
 //**
 
-if(BarCount != 0)
-    state := 
+if(BarCount != 0) //BarCount = bar_index+1, example BarCount=1,bar_index=0
+    state := SURRD
 else
     state := nextstate
+    
+switch state
+    SURRD =>
