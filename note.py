@@ -65,8 +65,28 @@ if(state==4)
   **//
   
 //**限制四倍週期之四條重疊線演算法
-  *
-  *
+  *用case
+  *用array
+  *用state
+  *看五點的第一根kbar 的分鐘 進而推算buff的array要多少 如果因為不能用動態矩陣的話 那麼一開始可以預設buff長度20，應該是不會有一開始的時間出現在20分鐘的
+  *一件奇怪的事情 OANDA交易所在我3/13 夏令時間看 切換到交易所時區 開盤都是17:00 我在想是不是夏令時間一到 會自動把以前到現在的歷史數據的時間全部-1 變成相對時間 絕對時間還是18:00 但是看的話會變成17:00 
+  *general 從8分鐘期開始到1440 , 4分週期要額外補5:00的值 用插值就好
+  *以OANDA: saox Eightcap外匯 為例 且切換為台北時間
+    夏令時間  禮拜一5:04開盤到隔天5:00 所以是24小時 禮拜日休息 所以一個禮拜的kbar，時間會走到禮拜六的5:00(就是4:59-5:00那根) 後來發現不一定從04分開始 也有從12分開始的
+    非夏令時間 禮拜一6:04開盤到隔天6:00 所以是24小時 禮拜日休息 所以一個禮拜的kbar，時間會走到禮拜六的6:00(就是5:59-6:00那根)
+  *以OANDA:加密貨幣比特幣美元為例 開4分鐘周期
+    夏令時間  5:04開盤到隔天5:00 所以是24小時 禮拜日休息 所以一個禮拜的kbar，時間會走到禮拜六5:00(就是4:59-5:00那根)
+    非夏令時間 6:04開盤到隔天6:00 所以是24小時 禮拜日休息 所以一個禮拜的kbar，時間會走到禮拜六6:00(就是5:59-6:00那根)
+  *eightcap指數 在monday的開盤時間跟其他日子的開盤時間不一樣  指數的商品不一樣 就算交易平台相同 開盤收盤時間也會不同 禮拜一甚至會和禮拜二的開盤時間不一樣
+    以台灣時間為例
+    US Dollar index cash夏令時間是從禮拜一6:00開始到隔天的5點 23個小時 而禮拜二開始是8:00開始到隔天5點 只有21小時
+    US Dollar index cash非夏令是從禮拜一7:00開始 到隔天6:00 所以是23個小時 而禮拜二開始是9:00到隔天6點
+  *eightcap指數 日經225指數 ４分鐘線
+    夏令時間是從禮拜一6:00開始到隔天的5:00, 23個小時 而禮拜二開始也是6:00開始到隔天5:00 
+    非夏令是從禮拜一7:00開始 到隔天6:00 所以是23個小時 而禮拜二開始也是7:00到隔天6點
+  *要大家從一個時間點開始我的時間計時器
+  *k bar依據不同的商品，追溯到第一根kbar的日期有點不同 應該是因為每個商品的開盤收盤時間不盡相同 但是總kbar數應該是差不多的
+    4分鐘的外匯k bar 以運作23小時來說 可以追溯到約三個月前
   *
   **//
 close_1over4 = array.get(Reqclose, 0)
@@ -103,3 +123,26 @@ currentYear = year(time)
 //tonumber
 currentperiod = timeframe.period
 currentperiod_div4 = str.tostring(str.tonumber(currentperiod)/4)
+
+//這樣寫可以隨時更新最新動態
+//@version=5
+indicator("array", overlay=true)
+array<float> a = na
+var int count = 0
+var float b = na
+var label testlabel = na
+var int barcount = 0
+barcount := barcount + 1
+a := array.new<float>(2, 0)
+array.push(a, 1)
+if(barcount==last_bar_index-count+1)
+    if(not na(testlabel))
+        label.delete(testlabel)
+    testlabel := label.new(x=last_bar_index-count, y=low, text="now k bar: " + str.tostring(last_bar_index-count+1)+"\n,,testint: "+ str.tostring(minute(time))+"\n,,teststr: "+str.tostring(dayofmonth(time))+"\n,,testbool: "+str.tostring(hour(time)),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+//
+
+//可以刷新所有矩陣裡面的元素值
+//@version=5
+indicator("array.fill example")
+a = array.new_float(size,value)
+array.fill(a, 0)

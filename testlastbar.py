@@ -380,7 +380,7 @@ if(GoGoFlag and SizeFlag)
             index_SBU_4over4 := index_key1_4over4
             index_SBD_4over4 := na
         if((not na(close_SBD_4over4)) and na(close_SBU_4over4)) // __📈
-            index_SBD_4over4 := index_key1_4over4
+            index_SBD_4over4 := index_key1_4over        4
             index_SBU_4over4 := na
 //common
         if(na(Label_Bar_4over4)==false)
