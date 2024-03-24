@@ -1,7 +1,7 @@
 //@version=5
 indicator("`request.security_lower_tf()` Example", overlay = true)
 var int buff1=na
-buff1 := last_bar_index-10000-1-1
+buff1 := last_bar_index-2442
 var float count = na
 currentperiod = str.tonumber(timeframe.period)
 currentperiod_div4 = currentperiod/4
@@ -28,6 +28,7 @@ var float diff = na
 var float barloop = na
 var float Quotient = na
 var float Remainder = na
+var float RemainKbar = na
 var float testint = na
 var float testint2 = na
 var float teststr = na
@@ -74,19 +75,25 @@ if(GOFlag)
             starttime := starttime+currentperiod
         else
             state := 4
+            lasttime := starttime
             diff := (HrMin2Min2-lasttime)/currentperiod
-            count := count+diff
-            lasttime := HrMin2Min2                        
-            starttime := FOREX_OANDATIME+(count-1)*currentperiod       
+            if(diff<0)
+                RemainKbar := (FOREX_OANDATIME+currentperiod*Quotient-lasttime)/currentperiod
+                testbool := lasttime
+                GOFlag := false
+                diff := na
+                teststr := RemainKbar
+            else
+                count := count+diff
+                lasttime := HrMin2Min2                        
+                starttime := FOREX_OANDATIME+(count-1)*currentperiod       
     
     testint := count
     testint2 := diff
 if(starttime == (FOREX_OANDATIME+currentperiod*Quotient))
     lasttime := FOREX_OANDATIME
     count := 0
-if(diff<0)
-    GOFlag := false
-    diff := na
+
 if bar_index == last_bar_index - buff1
     //label.new(last_bar_index-buff1, high, str.tostring(arrClose),color = color.orange,size = size.normal)
     firstPrice = array.get(arrClose, 1)

@@ -1,12 +1,16 @@
 ////**up-break, down-break, surrounded between sky and ground
 // 
 //  *local parameter : section where all the state is.
-//  *NOSKY or NOGRD : bounded to boundedless
-//  *state3 : maintain bounded
-//  *state4 : maintain non-bounded or non-bounded to bounded
-//  *state5 : plot
+//  *RESET
+//  *ARRAY Generator
+//  *Comparator
+//  * -NOSKY
+//  * -NOGRD
+//  * -BOUNDED
+//  *PLOT
 //  *破的轉點一律叫key2，缺少突破的控制訊號
 //  *支撐被破之後 SBU要馬上跟上，而在嚴格遞減的情況下，此時的SBD不可以長出來 
+//  *如果第一個BAR 不在17:00 (以OANDA為例) 怎麼辦? FLAG來偵測第一個在17時長出來的bar嗎
 //  *// 
 
 //@version=5
@@ -65,12 +69,14 @@ var label Label_SBD_1over4 = na
 
 //local parameter and constant
 var const int RESET = 1
-var const int NOSKY = 2
-var const int NOGRD = 3
-var const int SURRD = 4
-var const int HOLD = 5
+var const int ARRAYGEN = 2
+var const int NOSKY = 3
+var const int NOGRD = 4
+var const int SURRD = 5
 var const int PLOT = 6
 var const int DAY2MINUTE = 1440
+var const int FOREX_OPENTIMEOANDA = 1020
+var const int FOREX_OPENTIMEEIGHTCAP = 0
 var const int LEVEL1 = 1
 var const int LEVEL2 = 2
 var const int LEVEL3 = 3
