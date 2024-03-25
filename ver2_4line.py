@@ -27,17 +27,17 @@ indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 //  *//
 
 //common variable
-var int Number_index = na
-var int NumShift = 0
+var int numbershift := last_bar_index
 var int state = na
 var int nextstate = na
 var int statelevel = na
 var float Quotient = na
 var int Remainder = na
+var float diff = na
 var float start_low = na
 var float start_high = na
 var string TICKERID = syminfo.tickerid
-var array<float> arrayclose = array.new(currentperiod_div4,0)
+var array<float> arrayclose = array.new(0)
 var array<float> arraybuff = array.new(0)
 
 //figure variable 
@@ -78,18 +78,29 @@ type CurrentTime_Type
     int currentHr
     int currentMin
     int HrMin2Min
+    float starttime
+    int HrMin2Min2
+    float lasttime
 //**
 
 //Flag
 type Flag_Type
     bool SizeFlag
-    bool GoGoFlag
+    bool GoFlag
+    bool resetFlag 
 //**
 type Count_Type
     int levelcount = 0
     int count1 = 0 
     int count2 = 0
-    int BarCount = 0
+    int Barcount = 0
+    int RmnBarcount = 0
+method init_count(Count_Type this) =>
+    this.levelcount := 0
+    this.count1 := 0 
+    this.count2 := 0
+    this.Barcount := 0
+    this.RmnBarcount := 0
 //**
 
 //variable
@@ -128,42 +139,83 @@ type BOS_Type
     float Buff_key2_3over4 = na
     float Buff_key1_4over4 = na
     float Buff_key2_4over4 = na
+
+method init_BOS(BOS_Type this) =>
+    this.slope1 := na
+    this.slope2 := na
+    this.index_key1_1over4 := na
+    this.index_key2_1over4 := na
+    this.index_key1_2over4 := na
+    this.index_key2_2over4 := na
+    this.index_key1_3over4 := na
+    this.index_key2_3over4 := na
+    this.index_key1_4over4 := na
+    this.index_key2_4over4 := na
+    this.index_SBU_1over4 := 0
+    this.index_SBD_1over4 := 0
+    this.index_SBU_2over4 := 0
+    this.index_SBD_2over4 := 0
+    this.index_SBU_3over4 := 0
+    this.index_SBD_3over4 := 0
+    this.index_SBU_4over4 := 0
+    this.index_SBD_4over4 := 0
+    this.close_SBU_1over4 := 0
+    this.close_SBD_1over4 := 0
+    this.close_SBU_2over4 := 0
+    this.close_SBD_2over4 := 0
+    this.close_SBU_3over4 := 0
+    this.close_SBD_3over4 := 0
+    this.close_SBU_4over4 := 0
+    this.close_SBD_4over4 := 0
+    this.Buff_key1_1over4 := na
+    this.Buff_key2_1over4 := na
+    this.Buff_key1_2over4 := na
+    this.Buff_key2_2over4 := na
+    this.Buff_key1_3over4 := na
+    this.Buff_key2_3over4 := na
+    this.Buff_key1_4over4 := na
+    this.Buff_key2_4over4 := na
 //**
-var timeInfo = CurrentTime_Type.new(na, na, "", na, na, na, na, na, na)
-var countInfo = Count_Type.new(0,0,0,0)
-var flagInfo = Flag_Type.new(false,false)
+var timeInfo = CurrentTime_Type.new(na, na, "", na, na, na, na, na, na,na,na,na)
+var countInfo = Count_Type.new(0,0,0,0) // levelcount count1 count2 Barcount
+var flagInfo = Flag_Type.new(na,false,true) //size ,go,resetFlag
 var BOSInfo = BOS_Type.new()
 
-if (bar_index == 0) // 只在脚本加载时执行一次
+if barstate.isfirst // 只在脚本加载时执行一次
     timeInfo.currentperiod := str.tonumber(timeframe.period)
     timeInfo.currentperiod_div4 := timeInfo.currentperiod / 4
     timeInfo.currentperiod_div4_str := str.tostring(timeInfo.currentperiod_div4)
-    timeInfo.currentYear := year(time)
-    timeInfo.currentMon := month(time)
-    timeInfo.currentDay := dayofmonth(time) 
-    timeInfo.currentHr := hour(time) 
-    timeInfo.currentMin := minute(time) 
-    timeInfo.HrMin2Min := timeInfo.currentHr * 60 + timeInfo.currentMin
+timeInfo.currentYear := year(time)
+timeInfo.currentMon := month(time)
+timeInfo.currentDay := dayofmonth(time) 
+timeInfo.currentHr := hour(time) 
+timeInfo.currentMin := minute(time) 
+timeInfo.HrMin2Min := timeInfo.currentHr * 60 + timeInfo.currentMin
+if(timeInfo.HrMin2Min<FOREX_OANDATIME and HrMin2Min>=0)
+    HrMin2Min2 := HrMin2Min+DAY2MINUTE
+else
+    HrMin2Min2 := HrMin2Min
 ////**state ctrl
 //  *
 //  *//
-countInfo.BarCount += 1
+countInfo.Barcount += 1
 ReqClose := request.security_lower_tf(syminfo.tickerid,currentperiod_div4,close)
 flagInfo.SizeFlag := array.size(ReqClose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/currentperiod)
 Remainder := DAY2MINUTE%currentperiod
-if(HrMin2Min==1024 and str.contains(TICKERID,"OANDA"))
-    GoGoFlag = true
-if(HrMin2Min==0 and str.contains(TICKERID,"EIGHTCAP"))
-    GoGoFlag = true
-if(GoGoFlag) //BarCount = bar_index+1, example BarCount=1,bar_index=0
-    state := SURRD
+
+if(timeInfo.HrMin2Min2 == FOREX_OANDATIME and flagInfo.GoFlag == false and str.contains(TICKERID,"OANDA"))
+            flagInfo.resetFlag := false
+if(flagInfo.resetFlag) //Barcount = bar_index+1, example Barcount=1,bar_index=0
+    state := RESET
 else
     state := nextstate
     
 switch state
     RESET =>
-        nextstate := SURRD
+        nextstate := ARRAYGEN
+    ARRAYGEN =>
+
     SURRD => 
         if(level==1)
             nextstate := 
@@ -174,9 +226,44 @@ switch state
 //  *//
 switch state
     RESET =>
-        if(currentperiod==4)
-            array.push(arraybuff,array.get())
+        init_BOS(BOSInfo)
+        init_count(countInfo)
+    ARRAYGEN =>
+        countInfo.Barcount := 0
+        timeInfo.starttime := HrMin2Min2
+        timeInfo.lasttime := FOREX_OANDATIME
+        flagInfo.GoFlag := true
+        if(flagInfo.GoFlag)
+            if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 != FOREX_OANDATIME)
+                countInfo.Barcount := 1+(timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod
+                timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
+                diff := countInfo.Barcount
+            else if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 == FOREX_OANDATIME)
+                countInfo.Barcount := 1
+                diff := 0
+                timeInfo.starttime := timeInfo.HrMin2Min2
+            else
+                if(timeInfo.starttime + timeInfo.currentperiod == timeInfo.HrMin2Min2)
+                    diff := 1
+                    timeInfo.Barcount := timeInfo.Barcount + diff
+                    timeInfo.lasttime := timeInfo.starttime
+                    timeInfo.starttime += timeInfo.currentperiod
+                else
+                    timeInfo.lasttime := timeInfo.starttime
+                    diff := (timeInfo.HrMin2Min2-timeInfo.lasttime)/timeInfo.currentperiod
+                    if(diff<0)
+                        countInfo.RmnBarcount := (FOREX_OANDATIME + timeInfo.currentperiod*Quotient-timeInfo.lasttime)/timeInfo.currentperiod
+                        GoFlag := false
+                        diff := countInfo.RmnBarcount
+                        //這個情況表示新的開市日有可能從17:00 或17:28之類的開始 要討論
+                    else
+                        countInfo.Barcount += diff
+                        timeInfo.lasttime := timeInfo.HrMin2Min2
+                        timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
     SURRD=>
+
+
+
 
 
 ////**custom define function
