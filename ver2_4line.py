@@ -8,7 +8,7 @@
 //  * -NOGRD
 //  * -BOUNDED
 //  *PLOT
-//  *破的轉點一律叫key2，缺少突破的控制訊號
+//  *the turnpoint is called key2 anyway. 
 //  *支撐被破之後 SBU要馬上跟上，而在嚴格遞減的情況下，此時的SBD不可以長出來 
 //  *如果第一個BAR 不在17:00 (以OANDA為例) 怎麼辦? FLAG來偵測第一個在17時長出來的bar嗎
 //  *// 
@@ -26,37 +26,19 @@ indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 //  *test variable
 //  *//
 
-//time variable
-currentperiod = str.tonumber(timeframe.period)
-currentperiod_div4 = currentperiod/4
-currentperiod_div4_str = str.tostring(currentperiod_div4)
-currentYear = year(time)
-currentMon = month(time)
-currentDay = dayofmonth(time) //必須對準交易所的第幾天
-currentHr = hour(time) // hour 和 minute是對準交易所得時差
-currentMin = mimute(time)
-var int HrMin2Min = currentHr*60+currentMin 
-//**
-
 //common variable
 var int Number_index = na
 var int NumShift = 0
 var int state = na
 var int nextstate = na
 var int statelevel = na
-var int count = 0 
-var int level = na 
-var int BarCount = 0
 var float Quotient = na
 var int Remainder = na
-var bool GoGoFlag = false
 var float start_low = na
 var float start_high = na
-var bool SizeFlag = na
 var string TICKERID = syminfo.tickerid
 var array<float> arrayclose = array.new(currentperiod_div4,0)
 var array<float> arraybuff = array.new(0)
-//**
 
 //figure variable 
 var line line_start = na
@@ -77,11 +59,6 @@ var const int PLOT = 6
 var const int DAY2MINUTE = 1440
 var const int FOREX_OPENTIMEOANDA = 1020
 var const int FOREX_OPENTIMEEIGHTCAP = 0
-var const int LEVEL1 = 1
-var const int LEVEL2 = 2
-var const int LEVEL3 = 3
-var const int LEVEL4 = 4 
-//**
 
 //test variable
 var label test = na
@@ -90,49 +67,89 @@ var string teststr = na
 var bool testbool = na
 //**
 
-//variable
-var int slope1 = na
-var int slope2 = na
-var int index_key1_1over4 = na
-var int index_key2_1over4 = na
-var int index_key1_2over4 = na
-var int index_key2_2over4 = na
-var int index_key1_3over4 = na
-var int index_key2_3over4 = na
-var int index_key1_4over4 = na
-var int index_key2_4over4 = na
-var int index_SBU_1over4 = 0
-var int index_SBD_1over4 = 0
-var int index_SBU_2over4 = 0
-var int index_SBD_2over4 = 0
-var int index_SBU_3over4 = 0
-var int index_SBD_3over4 = 0
-var int index_SBU_4over4 = 0
-var int index_SBD_4over4 = 0
-var float close_SBU_1over4= 0
-var float close_SBD_1over4= 0
-var float close_SBU_2over4= 0
-var float close_SBD_2over4= 0
-var float close_SBU_3over4= 0
-var float close_SBD_3over4= 0
-var float close_SBU_4over4= 0
-var float close_SBD_4over4= 0
-var float Buff_key1_1over4 = na
-var float Buff_key2_1over4 = na
-var float Buff_key1_2over4 = na
-var float Buff_key2_2over4 = na
-var float Buff_key1_3over4 = na
-var float Buff_key2_3over4 = na
-var float Buff_key1_4over4 = na
-var float Buff_key2_4over4 = na
+//time variable
+type CurrentTime_Type
+    float currentperiod
+    float currentperiod_div4
+    string currentperiod_div4_str
+    int currentYear 
+    int currentMon
+    int currentDay
+    int currentHr
+    int currentMin
+    int HrMin2Min
 //**
 
+//Flag
+type Flag_Type
+    bool SizeFlag
+    bool GoGoFlag
+//**
+type Count_Type
+    int levelcount = 0
+    int count1 = 0 
+    int count2 = 0
+    int BarCount = 0
+//**
+
+//variable
+type BOS_Type
+    int slope1 = na
+    int slope2 = na
+    int index_key1_1over4 = na
+    int index_key2_1over4 = na
+    int index_key1_2over4 = na
+    int index_key2_2over4 = na
+    int index_key1_3over4 = na
+    int index_key2_3over4 = na
+    int index_key1_4over4 = na
+    int index_key2_4over4 = na
+    int index_SBU_1over4 = 0
+    int index_SBD_1over4 = 0
+    int index_SBU_2over4 = 0
+    int index_SBD_2over4 = 0
+    int index_SBU_3over4 = 0
+    int index_SBD_3over4 = 0
+    int index_SBU_4over4 = 0
+    int index_SBD_4over4 = 0
+    float close_SBU_1over4 = 0
+    float close_SBD_1over4 = 0
+    float close_SBU_2over4 = 0
+    float close_SBD_2over4 = 0
+    float close_SBU_3over4 = 0
+    float close_SBD_3over4 = 0
+    float close_SBU_4over4 = 0
+    float close_SBD_4over4 = 0
+    float Buff_key1_1over4 = na
+    float Buff_key2_1over4 = na
+    float Buff_key1_2over4 = na
+    float Buff_key2_2over4 = na
+    float Buff_key1_3over4 = na
+    float Buff_key2_3over4 = na
+    float Buff_key1_4over4 = na
+    float Buff_key2_4over4 = na
+//**
+var timeInfo = CurrentTime_Type.new(na, na, "", na, na, na, na, na, na)
+var countInfo = Count_Type.new(0,0,0,0)
+var flagInfo = Flag_Type.new(false,false)
+var BOSInfo = BOS_Type.new()
+
+if (bar_index == 0) // 只在脚本加载时执行一次
+    timeInfo.currentperiod := str.tonumber(timeframe.period)
+    timeInfo.currentperiod_div4 := timeInfo.currentperiod / 4
+    timeInfo.currentperiod_div4_str := str.tostring(timeInfo.currentperiod_div4)
+    timeInfo.currentYear := year(time)
+    timeInfo.currentMon := month(time)
+    timeInfo.currentDay := dayofmonth(time) 
+    timeInfo.currentHr := hour(time) 
+    timeInfo.currentMin := minute(time) 
+    timeInfo.HrMin2Min := timeInfo.currentHr * 60 + timeInfo.currentMin
 ////**state ctrl
 //  *
 //  *//
-BarCount := BarCount+1
+countInfo.BarCount += 1
 ReqClose := request.security_lower_tf(syminfo.tickerid,currentperiod_div4,close)
-SizeFlag := array.size(ReqClose)==4? true : false
+flagInfo.SizeFlag := array.size(ReqClose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/currentperiod)
 Remainder := DAY2MINUTE%currentperiod
 if(HrMin2Min==1024 and str.contains(TICKERID,"OANDA"))
