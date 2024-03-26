@@ -27,7 +27,7 @@ indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 //  *//
 
 //common variable
-var int numbershift = last_bar_index-51
+var int numbershift = last_bar_index - 51-52*46+1
 var int state = na
 var int nextstate = na
 var int statelevel = na
@@ -41,6 +41,7 @@ var int buffmonth = na
 var int buffday = na
 var int buffhour = na
 var int buffmin = na
+var int arraysize = na
 var string TICKERID = syminfo.tickerid
 var arrayclose = array.new<float>(0)
 var arraybuff = array.new<float>(0)
@@ -57,10 +58,10 @@ var label Label_SBD_1over4 = na
 //local parameter and constant
 var const int RESET = 1
 var const int ARRAYGEN = 2
-var const int NOSKY = 3
-var const int NOGRD = 4
-var const int SURRD = 5
-var const int PLOT = 6
+var const int PLOT = 3
+var const int SURRD = 4
+var const int NOSKY = 5
+var const int NOGRD = 6
 var const int DAY2MINUTE = 1440
 var const int FOREX_OANDATIME = 1020
 var const int FOREX_OPENTIMEEIGHTCAP = 0
@@ -70,6 +71,10 @@ var label test = na
 var int testint = 0
 var string teststr = na
 var bool testbool = na
+var float testfloat = na
+var testarray = array.new(0)
+var float testcount = na
+
 //**
 
 //time variable
@@ -93,10 +98,13 @@ type Flag_Type
     bool GoFlag
     bool resetFlag 
     bool plotFlag
+    bool diffFlag
+    bool bosFlag
+    bool jumpFlag
 //**
 type Count_Type
     int levelcount = 0
-    int count1 = 0 
+    float count1 = 0 
     int count2 = 0
     float Barcount = 0
     float RmnBarcount = 0
@@ -104,6 +112,10 @@ type Count_Type
 type BOS_Type
     int slope1 = na
     int slope2 = na
+    int state_1over4 = na
+    int state_2over4 = na
+    int state_3over4 = na
+    int state_4over4 = na
     int index_key1_1over4 = na
     int index_key2_1over4 = na
     int index_key1_2over4 = na
@@ -180,10 +192,19 @@ method init_BOS(BOS_Type this) =>
     this.Buff_key2_3over4 := na
     this.Buff_key1_4over4 := na
     this.Buff_key2_4over4 := na
+
+method init_Flag(Flag_Type this) =>
+    this.SizeFlag = na
+    this.GoFlag = false
+    this.resetFlag = false
+    this.plotFlag = false
+    this.diffFlag = false
+    this.bosFlag = false
+    this.jumpFlag = false
 //**
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
 var countInfo = Count_Type.new(0,0,0,0) // levelcount count1 count2 Barcount
-var flagInfo = Flag_Type.new(na,false,false,false) //size ,go,resetFlag,plotFlag
+var flagInfo = Flag_Type.new(na,false,false,false,false,false) //size ,go,resetFlag,plotFlag, diffFlag, jumpFlag
 var BOSInfo = BOS_Type.new()
 if barstate.isfirst // execute once when script started
     timeInfo.currentperiod := str.tonumber(timeframe.period)
@@ -204,9 +225,9 @@ arrayclose := request.security_lower_tf(syminfo.tickerid,timeframe,close)
 flagInfo.SizeFlag := array.size(arrayclose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/timeInfo.currentperiod)
 Remainder := DAY2MINUTE%timeInfo.currentperiod
-
+testarray := arrayclose
 ////*****state init*****////
-if(timeInfo.HrMin2Min2 == FOREX_OANDATIME and flagInfo.GoFlag == false and str.contains(TICKERID,"OANDA"))
+if(flagInfo.GoFlag == false and str.contains(TICKERID,"OANDA"))
     countInfo.Barcount := 0
     timeInfo.starttime := timeInfo.HrMin2Min2
     timeInfo.lasttime := FOREX_OANDATIME
@@ -223,9 +244,6 @@ switch state
         nextstate := ARRAYGEN
     ARRAYGEN =>
         nextstate := flagInfo.plotFlag? PLOT : nextstate
-    SURRD => 
-        if(countInfo.levelcount==1)
-            nextstate := SURRD
     PLOT =>
         nextstate := na
     => 
@@ -235,7 +253,7 @@ switch state
 ////*****data flow****////
 switch state
     RESET =>
-        flagInfo.resetFlag := false
+        init_Flag(flagInfo)
         init_BOS(BOSInfo)
         init_count(countInfo)
     ARRAYGEN =>
@@ -247,7 +265,8 @@ switch state
                 countInfo.Barcount := 1+(timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod
                 diff := (timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod
                 timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
-                
+                testfloat := 7
+                flagInfo.jumpFlag := true
             else if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 == FOREX_OANDATIME)
                 countInfo.Barcount := 1
                 diff := 0
@@ -259,33 +278,45 @@ switch state
                     timeInfo.lasttime := timeInfo.starttime
                     timeInfo.starttime += timeInfo.currentperiod
                 else
-
                     timeInfo.lasttime := timeInfo.starttime
                     diff := (timeInfo.HrMin2Min2-timeInfo.lasttime)/timeInfo.currentperiod
+                    flagInfo.jumpFlag := true
                     if(diff<0)
                         countInfo.RmnBarcount := (FOREX_OANDATIME + timeInfo.currentperiod*Quotient-timeInfo.lasttime)/timeInfo.currentperiod
-                        flagInfo.GoFlag := false //等到array處理完再拉起來
+                        countInfo.count1 := (timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod+1
                         diff := countInfo.RmnBarcount
                         countInfo.Barcount += diff
+                        flagInfo.diffFlag := true
                         //這個情況表示新的開市日有可能從17:00 或17:28之類的開始 要討論
                     else
                         countInfo.Barcount += diff
                         timeInfo.lasttime := timeInfo.HrMin2Min2
                         timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
-        if(timeInfo.starttime == (FOREX_OANDATIME+timeInfo.currentperiod*Quotient))
+        flagInfo.bosFlag := true
+        arraysize := array.size(arrayclose)        
+        while flagInfo.bosFlag == true
+            if(timeInfo.HrMin2Min2 == FOREX_OANDATIME+Quotient*timeInfo.currentperiod)
+                for i=0 to 4-arraysize-1
+                    array.push(arrayclose,array.get(arrayclose,arraysize-1))
+            if(flagInfo.jumpFlag and flagInfo.diffFlag == false) //表示要補值
+                for i=0 to (diff-1)*4-1
+                    array.unshift(arrayclose,array.get(arrayclose,0))
+            if(flagInfo.jumpFlag and flagInfo.diffFlag == true) //跨天跳時的處理
+                for i=0 to (diff*4)-1
+                    array.push(arrayclose,array.get(arrayclose,))
+            
+
+        if(countInfo.Barcount == Quotient+1) //當天資料已經處理完
             timeInfo.lasttime := FOREX_OANDATIME
-            testint := countInfo.Barcount
             countInfo.Barcount := 0
-        if bar_index == last_bar_index - numbershift-1
+            flagInfo.diffFlag := false 
+        if bar_index == last_bar_index - numbershift-2 //state要等到倒數第二根跑完arraygen才會進入畫圖狀態，所以倒數第三根nextstate要提前準備
             flagInfo.plotFlag := true
             
-    SURRD=>
-        diff := 0
-
     PLOT=>
         if(not na(test))
             label.delete(test)
-        test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n levelcount: "+str.tostring(countInfo.levelcount)+"\n arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n starttime : "+str.tostring(timeInfo.starttime)+"\n lasttime : "+str.tostring(timeInfo.lasttime)+"\n testint : "+str.tostring(testint),style=label.style_triangledown,color = color.green)
+        test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n levelcount: "+str.tostring(countInfo.levelcount)+"\n arrayclose : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n starttime : "+str.tostring(timeInfo.starttime)+"\n lasttime : "+str.tostring(timeInfo.lasttime)+"\n testfloat : "+str.tostring(testfloat),style=label.style_triangledown,color = color.green)
     =>
         diff := 0
 
