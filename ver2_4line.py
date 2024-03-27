@@ -105,17 +105,17 @@ type Flag_Type
 type Count_Type
     int levelcount = 0
     float count1 = 0 
-    int count2 = 0
+    int boscount = 0
     float Barcount = 0
     float RmnBarcount = 0
 //**
-type BOS_Type
+type BOS_Type 
     int slope1 = na
     int slope2 = na
-    int state_1over4 = na
-    int state_2over4 = na
-    int state_3over4 = na
-    int state_4over4 = na
+    int state_1over4 = SURRD //SURRD defalut
+    int state_2over4 = SURRD //SURRD defalut
+    int state_3over4 = SURRD //SURRD defalut
+    int state_4over4 = SURRD //SURRD defalut
     int index_key1_1over4 = na
     int index_key2_1over4 = na
     int index_key1_2over4 = na
@@ -153,13 +153,17 @@ type BOS_Type
 method init_count(Count_Type this) =>
     this.levelcount := 0
     this.count1 := 0 
-    this.count2 := 0
+    this.boscount := 0
     this.Barcount := 0
     this.RmnBarcount := 0
 
 method init_BOS(BOS_Type this) =>
     this.slope1 := na
     this.slope2 := na
+    this.state_1over4 = SURRD
+    this.state_2over4 = SURRD
+    this.state_3over4 = SURRD
+    this.state_4over4 = SURRD
     this.index_key1_1over4 := na
     this.index_key2_1over4 := na
     this.index_key1_2over4 := na
@@ -203,7 +207,7 @@ method init_Flag(Flag_Type this) =>
     this.jumpFlag = false
 //**
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
-var countInfo = Count_Type.new(0,0,0,0) // levelcount count1 count2 Barcount
+var countInfo = Count_Type.new(0,0,0,0) // levelcount count1 boscount Barcount
 var flagInfo = Flag_Type.new(na,false,false,false,false,false) //size ,go,resetFlag,plotFlag, diffFlag, jumpFlag
 var BOSInfo = BOS_Type.new()
 if barstate.isfirst // execute once when script started
