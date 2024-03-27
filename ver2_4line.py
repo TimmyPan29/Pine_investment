@@ -288,17 +288,31 @@ switch state
                     flagInfo.jumpFlag := true
                     if(diff<0)
                         countInfo.RmnBarcount := (FOREX_OANDATIME + timeInfo.currentperiod*Quotient-timeInfo.lasttime)/timeInfo.currentperiod
-                        countInfo.count1 := (timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod+1
+                        countInfo.count1 := (timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod
                         diff := countInfo.RmnBarcount
-                        countInfo.Barcount += diff
+                        countInfo.Barcount += diff + countInfo.count1 + 1
                         flagInfo.diffFlag := true
                         //這個情況表示新的開市日有可能從17:00 或17:28之類的開始 要討論
                     else
                         countInfo.Barcount += diff
                         timeInfo.lasttime := timeInfo.HrMin2Min2
                         timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
+        if(flagInfo.diffFlag) //跳天 往前插值補滿
+            for i=0 to 4*(diff+countInfo.count1)-1
+                array.unshift(arrayclose,array.get(arrayclose,0))
+
+        else if(flagInfo.jumpFlag and countInfo.Barcount==Quotient+1) //跳 且 跳到當天最後一根
+
+        else
+
+        arraysize := array.size(arrayclose)                   
         flagInfo.bosFlag := true
-        arraysize := array.size(arrayclose)        
+        //level1
+        //level2
+        //level3
+        //level4
+        
+
 //        while flagInfo.bosFlag == true
 //            if(timeInfo.HrMin2Min2 == FOREX_OANDATIME+Quotient*timeInfo.currentperiod)
 //                for i=0 to 4-arraysize-1
@@ -314,6 +328,10 @@ switch state
         if(countInfo.Barcount == Quotient+1) //當天資料已經處理完
             timeInfo.lasttime := FOREX_OANDATIME
             countInfo.Barcount := 0
+            flagInfo.diffFlag := false 
+        else if(countInfo.Barcount > Quotient+1) //表示有跳天
+            timeInfo.lasttime := FOREX_OANDATIME
+            countInfo.Barcount := countInfo.Barcount%(Quotient+1)
             flagInfo.diffFlag := false 
         if bar_index == last_bar_index - numbershift-2 //state要等到倒數第二根跑完arraygen才會進入畫圖狀態，所以倒數第三根nextstate要提前準備
             flagInfo.plotFlag := true

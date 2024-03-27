@@ -53,13 +53,29 @@ type Flag_Type
     bool bosFlag
     bool jumpFlag
 //**
+var const int RESET = 1
+var const int ARRAYGEN = 2
+var const int PLOT = 3
+var const int SURRD = 4
+var const int NOSKY = 5
+var const int NOGRD = 6
+var const int DAY2MINUTE = 1440
+var const int FOREX_OANDATIME = 1020
+var const int FOREX_OPENTIMEEIGHTCAP = 0
 //the life cycle of this method live untill count == size()
-method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr) => 
-  int count = 0 //if count == Barcount? if crossover day ?
-  bool bosFlag = false
-  bosFlag := true
-  while bosFlag 
+method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient) => 
+  int count = b.boscount //if count == Barcount? if crossover day ?
+  while f.bosflag 
     switch b.state_1over4
+      SURRD =>
+        
+      NOSKY =>
+
+      NOGRD =>
+   
+    if((count%(Quotient+1) == b.Barcount and diffFlag) or count == Quotient+1) //it means diff<0, jump over the day or today is at the end. 
+      break
+    
 
 
 
