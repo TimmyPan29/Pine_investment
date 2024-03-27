@@ -27,7 +27,7 @@ indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 //  *//
 
 //common variable
-var int numbershift = last_bar_index - 51-52*46+1
+var int numbershift = 100
 var int state = na
 var int nextstate = na
 var int statelevel = na
@@ -72,7 +72,7 @@ var int testint = 0
 var string teststr = na
 var bool testbool = na
 var float testfloat = na
-var testarray = array.new(0)
+var testarray = array.new<float>(0)
 var float testcount = na
 
 //**
@@ -198,14 +198,15 @@ method init_BOS(BOS_Type this) =>
     this.Buff_key2_4over4 := na
 
 method init_Flag(Flag_Type this) =>
-    this.SizeFlag = na
-    this.GoFlag = false
-    this.resetFlag = false
-    this.plotFlag = false
-    this.diffFlag = false
-    this.bosFlag = false
-    this.jumpFlag = false
+    this.SizeFlag := na
+    this.GoFlag := false
+    this.resetFlag := false
+    this.plotFlag := false
+    this.diffFlag := false
+    this.bosFlag := false
+    this.jumpFlag := false
 //**
+
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
 var countInfo = Count_Type.new(0,0,0,0) // levelcount count1 boscount Barcount
 var flagInfo = Flag_Type.new(na,false,false,false,false,false) //size ,go,resetFlag,plotFlag, diffFlag, jumpFlag
@@ -231,7 +232,7 @@ Quotient := math.floor(float(DAY2MINUTE)/timeInfo.currentperiod)
 Remainder := DAY2MINUTE%timeInfo.currentperiod
 testarray := arrayclose
 ////*****state init*****////
-if(flagInfo.GoFlag == false and str.contains(TICKERID,"OANDA"))
+if(timeInfo.HrMin2Min2 == FOREX_OANDATIME and flagInfo.GoFlag == false and str.contains(TICKERID,"OANDA"))
     countInfo.Barcount := 0
     timeInfo.starttime := timeInfo.HrMin2Min2
     timeInfo.lasttime := FOREX_OANDATIME
@@ -298,17 +299,17 @@ switch state
                         timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
         flagInfo.bosFlag := true
         arraysize := array.size(arrayclose)        
-        while flagInfo.bosFlag == true
-            if(timeInfo.HrMin2Min2 == FOREX_OANDATIME+Quotient*timeInfo.currentperiod)
-                for i=0 to 4-arraysize-1
-                    array.push(arrayclose,array.get(arrayclose,arraysize-1))
-            if(flagInfo.jumpFlag and flagInfo.diffFlag == false) //表示要補值
-                for i=0 to (diff-1)*4-1
-                    array.unshift(arrayclose,array.get(arrayclose,0))
-            if(flagInfo.jumpFlag and flagInfo.diffFlag == true) //跨天跳時的處理
-                for i=0 to (diff*4)-1
-                    array.push(arrayclose,array.get(arrayclose,))
-            
+//        while flagInfo.bosFlag == true
+//            if(timeInfo.HrMin2Min2 == FOREX_OANDATIME+Quotient*timeInfo.currentperiod)
+//                for i=0 to 4-arraysize-1
+//                    array.push(arrayclose,array.get(arrayclose,arraysize-1))
+//            if(flagInfo.jumpFlag and flagInfo.diffFlag == false) //表示要補值
+//                for i=0 to (diff-1)*4-1
+//                    array.unshift(arrayclose,array.get(arrayclose,0))
+//            if(flagInfo.jumpFlag and flagInfo.diffFlag == true) //跨天跳時的處理
+//                for i=0 to (diff-1)*4-1
+//                    array.push(arrayclose,array.get(arrayclose,0))
+//            
 
         if(countInfo.Barcount == Quotient+1) //當天資料已經處理完
             timeInfo.lasttime := FOREX_OANDATIME
@@ -332,9 +333,8 @@ if bar_index == last_bar_index - numbershift
     buffday := dayofmonth(time) 
     buffhour := hour(time)
     buffmin := minute(time)
-if bar_index == last_bar_index 
+if bar_index == last_bar_index - numbershift
     label.new(last_bar_index, low, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(state)+"\n testint=\t" + str.tostring(testint),style=label.style_triangledown,color = color.green)
-
 
 ////**
 //  *
