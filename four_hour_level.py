@@ -12,7 +12,7 @@
 //  *先處理前三個點,初始化SBD SBU
 //  *// 
 
-//@version=5
+//@version5
 indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
 
 ////**參數
@@ -235,7 +235,7 @@ if(GoGoFlag and SizeFlag)
         if(na(close_SBU_3over4) or na(close_SBD_3over4))
             state_3over4 := 4
 
-//state2 4over4
+//state2 4over4 //two side bounded to one sied bound
     if(state_4over4==2)
         if(slope1_4over4!=slope2_4over4)
             teststr := "im hereerere"

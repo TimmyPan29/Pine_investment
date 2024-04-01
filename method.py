@@ -75,11 +75,10 @@ var const int DAY2MINUTE = 1440
 var const int FOREX_OANDATIME = 1020
 var const int FOREX_OPENTIMEEIGHTCAP = 0
 //the life cycle of this method live untill count == size()
-method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient) => 
+method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
   int count = c.boscount //if count == Barcount? if crossover day ?
   int diff = c.Barcount - c.boscount
   int NowBar = count + 1
-  int countarray = 0
   int j = 0
   while f.bosflag 
     if((not na(b.close_SBU_1over4)) and (not na(b.close_SBD_1over4)) )//有天地 留在SURRD 依此類推
@@ -89,10 +88,24 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
     else
       b.state_1over4 := NOGRD
     while j<array.size(arr)
+      b.Buff_close1_1over4 := b.Buff_close2_1over4
+      b.Buff_close2_1over4 := b.Buff_close3_1over4 
+      b.Buff_close3_1over4 := array.get(arr,j)
+      b.slope1 := b.Buff_close2_1over4 - b.Buff_close1_1over4>0? 1 : -1
+      b.slope2 := b.Buff_close3_1over4 - b.Buff_close2_1over4>0? 1 : -1
       switch b.state_1over4
         SURRD =>
-          //algor
-          
+          if(b.Buff_close3_1over4>b.close_SBU_1over4)
+            b.close_SBU_1over4 := na
+            b.close_SBD_1over4 := b.Buff_key1_1over4
+            b.index_SBD_1over4 := index
+          else if(b.Buff_close3_1over4<b.close_SBD_1over4)
+            b.close_SBD_1over4 := na
+            b.close_SBU_1over4 := b.Buff_key1_1over4
+            b.index_SBU_1over4 := index
+          else //maintain SURRD
+
+              
           
         NOSKY =>
 
@@ -100,9 +113,11 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
         =>
           label.new(bar_index,low,"something wrong")
     //end switch
+      j += 1
+      break
   //end while
-    count += 1
-    if((count%(Quotient+1) == c.Barcount and f.diffFlag) or ((count == Quotient+1) and not(f.diffFlag)) //it means diff<0, jump over the day or today is at the end. 
+    count := ((j+1)%4)==0? count+1 : count
+    if((count == c.Barcount and f.diffFlag) or ((count == Quotient+1) and not(f.diffFlag)) //it means diff<0, jump over the day or today is at the end. 
       break
 //end while
     

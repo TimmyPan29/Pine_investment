@@ -43,6 +43,7 @@ var int buffhour = na
 var int buffmin = na
 var int arraysize = na
 var int Remainder2Bar = na
+var int index = 0
 var string TICKERID = syminfo.tickerid
 var arrayclose = array.new<float>(0)
 var arraybuff = array.new<float>(0)
@@ -352,7 +353,7 @@ if bar_index == last_bar_index - numbershift
     buffmin := minute(time)
 if bar_index == last_bar_index - numbershift
     label.new(last_bar_index, low, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(state)+"\n testint=\t" + str.tostring(testint),style=label.style_triangledown,color = color.green)
-
+index += 1
 ////**
 //  *
 //  *//
