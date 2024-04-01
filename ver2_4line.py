@@ -42,6 +42,7 @@ var int buffday = na
 var int buffhour = na
 var int buffmin = na
 var int arraysize = na
+var int Remainder2Bar = na
 var string TICKERID = syminfo.tickerid
 var arrayclose = array.new<float>(0)
 var arraybuff = array.new<float>(0)
@@ -208,7 +209,7 @@ method init_Flag(Flag_Type this) =>
 //**
 
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
-var countInfo = Count_Type.new(0,0,0,0) // levelcount count1 boscount Barcount
+var countInfo = Count_Type.new(0,0,0,0,0) // levelcount count1 boscount Barcount,RmnBarcount
 var flagInfo = Flag_Type.new(na,false,false,false,false,false) //size ,go,resetFlag,plotFlag, diffFlag, jumpFlag
 var BOSInfo = BOS_Type.new()
 if barstate.isfirst // execute once when script started
@@ -230,6 +231,7 @@ arrayclose := request.security_lower_tf(syminfo.tickerid,timeframe,close)
 flagInfo.SizeFlag := array.size(arrayclose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/timeInfo.currentperiod)
 Remainder := DAY2MINUTE%timeInfo.currentperiod
+Remainder2Bar := Remainder%currentperiod_div4+1
 testarray := arrayclose
 ////*****state init*****////
 if(timeInfo.HrMin2Min2 == FOREX_OANDATIME and flagInfo.GoFlag == false and str.contains(TICKERID,"OANDA"))
@@ -297,41 +299,38 @@ switch state
                         countInfo.Barcount += diff
                         timeInfo.lasttime := timeInfo.HrMin2Min2
                         timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
+
+        arraysize := array.size(arrayclose) 
         if(flagInfo.diffFlag) //跳天 往前插值補滿
             for i=0 to 4*(diff+countInfo.count1)-1
                 array.unshift(arrayclose,array.get(arrayclose,0))
-
         else if(flagInfo.jumpFlag and countInfo.Barcount==Quotient+1) //跳 且 跳到當天最後一根
+            for i=0 to 4*(diff)-1
+                array.unshift(arrayclose,array.get(arrayclose,0))
+            for i= 0 to Remainder2Bar-1
+                array.push(arrayclose,array.get(arrayclose,arraysize-1))
+        else if(not(flagInfo.jumpFlag) and countInfo.Barcount==Quotient+1) //沒有跳 但是已經最後根
+            for i= 0 to Remainder2Bar-1
+                array.push(arrayclose,array.get(arrayclose,arraysize-1))
+        else //沒有跳 一根一根進來 且不是最後一根
+            label.new(bar_index,low,"normal one by one input")
+            //arrayclose := arrayclose    
 
-        else
-
-        arraysize := array.size(arrayclose)                   
         flagInfo.bosFlag := true
         //level1
         //level2
         //level3
-        //level4
-        
-
-//        while flagInfo.bosFlag == true
-//            if(timeInfo.HrMin2Min2 == FOREX_OANDATIME+Quotient*timeInfo.currentperiod)
-//                for i=0 to 4-arraysize-1
-//                    array.push(arrayclose,array.get(arrayclose,arraysize-1))
-//            if(flagInfo.jumpFlag and flagInfo.diffFlag == false) //表示要補值
-//                for i=0 to (diff-1)*4-1
-//                    array.unshift(arrayclose,array.get(arrayclose,0))
-//            if(flagInfo.jumpFlag and flagInfo.diffFlag == true) //跨天跳時的處理
-//                for i=0 to (diff-1)*4-1
-//                    array.push(arrayclose,array.get(arrayclose,0))
-//            
-
-        if(countInfo.Barcount == Quotient+1) //當天資料已經處理完
+        //level4         
+        countInfo.boscount := countInfo.Barcount
+        if(countInfo.boscount == Quotient+1) //當天資料已經處理完
             timeInfo.lasttime := FOREX_OANDATIME
             countInfo.Barcount := 0
+            countInfo.boscount := 0
             flagInfo.diffFlag := false 
-        else if(countInfo.Barcount > Quotient+1) //表示有跳天
+        else if(countInfo.boscount > Quotient+1) //表示有跳天
             timeInfo.lasttime := FOREX_OANDATIME
-            countInfo.Barcount := countInfo.Barcount%(Quotient+1)
+            countInfo.Barcount := countInfo.boscount%(Quotient+1)
+            countInfo.boscount := ountInfo.Barcount
             flagInfo.diffFlag := false 
         if bar_index == last_bar_index - numbershift-2 //state要等到倒數第二根跑完arraygen才會進入畫圖狀態，所以倒數第三根nextstate要提前準備
             flagInfo.plotFlag := true

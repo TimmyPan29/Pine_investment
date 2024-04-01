@@ -11,7 +11,7 @@ type BOS_Type
    int state_2over4 = SURRD
    int state_3over4 = SURRD
    int state_4over4 = SURRD
-   int index_key1_1over4 = na
+   int index_key1_1over4 = 0
    int index_key2_1over4 = na
    int index_key1_2over4 = na
    int index_key2_2over4 = na
@@ -35,14 +35,26 @@ type BOS_Type
    float close_SBD_3over4 = 0
    float close_SBU_4over4 = 0
    float close_SBD_4over4 = 0
-   float Buff_key1_1over4 = na
+   float Buff_key1_1over4 = 0
    float Buff_key2_1over4 = na
-   float Buff_key1_2over4 = na
+   float Buff_key1_2over4 = 0
    float Buff_key2_2over4 = na
-   float Buff_key1_3over4 = na
+   float Buff_key1_3over4 = 0
    float Buff_key2_3over4 = na
-   float Buff_key1_4over4 = na
+   float Buff_key1_4over4 = 0
    float Buff_key2_4over4 = na
+   float Buff_close1_1over4 = 0
+   float Buff_close2_1over4 = 0
+   float Buff_close3_1over4 = 0
+   float Buff_close1_2over4 = 0
+   float Buff_close2_2over4 = 0
+   float Buff_close3_2over4 = 0
+   float Buff_close1_3over4 = 0
+   float Buff_close2_3over4 = 0
+   float Buff_close3_3over4 = 0
+   float Buff_close1_4over4 = 0
+   float Buff_close2_4over4 = 0
+   float Buff_close3_4over4 = 0   
 //**
 type Flag_Type
     bool SizeFlag
@@ -64,17 +76,35 @@ var const int FOREX_OANDATIME = 1020
 var const int FOREX_OPENTIMEEIGHTCAP = 0
 //the life cycle of this method live untill count == size()
 method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient) => 
-  int count = b.boscount //if count == Barcount? if crossover day ?
+  int count = c.boscount //if count == Barcount? if crossover day ?
+  int diff = c.Barcount - c.boscount
+  int NowBar = count + 1
+  int countarray = 0
+  int j = 0
   while f.bosflag 
-    switch b.state_1over4
-      SURRD =>
-        
-      NOSKY =>
+    if((not na(b.close_SBU_1over4)) and (not na(b.close_SBD_1over4)) )//有天地 留在SURRD 依此類推
+      b.state_1over4 := SURRD
+    else if ((na(b.close_SBU_1over4)) and (not na(b.close_SBD_1over4)) )
+      b.state_1over4 := NOSKY
+    else
+      b.state_1over4 := NOGRD
+    while j<array.size(arr)
+      switch b.state_1over4
+        SURRD =>
+          //algor
+          
+          
+        NOSKY =>
 
-      NOGRD =>
-   
-    if((count%(Quotient+1) == b.Barcount and diffFlag) or count == Quotient+1) //it means diff<0, jump over the day or today is at the end. 
+        NOGRD =>
+        =>
+          label.new(bar_index,low,"something wrong")
+    //end switch
+  //end while
+    count += 1
+    if((count%(Quotient+1) == c.Barcount and f.diffFlag) or ((count == Quotient+1) and not(f.diffFlag)) //it means diff<0, jump over the day or today is at the end. 
       break
+//end while
     
 
 
