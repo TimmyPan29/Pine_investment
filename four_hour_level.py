@@ -282,7 +282,7 @@ if(GoGoFlag and SizeFlag)
             state_3over4 := 5
 
 //bug index here
-//state3 4over4
+//state3 4over4 //maintain bounded
     if(state_4over4==3)
         if(slope1_4over4!=slope2_4over4)
             Buff_key1_4over4 := Buff_close2_4over4

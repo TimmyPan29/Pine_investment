@@ -95,6 +95,9 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
       b.slope2 := b.Buff_close3_1over4 - b.Buff_close2_1over4>0? 1 : -1
       switch b.state_1over4
         SURRD =>
+          if(b.slope1 != b.slope2)
+            b.Buff_key1_1over4 := b.Buff_close2_1over4
+            b.index_key1_1over4 := index-1
           if(b.Buff_close3_1over4>b.close_SBU_1over4)
             b.close_SBU_1over4 := na
             b.close_SBD_1over4 := b.Buff_key1_1over4
@@ -104,6 +107,7 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             b.close_SBU_1over4 := b.Buff_key1_1over4
             b.index_SBU_1over4 := index
           else //maintain SURRD
+            label.new(bar_index,low,"do nothing")
 
               
           
