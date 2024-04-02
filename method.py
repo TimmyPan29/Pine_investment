@@ -107,7 +107,7 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             b.close_SBU_1over4 := b.Buff_key1_1over4
             b.index_SBU_1over4 := index
           else //maintain SURRD
-            label.new(bar_index,low,"do nothing")
+            label.new(bar_index,low,"still in bounded box)
 
               
           
