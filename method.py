@@ -107,20 +107,31 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             b.close_SBU_1over4 := b.Buff_key1_1over4
             b.index_SBU_1over4 := index
           else //maintain SURRD
-            label.new(bar_index,low,"still in bounded box)
-
-              
-          
+            label.new(bar_index,low,"still in bounded box")
         NOSKY =>
-
+          if(b.slope1 != b.slope2)
+            b.Buff_key2_1over4 := b.Buff_close2_1over4
+            b.index_key2_1over4 := index
+          if(na(b.close_SBU_1over4))
+            b.close_SBU_1over4 := b.Buff_key2_1over4
+            b.index_SBU_1over4 := b.index_key2_1over4
+            if(b.Buff_close3_1over4<b.close_SBD_1over4)
+              b.Buff_key1_1over4 := b.Buff_close2_1over4
+              b.close_SBD_1over4 := na
         NOGRD =>
+          if(na(b.close_SBD_1over4))
+            b.close_SBD_1over4 := b.Buff_key2_1over4
+            b.index_SBD_1over4 := b.index_key2_1over4
+            if(b.Buff_close3_1over4>b.close_SBU_1over4)
+              b.Buff_key1_1over4 := b.Buff_close2_1over4
+              b.close_SBU_1over4 := na          
         =>
           label.new(bar_index,low,"something wrong")
     //end switch
       j += 1
       break
   //end while
-    count := ((j+1)%4)==0? count+1 : count
+    count := (j%4)==0? count+1 : count
     if((count == c.Barcount and f.diffFlag) or ((count == Quotient+1) and not(f.diffFlag)) //it means diff<0, jump over the day or today is at the end. 
       break
 //end while
