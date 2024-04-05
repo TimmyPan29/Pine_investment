@@ -1,5 +1,5 @@
 //@version=5
-indicator("4level_line", shorttitle="SB", overlay=true) 
+indicator("4level_line", shorttitle="BOStest", overlay=true) 
 ////**up-break, down-break, surrounded between sky and ground
 // 
 //  *local parameter : section where all the state is.
@@ -349,4 +349,4 @@ if bar_index == last_bar_index - numbershift
     buffhour := hour(time)
     buffmin := minute(time)
 if bar_index == last_bar_index - numbershift
-    label.new(last_bar_index, low, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(state)+"\n testint=\t" + str.tostring(BOSInfo.close_SBU_1over4),style=label.style_triangledown,color = color.green)
+    label.new(last_bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(BOSInfo.state_1over4)+"\n testint=\t" + str.tostring(BOSInfo.close_SBU_1over4),style=label.style_triangledown,color = color.green)
