@@ -270,16 +270,19 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_1over4 := b.Buff_close2_1over4
                         b.index_key2_1over4 := index
-                    if(na(b.close_SBU_1over4))
                         b.close_SBU_1over4 := b.Buff_key2_1over4
                         b.index_SBU_1over4 := b.index_key2_1over4
+                        b.Buff_key1_1over4 := b.Buff_key2_1over4
                     if(b.Buff_close3_1over4<b.close_SBD_1over4)
                         b.Buff_key1_1over4 := b.Buff_close2_1over4
                         b.close_SBD_1over4 := na
                 NOGRD =>
-                    if(na(b.close_SBD_1over4))
+                    if(b.slope1 != b.slope2)
+                        b.Buff_key2_1over4 := b.Buff_close2_1over4
+                        b.index_key2_1over4 := index
                         b.close_SBD_1over4 := b.Buff_key2_1over4
                         b.index_SBD_1over4 := b.index_key2_1over4
+                        b.Buff_key1_1over4 := b.Buff_key2_1over4
                     if(b.Buff_close3_1over4>b.close_SBU_1over4)
                         b.Buff_key1_1over4 := b.Buff_close2_1over4
                         b.close_SBU_1over4 := na          
@@ -289,8 +292,8 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 1
             break
         //end while
-        count := ((j+1)%4)==0? count+1 : count
-        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+        count := j%4==0? count+1 : count
+        if((count == c.Barcount and f.diffFlag) or (count == 3 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
 //end method   
@@ -330,16 +333,19 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_2over4 := b.Buff_close2_2over4
                         b.index_key2_2over4 := index
-                    if(na(b.close_SBU_2over4))
                         b.close_SBU_2over4 := b.Buff_key2_2over4
                         b.index_SBU_2over4 := b.index_key2_2over4
+                        b.Buff_key1_2over4 := b.Buff_key2_2over4
                     if(b.Buff_close3_2over4<b.close_SBD_2over4)
                         b.Buff_key1_2over4 := b.Buff_close2_2over4
                         b.close_SBD_2over4 := na
                 NOGRD =>
-                    if(na(b.close_SBD_2over4))
+                    if(b.slope1 != b.slope2)
+                        b.Buff_key2_2over4 := b.Buff_close2_2over4
+                        b.index_key2_2over4 := index
                         b.close_SBD_2over4 := b.Buff_key2_2over4
                         b.index_SBD_2over4 := b.index_key2_2over4
+                        b.Buff_key1_2over4 := b.Buff_key2_2over4
                     if(b.Buff_close3_2over4>b.close_SBU_2over4)
                         b.Buff_key1_2over4 := b.Buff_close2_2over4
                         b.close_SBU_2over4 := na          
@@ -391,16 +397,19 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_3over4 := b.Buff_close2_3over4
                         b.index_key2_3over4 := index
-                    if(na(b.close_SBU_3over4))
                         b.close_SBU_3over4 := b.Buff_key2_3over4
                         b.index_SBU_3over4 := b.index_key2_3over4
+                        b.Buff_key1_3over4 := b.Buff_key2_3over4
                     if(b.Buff_close3_3over4<b.close_SBD_3over4)
                         b.Buff_key1_3over4 := b.Buff_close2_3over4
                         b.close_SBD_3over4 := na
                 NOGRD =>
-                    if(na(b.close_SBD_3over4))
+                    if(b.slope1 != b.slope2)
+                        b.Buff_key2_3over4 := b.Buff_close2_3over4
+                        b.index_key2_3over4 := index
                         b.close_SBD_3over4 := b.Buff_key2_3over4
                         b.index_SBD_3over4 := b.index_key2_3over4
+                        b.Buff_key1_3over4 := b.Buff_key2_3over4
                     if(b.Buff_close3_3over4>b.close_SBU_3over4)
                         b.Buff_key1_3over4 := b.Buff_close2_3over4
                         b.close_SBU_3over4 := na          
@@ -451,16 +460,19 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_4over4 := b.Buff_close2_4over4
                         b.index_key2_4over4 := index
-                    if(na(b.close_SBU_4over4))
                         b.close_SBU_4over4 := b.Buff_key2_4over4
                         b.index_SBU_4over4 := b.index_key2_4over4
+                        b.Buff_key1_4over4 := b.Buff_key2_4over4
                     if(b.Buff_close3_4over4<b.close_SBD_4over4)
                         b.Buff_key1_4over4 := b.Buff_close2_4over4
                         b.close_SBD_4over4 := na
                 NOGRD =>
-                    if(na(b.close_SBD_4over4))
+                    if(b.slope1 != b.slope2)
+                        b.Buff_key2_4over4 := b.Buff_close2_4over4
+                        b.index_key2_4over4 := index
                         b.close_SBD_4over4 := b.Buff_key2_4over4
                         b.index_SBD_4over4 := b.index_key2_4over4
+                        b.Buff_key1_4over4 := b.Buff_key2_4over4
                     if(b.Buff_close3_4over4>b.close_SBU_4over4)
                         b.Buff_key1_4over4 := b.Buff_close2_4over4
                         b.close_SBU_4over4 := na          
@@ -474,7 +486,7 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
         if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
-//end method   
+//end method      
 
 //*****var initialization*****//
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
@@ -569,12 +581,12 @@ switch state
                         countInfo.Barcount += diff
                         timeInfo.lasttime := timeInfo.HrMin2Min2
                         timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
+                        flagInfo.diffFlag := false
 
         arraysize := array.size(arrayclose) 
         if(flagInfo.diffFlag) //跳天 往前插值補滿
             for i=0 to 4*(diff+countInfo.count1)-1
                 array.unshift(arrayclose,array.get(arrayclose,0))
-            flagInfo.diffFlag := false
         else if(flagInfo.jumpFlag and countInfo.Barcount==Quotient+1) //跳 且 跳到當天最後一根
             for i=0 to 4*(diff)-1
                 array.unshift(arrayclose,array.get(arrayclose,0))

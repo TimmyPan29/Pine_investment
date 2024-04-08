@@ -324,9 +324,10 @@ flagInfo.SizeFlag := array.size(arrayclose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/timeInfo.currentperiod)
 Remainder := DAY2MINUTE%timeInfo.currentperiod
 Remainder2Bar := Remainder%timeInfo.currentperiod_div4+1
-testarray := arrayclose
-arraybuff := array.from(1.7,1.71,1.72,1.73,1.74,1.75,1.76,1.67,1.64,1.61,1.77,1.78)
+testarray := arrayclose    
 if(barstate.isfirst)
+    for i=0 to 4*(4)-1
+        array.unshift(arraybuff,array.get(arrayclose,0))
     countInfo.boscount := 0
     countInfo.Barcount := 3
     flagInfo.bosFlag := true
