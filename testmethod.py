@@ -270,16 +270,19 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_1over4 := b.Buff_close2_1over4
                         b.index_key2_1over4 := index
-                    if(na(b.close_SBU_1over4))
                         b.close_SBU_1over4 := b.Buff_key2_1over4
                         b.index_SBU_1over4 := b.index_key2_1over4
+                        b.Buff_key1_1over4 := b.Buff_key2_1over4
                     if(b.Buff_close3_1over4<b.close_SBD_1over4)
                         b.Buff_key1_1over4 := b.Buff_close2_1over4
                         b.close_SBD_1over4 := na
                 NOGRD =>
-                    if(na(b.close_SBD_1over4))
+                    if(b.slope1 != b.slope2)
+                        b.Buff_key2_1over4 := b.Buff_close2_1over4
+                        b.index_key2_1over4 := index
                         b.close_SBD_1over4 := b.Buff_key2_1over4
                         b.index_SBD_1over4 := b.index_key2_1over4
+                        b.Buff_key1_1over4 := b.Buff_key2_1over4
                     if(b.Buff_close3_1over4>b.close_SBU_1over4)
                         b.Buff_key1_1over4 := b.Buff_close2_1over4
                         b.close_SBU_1over4 := na          
@@ -289,8 +292,8 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 1
             break
         //end while
-        count := (j%4)==0? count+1 : count
-        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+        count := j%4==0? count+1 : count
+        if((count == c.Barcount and f.diffFlag) or (count == 3 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
 //end method   
@@ -323,23 +326,22 @@ Remainder := DAY2MINUTE%timeInfo.currentperiod
 Remainder2Bar := Remainder%timeInfo.currentperiod_div4+1
 testarray := arrayclose
 arraybuff := array.from(1.7,1.71,1.72,1.73,1.74,1.75,1.76,1.67,1.64,1.61,1.77,1.78)
-countInfo.boscount := 0
-countInfo.Barcount := 3
 if(barstate.isfirst)
+    countInfo.boscount := 0
+    countInfo.Barcount := 3
     flagInfo.bosFlag := true
     BOScal_level1(BOSInfo,countInfo,flagInfo,arraybuff,Quotient,index)
+    countInfo.boscount := countInfo.Barcount
 index += 1
 //1over4 start 
-line.new(x1=bar_index, y1=BOSInfo.close_SBU_1over4, x2=bar_index +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.black)
-line.new(x1=bar_index, y1=BOSInfo.close_SBD_1over4, x2=bar_index +100, y2=BOSInfo.close_SBD_1over4, width=2, color=color.black)
 
 if(na(Label_SBU_1over4)==false)
     label.delete(Label_SBU_1over4)
-Label_SBU_1over4 := label.new(x=bar_index, y=BOSInfo.close_SBU_1over4, text="SBU_1over4: " + str.tostring(BOSInfo.close_SBU_1over4), xloc = xloc.bar_index, yloc=yloc.price,color=color.red) 
+Label_SBU_1over4 := label.new(x=last_bar_index - numbershift, y=BOSInfo.close_SBU_1over4, text="SBU_1over4: " + str.tostring(BOSInfo.close_SBU_1over4), xloc = xloc.bar_index, yloc=yloc.price,color=color.red) 
 
 if(na(Label_SBD_1over4)==false)
     label.delete(Label_SBD_1over4)
-Label_SBD_1over4 := label.new(x=bar_index, y=BOSInfo.close_SBD_1over4, text="SBD_1over4: " + str.tostring(BOSInfo.close_SBD_1over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up)
+Label_SBD_1over4 := label.new(x=last_bar_index - numbershift, y=BOSInfo.close_SBD_1over4, text="SBD_1over4: " + str.tostring(BOSInfo.close_SBD_1over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up)
 //1over4 end
 if bar_index == last_bar_index - numbershift
     //label.new(last_bar_index-numbershift, high, str.tostring(arrayclose),color orange,size := size.normal)
@@ -348,5 +350,7 @@ if bar_index == last_bar_index - numbershift
     buffday := dayofmonth(time) 
     buffhour := hour(time)
     buffmin := minute(time)
+    line.new(x1=last_bar_index - numbershift, y1=BOSInfo.close_SBU_1over4, x2=last_bar_index - numbershift +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.black)
+    line.new(x1=last_bar_index - numbershift, y1=BOSInfo.close_SBD_1over4, x2=last_bar_index - numbershift +100, y2=BOSInfo.close_SBD_1over4, width=2, color=color.black)
 if bar_index == last_bar_index - numbershift
-    label.new(last_bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(BOSInfo.state_1over4)+"\n testint=\t" + str.tostring(BOSInfo.close_SBU_1over4),style=label.style_triangledown,color = color.green)
+    label.new(bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(BOSInfo.state_1over4)+"\n testint=\t" + str.tostring(BOSInfo.Buff_close3_1over4),style=label.style_triangledown,color = color.green)
