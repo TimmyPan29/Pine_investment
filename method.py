@@ -119,7 +119,7 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 2
             break
         //end while
-        count := ((j+1)%4)==0? count+1 : count
+        count := j%4==0? count+1 : count
         if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
@@ -183,7 +183,7 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 3
             break
         //end while
-        count := ((j+1)%4)==0? count+1 : count
+        count := j%4==0? count+1 : count
         if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
@@ -246,7 +246,7 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 4
             break
         //end while
-        count := ((j+1)%4)==0? count+1 : count
+        count := j%4==0? count+1 : count
         if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
