@@ -47,6 +47,8 @@ var float flt_timeframe = na
 var string TICKERID = syminfo.tickerid
 var arrayclose = array.new<float>(0)
 var arraybuff = array.new<float>(0)
+var string EXCHANGE = na
+var int BASETIME = na
 
 //figure variable 
 var label Label_SBU_1over4 = na
@@ -68,7 +70,7 @@ var const int NOSKY = 5
 var const int NOGRD = 6
 var const int DAY2MINUTE = 1440
 var const int FOREX_OANDATIME = 1020
-var const int FOREX_OPENTIMEEIGHTCAP = 0
+var const int CRYPTO_EIGHTCAPTIME = 0
 
 //test variable
 var label test = na
@@ -78,7 +80,7 @@ var bool testbool = na
 var float testfloat = na
 var testarray = array.new<float>(0)
 var float testcount = na
-
+var testbool2 = false
 //**
 
 //time variable
@@ -303,6 +305,13 @@ var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
 var countInfo = Count_Type.new(0,0,0,0,0) // levelcount count1 boscount Barcount,RmnBarcount
 var flagInfo = Flag_Type.new(na,false,false,false,false,false) //size ,go,resetFlag,plotFlag, diffFlag, jumpFlag
 var BOSInfo = BOS_Type.new()
+//*****custom option*****//
+numbershift := 2
+BASETIME := CRYPTO_EIGHTCAPTIME
+EXCHANGE := "EIGHTCAP"
+//*****end*****//
+if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false and str.contains(TICKERID,EXCHANGE))
+    testbool2 := true
 if barstate.isfirst // execute once when script started
     timeInfo.currentperiod := str.tonumber(timeframe.period)
     timeInfo.currentperiod_div4 := timeInfo.currentperiod / 4
@@ -314,12 +323,15 @@ timeInfo.currentDay := dayofmonth(time)
 timeInfo.currentHr := hour(time) 
 timeInfo.currentMin := minute(time) 
 timeInfo.HrMin2Min := timeInfo.currentHr * 60 + timeInfo.currentMin
-if(timeInfo.HrMin2Min<FOREX_OANDATIME and timeInfo.HrMin2Min>=0)
+if(timeInfo.HrMin2Min<BASETIME and timeInfo.HrMin2Min>=0)
     timeInfo.HrMin2Min2 := timeInfo.HrMin2Min + DAY2MINUTE
 else
     timeInfo.HrMin2Min2 := timeInfo.HrMin2Min
 
 arrayclose := request.security_lower_tf(syminfo.tickerid,str_timeframe,close)
+arraysize := array.size(arrayclose)
+if(arraysize == 0)
+    array.push(arrayclose,close)
 flagInfo.SizeFlag := array.size(arrayclose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/timeInfo.currentperiod)
 Remainder := DAY2MINUTE%timeInfo.currentperiod
@@ -327,11 +339,11 @@ Remainder2Bar := Remainder%timeInfo.currentperiod_div4+1
 testarray := arrayclose    
 if(barstate.isfirst)
     for i=0 to 4*(4)-1
-        array.unshift(arraybuff,array.get(arrayclose,0))
+        array.unshift(arrayclose,array.get(arrayclose,0))
     countInfo.boscount := 0
     countInfo.Barcount := 3
     flagInfo.bosFlag := true
-    BOScal_level1(BOSInfo,countInfo,flagInfo,arraybuff,Quotient,index)
+    BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
     countInfo.boscount := countInfo.Barcount
 index += 1
 //1over4 start 
@@ -354,4 +366,4 @@ if bar_index == last_bar_index - numbershift
     line.new(x1=last_bar_index - numbershift, y1=BOSInfo.close_SBU_1over4, x2=last_bar_index - numbershift +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.black)
     line.new(x1=last_bar_index - numbershift, y1=BOSInfo.close_SBD_1over4, x2=last_bar_index - numbershift +100, y2=BOSInfo.close_SBD_1over4, width=2, color=color.black)
 if bar_index == last_bar_index - numbershift
-    label.new(bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(BOSInfo.state_1over4)+"\n testint=\t" + str.tostring(arraybuff),style=label.style_triangledown,color = color.green)
+    label.new(bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(BOSInfo.state_1over4)+"\n testint=\t" + str.tostring(arrayclose)+"\n testbool2=\t" + str.tostring(testbool2),style=label.style_triangledown,color = color.green)

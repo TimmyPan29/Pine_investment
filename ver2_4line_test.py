@@ -1,5 +1,5 @@
 //@version=5
-indicator("4level_line", shorttitle="fourline", overlay=true) 
+indicator("4level_line", shorttitle="fourlinetest", overlay=true) 
 ////**up-break, down-break, surrounded between sky and ground
 // 
 //  *local parameter : section where all the state is.
@@ -46,7 +46,6 @@ var string str_timeframe = na
 var float flt_timeframe = na 
 var string TICKERID = syminfo.tickerid
 var arrayclose = array.new<float>(0)
-var arraybuff = array.new<int>(0)
 
 //figure variable 
 var label Label_SBU_1over4 = na
@@ -68,7 +67,6 @@ var const int NOSKY = 5
 var const int NOGRD = 6
 var const int DAY2MINUTE = 1440
 var const int FOREX_OANDATIME = 1020
-var const int FOREX_OPENTIMEEIGHTCAP = 0
 
 //test variable
 var label test = na
@@ -510,11 +508,14 @@ else
     timeInfo.HrMin2Min2 := timeInfo.HrMin2Min
 
 arrayclose := request.security_lower_tf(syminfo.tickerid,str_timeframe,close)
+arraysize := array.size(arrayclose)
+if(arraysize == 0)
+    for i=0 to 3
+        array.push(arrayclose,close)
 flagInfo.SizeFlag := array.size(arrayclose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/timeInfo.currentperiod)
 Remainder := DAY2MINUTE%timeInfo.currentperiod
 Remainder2Bar := Remainder%timeInfo.currentperiod_div4+1
-testarray := arraybuff
 ////*****state init*****////
 if(timeInfo.HrMin2Min2 == FOREX_OANDATIME and flagInfo.GoFlag == false and str.contains(TICKERID,"OANDA"))
     countInfo.Barcount := 0
@@ -584,7 +585,7 @@ switch state
                         timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
                         flagInfo.diffFlag := false
 
-        arraysize := array.size(arrayclose) 
+        
         if(flagInfo.diffFlag) //跳天 往前插值補滿
             for i=0 to 4*(diff+countInfo.count1+1)-1
                 array.unshift(arrayclose,array.get(arrayclose,0))
@@ -604,14 +605,12 @@ switch state
             //arrayclose := arrayclose    
 
         flagInfo.bosFlag := true
-//        if(bar_index<313 and bar_index>=0)
-//            BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
+        if(bar_index<313 and bar_index>=0)
+            BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
 //        BOScal_level2(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
 //        BOScal_level3(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
 //        BOScal_level4(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
         countInfo.boscount := countInfo.Barcount
-        if((arraysize%4)!=0)
-            array.push(arraybuff,arraysize)
         if(countInfo.boscount == Quotient+1) //當天資料已經處理完
             timeInfo.lasttime := FOREX_OANDATIME
             countInfo.Barcount := 0
