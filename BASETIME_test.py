@@ -300,7 +300,7 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             break
         //end while
         count := j%4==0? count+1 : count
-        if(f.GoFlag) //it means diff<0, jump over the day or today is at the end. 
+        if(count==c.Barcount) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
 //end method   
@@ -495,7 +495,7 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
     //end while
 //end method      
 //*****custom option*****//
-numbershift := last_bar_index - last_bar_index
+numbershift := last_bar_index - 52-52*23-51
 BASETIME := SAXO_FOREX //改成妳想要的如右 EIGHTCAP_CRYPTO, EIGHTCAP_FOREX, SAXO_CRYPTO, SAXO_FOREX, OANDA_CRYPTO, OANDA_FOREX
 EXCHANGE := "SAXO" //改現在妳在的交易所的名子
 //*****var initialization*****//
@@ -598,26 +598,28 @@ switch state
                         timeInfo.starttime := BASETIME + (countInfo.Barcount-1)*timeInfo.currentperiod
                         flagInfo.diffFlag := false
 
-        
-        if(flagInfo.diffFlag) //跳天 往前插值補滿
-            for i=0 to 4*(diff+countInfo.count1+1)-1
-                array.unshift(arrayclose,array.get(arrayclose,0))
-        else if(flagInfo.jumpFlag and countInfo.Barcount==Quotient+1) //跳 且 跳到當天最後一根
-            for i=0 to 4*(diff)-1
-                array.unshift(arrayclose,array.get(arrayclose,0))
-            for i= 0 to Remainder2Bar-1
-                array.push(arrayclose,array.get(arrayclose,arraysize-1))
-        else if(flagInfo.jumpFlag and countInfo.Barcount!=Quotient+1)//跳 但沒跳到最後一根
-            for i=0 to 4*(diff)-1
-                array.unshift(arrayclose,array.get(arrayclose,0))
-        else if(not(flagInfo.jumpFlag) and countInfo.Barcount==Quotient+1) //沒有跳 但是已經最後根
-            for i= 0 to fourminus_Remainger2Bar-1
+        if(arraysize!=4)
+            for 0 to (3-arraysize)
                 array.push(arrayclose,close)
-        else //沒有跳 一根一根進來 且不是最後一根
-            if(bar_index == 9075)
-                label.new(bar_index,low-low/20,"one by one input")
-            //arrayclose := arrayclose    
-
+//        if(flagInfo.diffFlag) //跳天 往前插值補滿
+//            for i=0 to 4*(diff+countInfo.count1+1)-1
+//                array.unshift(arrayclose,array.get(arrayclose,0))
+//        else if(flagInfo.jumpFlag and countInfo.Barcount==Quotient+1) //跳 且 跳到當天最後一根
+//            for i=0 to 4*(diff)-1
+//                array.unshift(arrayclose,array.get(arrayclose,0))
+//            for i= 0 to Remainder2Bar-1
+//                array.push(arrayclose,array.get(arrayclose,arraysize-1))
+//        else if(flagInfo.jumpFlag and countInfo.Barcount!=Quotient+1)//跳 但沒跳到最後一根
+//            for i=0 to 4*(diff)-1
+//                array.unshift(arrayclose,array.get(arrayclose,0))
+//        else if(not(flagInfo.jumpFlag) and countInfo.Barcount==Quotient+1) //沒有跳 但是已經最後根
+//            for i= 0 to fourminus_Remainger2Bar-1
+//                array.push(arrayclose,close)
+//        else //沒有跳 一根一根進來 且不是最後一根
+//            if(bar_index == 9075)
+//                label.new(bar_index,low-low/20,"one by one input")
+//            //arrayclose := arrayclose    
+        testfloat := countInfo.Barcount
         flagInfo.bosFlag := true
         if(bar_index>=0)
             BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
@@ -661,8 +663,6 @@ switch state
         label.new(bar_index,low+0.1,"run into wrong state")
 //plot end
 //*****test plot*****//
-if(bar_index==last_bar_index-1)
-    testfloat := countInfo.count1
 if bar_index == last_bar_index - numbershift
     //label.new(last_bar_index-numbershift, high, str.tostring(arrayclose),color orange,size := size.normal)
     buffyear := year(time)
