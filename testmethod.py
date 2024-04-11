@@ -239,7 +239,8 @@ method init_Flag(Flag_Type this) =>
 method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
     float count = c.boscount //if count == Barcount? if crossover day ?
     float NowBar = count + 1
-    int j = 0
+    int j = na
+    j := 0
     while f.bosFlag 
         if((not na(b.close_SBU_1over4)) and (not na(b.close_SBD_1over4)) )//有天地 留在SURRD 依此類推
             b.state_1over4 := SURRD
@@ -295,7 +296,7 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             break
         //end while
         count := j%4==0? count+1 : count
-        if((count == c.Barcount and f.diffFlag) or (count == 3 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+        if(count == c.Barcount or count>c.Barcount) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
 //end method   

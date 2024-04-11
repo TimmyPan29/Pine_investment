@@ -69,8 +69,12 @@ var const int SURRD = 4
 var const int NOSKY = 5
 var const int NOGRD = 6
 var const int DAY2MINUTE = 1440
-var const int FOREX_OANDATIME = 1020
-var const int CRYPTO_EIGHTCAPTIME = 0
+var const int EIGHTCAP_CRYPTO = 0
+var const int EIGHTCAP_FOREX = 0
+var const int SAXO_CRYPTO = 1020
+var const int SAXO_FOREX = 1020
+var const int OANDA_CRYPTO = 1020
+var const int OANDA_FOREX = 1020
 
 //test variable
 var label test = na
@@ -239,7 +243,8 @@ method init_Flag(Flag_Type this) =>
 method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
     float count = c.boscount //if count == Barcount? if crossover day ?
     float NowBar = count + 1
-    int j = 0
+    int j = na
+    j := 0
     while f.bosFlag 
         if((not na(b.close_SBU_1over4)) and (not na(b.close_SBD_1over4)) )//有天地 留在SURRD 依此類推
             b.state_1over4 := SURRD
@@ -295,7 +300,7 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             break
         //end while
         count := j%4==0? count+1 : count
-        if(count == Quotient+1) //it means diff<0, jump over the day or today is at the end. 
+        if(f.GoFlag) //it means diff<0, jump over the day or today is at the end. 
             break
     //end while
 //end method   
@@ -490,9 +495,9 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
     //end while
 //end method      
 //*****custom option*****//
-numbershift := 2
-BASETIME := CRYPTO_EIGHTCAPTIME
-EXCHANGE := "EIGHTCAP"
+numbershift := last_bar_index - last_bar_index
+BASETIME := SAXO_FOREX //改成妳想要的如右 EIGHTCAP_CRYPTO, EIGHTCAP_FOREX, SAXO_CRYPTO, SAXO_FOREX, OANDA_CRYPTO, OANDA_FOREX
+EXCHANGE := "SAXO" //改現在妳在的交易所的名子
 //*****var initialization*****//
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
 var countInfo = Count_Type.new(0,0,0,0,0) // levelcount count1 boscount Barcount,RmnBarcount
@@ -609,16 +614,16 @@ switch state
             for i= 0 to fourminus_Remainger2Bar-1
                 array.push(arrayclose,close)
         else //沒有跳 一根一根進來 且不是最後一根
-            if(bar_index == 1995)
+            if(bar_index == 9075)
                 label.new(bar_index,low-low/20,"one by one input")
             //arrayclose := arrayclose    
 
         flagInfo.bosFlag := true
-        if(bar_index<10000 and bar_index>=9000)
+        if(bar_index>=0)
             BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
-//        BOScal_level2(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
-//        BOScal_level3(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
-//        BOScal_level4(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
+//            BOScal_level2(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
+//            BOScal_level3(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
+//            BOScal_level4(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
         countInfo.boscount := countInfo.Barcount
         if(countInfo.boscount == Quotient+1) //當天資料已經處理完
             timeInfo.lasttime := BASETIME
@@ -628,7 +633,7 @@ switch state
             flagInfo.jumpFlag := false
         else if(countInfo.boscount > Quotient+1) //表示有跳天
             timeInfo.lasttime := BASETIME
-            countInfo.Barcount := countInfo.boscount%(Quotient+1)
+            countInfo.Barcount := countInfo.Barcount%(Quotient+1)
             countInfo.boscount := countInfo.Barcount
             flagInfo.diffFlag := false
             flagInfo.jumpFlag := false
@@ -665,6 +670,6 @@ if bar_index == last_bar_index - numbershift
     buffday := dayofmonth(time) 
     buffhour := hour(time)
     buffmin := minute(time)
-if bar_index == last_bar_index - numbershift
-    label.new(last_bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(state)+"\n testint=\t" + str.tostring(testint)+"\n testfloat=\t" + str.tostring(testfloat),style=label.style_triangledown,color = color.green)
+if bar_index == last_bar_index
+    label.new(last_bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t EXCHANGE RIGHT??\t" + str.tostring(str.contains(syminfo.tickerid,EXCHANGE))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(state)+"\n Go flag?=\t" + str.tostring(flagInfo.GoFlag)+"\n testint=\t" + str.tostring(testint)+"\n testfloat=\t" + str.tostring(testfloat),style=label.style_triangledown,color = color.green)
 index += 1
