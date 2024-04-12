@@ -1,5 +1,5 @@
 //@version=5
-indicator("hr,week sbd sbu", shorttitle="SB", overlay=true)
+indicator("BOSondeline", shorttitle="BOS_origin", overlay=true)
 
 ////**參數
 //  *自定義參數
@@ -167,18 +167,18 @@ if(state==5)
         line.delete(myLine)
     myLine := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)
 
-    line.new(x1=index_SBU, y1=close_SBU, x2=index_SBU +100, y2=close_SBU, width=2, color=color.black)
-    line.new(x1=index_SBD, y1=close_SBD, x2=index_SBD +100, y2=close_SBD, width=2, color=color.black)
+    line.new(x1=index_SBU, y1=close_SBU, x2=index_SBU +100, y2=close_SBU, width=2, color=color.blue)
+    line.new(x1=index_SBD, y1=close_SBD, x2=index_SBD +100, y2=close_SBD, width=2, color=color.blue)
     //line.new(x1=bar_index-1, y1=Buff_close2, x2=bar_index, y2=Buff_close2, width=2, color=color.yellow)
     //line.new(x1=1-100, y1=Buff_key1, x2=1 + 100, y2=Buff_key1, width=2, color=color.orange)
     //line.new(x1=1-100, y1=Buff_close3, x2=1 + 100, y2=Buff_close3, width=2, color=color.black)
 
     if(na(label_SBU)==false)
         label.delete(label_SBU)
-    label_SBU := label.new(x=index_SBU, y=close_SBU, text="SBU: " + str.tostring(close_SBU), xloc = xloc.bar_index,yloc=yloc.price,color=color.red) 
+    label_SBU := label.new(x=index_SBU, y=close_SBU, text="SBU: " + str.tostring(close_SBU), xloc = xloc.bar_index,yloc=yloc.price,color=color.blue) 
 
     if(na(label_SBD)==false)
         label.delete(label_SBD)
-    label_SBD := label.new(x=index_SBD, y=close_SBD, text="SBD: " + str.tostring(close_SBD), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up) 
+    label_SBD := label.new(x=index_SBD, y=close_SBD, text="SBD: " + str.tostring(close_SBD), xloc = xloc.bar_index,yloc=yloc.price,color=color.blue,style = label.style_label_up) 
     state := na
 

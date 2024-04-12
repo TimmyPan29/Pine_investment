@@ -271,33 +271,34 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.Buff_close3_1over4>b.close_SBU_1over4)
                         b.close_SBU_1over4 := na
                         b.close_SBD_1over4 := b.Buff_key1_1over4
-                        b.index_SBD_1over4 := index
+                        b.index_SBD_1over4 := b.index_key1_1over4
                     else if(b.Buff_close3_1over4<b.close_SBD_1over4)
                         b.close_SBD_1over4 := na
                         b.close_SBU_1over4 := b.Buff_key1_1over4
-                        b.index_SBU_1over4 := index
+                        b.index_SBU_1over4 := b.index_key1_1over4
 //                    else //maintain SURRD still in bounded box
-                        
                 NOSKY =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_1over4 := b.Buff_close2_1over4
-                        b.index_key2_1over4 := index
+                        b.index_key2_1over4 := index-1
                         b.close_SBU_1over4 := b.Buff_key2_1over4
                         b.index_SBU_1over4 := b.index_key2_1over4
                         b.Buff_key1_1over4 := b.Buff_key2_1over4
+                        b.index_key1_1over4 := b.index_key2_1over4
                     if(b.Buff_close3_1over4<b.close_SBD_1over4)
-                        b.Buff_key1_1over4 := b.Buff_close2_1over4
                         b.close_SBD_1over4 := na
+                        b.index_SBD_1over4 := na
                 NOGRD =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_1over4 := b.Buff_close2_1over4
-                        b.index_key2_1over4 := index
+                        b.index_key2_1over4 := index-1
                         b.close_SBD_1over4 := b.Buff_key2_1over4
                         b.index_SBD_1over4 := b.index_key2_1over4
                         b.Buff_key1_1over4 := b.Buff_key2_1over4
+                        b.index_key1_1over4 := b.index_key2_1over4
                     if(b.Buff_close3_1over4>b.close_SBU_1over4)
-                        b.Buff_key1_1over4 := b.Buff_close2_1over4
-                        b.close_SBU_1over4 := na          
+                        b.close_SBU_1over4 := na
+                        b.index_SBU_1over4 := na          
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
@@ -336,32 +337,34 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.Buff_close3_2over4>b.close_SBU_2over4)
                         b.close_SBU_2over4 := na
                         b.close_SBD_2over4 := b.Buff_key1_2over4
-                        b.index_SBD_2over4 := index
+                        b.index_SBD_2over4 := b.index_key1_2over4
                     else if(b.Buff_close3_2over4<b.close_SBD_2over4)
                         b.close_SBD_2over4 := na
                         b.close_SBU_2over4 := b.Buff_key1_2over4
-                        b.index_SBU_2over4 := index
-//                    else //maintain SURRD, still in bounded box
+                        b.index_SBU_2over4 := b.index_key1_2over4
+//                    else //maintain SURRD still in bounded box
                 NOSKY =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_2over4 := b.Buff_close2_2over4
-                        b.index_key2_2over4 := index
+                        b.index_key2_2over4 := index-1
                         b.close_SBU_2over4 := b.Buff_key2_2over4
                         b.index_SBU_2over4 := b.index_key2_2over4
                         b.Buff_key1_2over4 := b.Buff_key2_2over4
+                        b.index_key1_2over4 := b.index_key2_2over4
                     if(b.Buff_close3_2over4<b.close_SBD_2over4)
-                        b.Buff_key1_2over4 := b.Buff_close2_2over4
                         b.close_SBD_2over4 := na
+                        b.index_SBD_2over4 := na
                 NOGRD =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_2over4 := b.Buff_close2_2over4
-                        b.index_key2_2over4 := index
+                        b.index_key2_2over4 := index-1
                         b.close_SBD_2over4 := b.Buff_key2_2over4
                         b.index_SBD_2over4 := b.index_key2_2over4
                         b.Buff_key1_2over4 := b.Buff_key2_2over4
+                        b.index_key1_2over4 := b.index_key2_2over4
                     if(b.Buff_close3_2over4>b.close_SBU_2over4)
-                        b.Buff_key1_2over4 := b.Buff_close2_2over4
-                        b.close_SBU_2over4 := na          
+                        b.close_SBU_2over4 := na
+                        b.index_SBU_2over4 := na          
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
@@ -403,32 +406,34 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.Buff_close3_3over4>b.close_SBU_3over4)
                         b.close_SBU_3over4 := na
                         b.close_SBD_3over4 := b.Buff_key1_3over4
-                        b.index_SBD_3over4 := index
+                        b.index_SBD_3over4 := b.index_key1_3over4
                     else if(b.Buff_close3_3over4<b.close_SBD_3over4)
                         b.close_SBD_3over4 := na
                         b.close_SBU_3over4 := b.Buff_key1_3over4
-                        b.index_SBU_3over4 := index
-//                    else //maintain SURRD, still in bounded box
+                        b.index_SBU_3over4 := b.index_key1_3over4
+//                    else //maintain SURRD still in bounded box
                 NOSKY =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_3over4 := b.Buff_close2_3over4
-                        b.index_key2_3over4 := index
+                        b.index_key2_3over4 := index-1
                         b.close_SBU_3over4 := b.Buff_key2_3over4
                         b.index_SBU_3over4 := b.index_key2_3over4
                         b.Buff_key1_3over4 := b.Buff_key2_3over4
+                        b.index_key1_3over4 := b.index_key2_3over4
                     if(b.Buff_close3_3over4<b.close_SBD_3over4)
-                        b.Buff_key1_3over4 := b.Buff_close2_3over4
                         b.close_SBD_3over4 := na
+                        b.index_SBD_3over4 := na
                 NOGRD =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_3over4 := b.Buff_close2_3over4
-                        b.index_key2_3over4 := index
+                        b.index_key2_3over4 := index-1
                         b.close_SBD_3over4 := b.Buff_key2_3over4
                         b.index_SBD_3over4 := b.index_key2_3over4
                         b.Buff_key1_3over4 := b.Buff_key2_3over4
+                        b.index_key1_3over4 := b.index_key2_3over4
                     if(b.Buff_close3_3over4>b.close_SBU_3over4)
-                        b.Buff_key1_3over4 := b.Buff_close2_3over4
-                        b.close_SBU_3over4 := na          
+                        b.close_SBU_3over4 := na
+                        b.index_SBU_3over4 := na          
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
@@ -467,32 +472,34 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                     if(b.Buff_close3_4over4>b.close_SBU_4over4)
                         b.close_SBU_4over4 := na
                         b.close_SBD_4over4 := b.Buff_key1_4over4
-                        b.index_SBD_4over4 := index
+                        b.index_SBD_4over4 := b.index_key1_4over4
                     else if(b.Buff_close3_4over4<b.close_SBD_4over4)
                         b.close_SBD_4over4 := na
                         b.close_SBU_4over4 := b.Buff_key1_4over4
-                        b.index_SBU_4over4 := index
-//                    else //maintain SURRD, still in bounded box
+                        b.index_SBU_4over4 := b.index_key1_4over4
+//                    else //maintain SURRD still in bounded box
                 NOSKY =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_4over4 := b.Buff_close2_4over4
-                        b.index_key2_4over4 := index
+                        b.index_key2_4over4 := index-1
                         b.close_SBU_4over4 := b.Buff_key2_4over4
                         b.index_SBU_4over4 := b.index_key2_4over4
                         b.Buff_key1_4over4 := b.Buff_key2_4over4
+                        b.index_key1_4over4 := b.index_key2_4over4
                     if(b.Buff_close3_4over4<b.close_SBD_4over4)
-                        b.Buff_key1_4over4 := b.Buff_close2_4over4
                         b.close_SBD_4over4 := na
+                        b.index_SBD_4over4 := na
                 NOGRD =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_4over4 := b.Buff_close2_4over4
-                        b.index_key2_4over4 := index
+                        b.index_key2_4over4 := index-1
                         b.close_SBD_4over4 := b.Buff_key2_4over4
                         b.index_SBD_4over4 := b.index_key2_4over4
                         b.Buff_key1_4over4 := b.Buff_key2_4over4
+                        b.index_key1_4over4 := b.index_key2_4over4
                     if(b.Buff_close3_4over4>b.close_SBU_4over4)
-                        b.Buff_key1_4over4 := b.Buff_close2_4over4
-                        b.close_SBU_4over4 := na          
+                        b.close_SBU_4over4 := na
+                        b.index_SBU_4over4 := na          
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
@@ -542,7 +549,8 @@ Remainder := DAY2MINUTE%timeInfo.currentperiod
 Remainder2Bar := math.floor(Remainder/timeInfo.currentperiod_div4)+1
 fourminus_Remainger2Bar := 4-Remainder2Bar
 ////*****state init*****////
-if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false and str.contains(TICKERID,EXCHANGE))
+if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false and str.contains(TICKERID,EXCHANGE))//start!!!
+    index := bar_index
     countInfo.Barcount := 0
     timeInfo.starttime := timeInfo.HrMin2Min2
     timeInfo.lasttime := BASETIME
@@ -596,7 +604,6 @@ switch state
                     timeInfo.starttime += timeInfo.currentperiod
                     flagInfo.jumpFlag := false
                     flagInfo.diffFlag := false
-                    testfloat2 := 999
                 else
                     timeInfo.lasttime := timeInfo.starttime
                     diff := (timeInfo.HrMin2Min2-timeInfo.lasttime)/timeInfo.currentperiod
@@ -662,11 +669,12 @@ switch state
             countInfo.boscount := countInfo.Barcount
         if bar_index == last_bar_index - numbershift-2 //state要等到倒數第二根跑完arraygen才會進入畫圖狀態，所以倒數第三根nextstate要提前準備
             flagInfo.plotFlag := true
-            
+        index += 1
     PLOT=>
+//        testfloat2 := BOSInfo.index_SBD_4over4
 //        if(not na(test))
 //            label.delete(test)
-//        test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 diff: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n this bar is not allowed to be cal,but is bar now...\nHrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat),style = label.style_triangledown,color = color.green)
+//        test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 4over4SBDindex: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n this bar is not allowed to be cal,but is bar now...\nHrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat),style = label.style_triangledown,color = color.green)
     
 //1over4 start 
         line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.red)
@@ -731,4 +739,3 @@ switch state
 //    buffmin := minute(time)
 //if bar_index == last_bar_index
 //    label.new(last_bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t EXCHANGE RIGHT??\t" + str.tostring(str.contains(syminfo.tickerid,EXCHANGE))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(state)+"\n Go flag?=\t" + str.tostring(flagInfo.GoFlag)+"\n testint=\t" + str.tostring(testint)+"\n testfloat=\t" + str.tostring(testfloat),style=label.style_triangledown,color = color.green)
-index += 1
