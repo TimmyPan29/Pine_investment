@@ -25,7 +25,7 @@ indicator("4level_line", shorttitle="fourlinetest", overlay=true)
 //  *//
 
 //common variable
-var int numbershift = 2
+var int numbershift = na
 var int state = na
 var int nextstate = na
 var int statelevel = na
@@ -41,11 +41,14 @@ var int buffhour = na
 var int buffmin = na
 var int arraysize = na
 var float Remainder2Bar = na
+var float fourminus_Remainger2Bar = na
 var int index = 0
 var string str_timeframe = na
 var float flt_timeframe = na 
 var string TICKERID = syminfo.tickerid
 var arrayclose = array.new<float>(0)
+var int BASETIME = 0
+var string EXCHANGE = na
 
 //figure variable 
 var label Label_SBU_1over4 = na
@@ -66,7 +69,12 @@ var const int SURRD = 4
 var const int NOSKY = 5
 var const int NOGRD = 6
 var const int DAY2MINUTE = 1440
-var const int FOREX_OANDATIME = 1020
+var const int EIGHTCAP_CRYPTO = 0
+var const int EIGHTCAP_FOREX = 0
+var const int SAXO_CRYPTO = 1020
+var const int SAXO_FOREX = 1020
+var const int OANDA_CRYPTO = 1020
+var const int OANDA_FOREX = 1020
 
 //test variable
 var label test = na
@@ -76,7 +84,12 @@ var bool testbool = na
 var float testfloat = na
 var testarray = array.new<int>(0)
 var float testcount = na
-
+var bool testbool2 = na
+var bool testbool3 = na
+var float testfloat2 = na
+var float testfloat3 = na
+var float testfloat4 = na
+var float testfloat5 = na
 //**
 
 //time variable
@@ -235,7 +248,8 @@ method init_Flag(Flag_Type this) =>
 method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
     float count = c.boscount //if count == Barcount? if crossover day ?
     float NowBar = count + 1
-    int j = 0
+    int j = na
+    j := 0
     while f.bosFlag 
         if((not na(b.close_SBU_1over4)) and (not na(b.close_SBD_1over4)) )//有天地 留在SURRD 依此類推
             b.state_1over4 := SURRD
@@ -262,8 +276,8 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                         b.close_SBD_1over4 := na
                         b.close_SBU_1over4 := b.Buff_key1_1over4
                         b.index_SBU_1over4 := index
-                    else //maintain SURRD
-                        label.new(bar_index,low,"still in bounded box")
+//                    else //maintain SURRD still in bounded box
+                        
                 NOSKY =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_1over4 := b.Buff_close2_1over4
@@ -290,9 +304,11 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 1
             break
         //end while
-        count := j%4==0? count+1 : count
-        if(count == Quotient+1) //it means diff<0, jump over the day or today is at the end. 
+        if(j>=4)
             break
+//        count := j%4==0? count+1 : count
+//        if(count==c.Barcount) //it means diff<0, jump over the day or today is at the end. 
+//            break
     //end while
 //end method   
 method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
@@ -325,8 +341,7 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                         b.close_SBD_2over4 := na
                         b.close_SBU_2over4 := b.Buff_key1_2over4
                         b.index_SBU_2over4 := index
-                    else //maintain SURRD
-                        label.new(bar_index,low,"still in bounded box")
+//                    else //maintain SURRD, still in bounded box
                 NOSKY =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_2over4 := b.Buff_close2_2over4
@@ -353,15 +368,19 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 2
             break
         //end while
-        count := j%4==0? count+1 : count
-        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+        if(j>=4)
             break
+//        count := j%4==0? count+1 : count
+//        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+//            break //fix if j==4 break
     //end while
 //end method  
 method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
     float count = c.boscount //if count == Barcount? if crossover day ?
     float NowBar = count + 1
     int j = na
+    if(NowBar>52)
+        NowBar := NowBar-52
     j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
     while f.bosFlag 
         if((not na(b.close_SBU_3over4)) and (not na(b.close_SBD_3over4)) )//有天地 留在SURRD 依此類推
@@ -389,8 +408,7 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                         b.close_SBD_3over4 := na
                         b.close_SBU_3over4 := b.Buff_key1_3over4
                         b.index_SBU_3over4 := index
-                    else //maintain SURRD
-                        label.new(bar_index,low,"still in bounded box")
+//                    else //maintain SURRD, still in bounded box
                 NOSKY =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_3over4 := b.Buff_close2_3over4
@@ -417,9 +435,11 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 3
             break
         //end while
-        count := j%4==0? count+1 : count
-        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+        if(j>=4)
             break
+//        count := j%4==0? count+1 : count
+//        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+//            break
     //end while
 //end method   
 method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
@@ -452,8 +472,7 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                         b.close_SBD_4over4 := na
                         b.close_SBU_4over4 := b.Buff_key1_4over4
                         b.index_SBU_4over4 := index
-                    else //maintain SURRD
-                        label.new(bar_index,low,"still in bounded box")
+//                    else //maintain SURRD, still in bounded box
                 NOSKY =>
                     if(b.slope1 != b.slope2)
                         b.Buff_key2_4over4 := b.Buff_close2_4over4
@@ -480,12 +499,17 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
             j += 4
             break
         //end while
-        count := j%4==0? count+1 : count
-        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+        if(j>=4)
             break
+//        count := j%4==0? count+1 : count
+//        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+//            break
     //end while
 //end method      
-
+//*****custom option*****//
+numbershift := last_bar_index - last_bar_index 
+BASETIME := OANDA_FOREX //改成妳想要的如右 EIGHTCAP_CRYPTO, EIGHTCAP_FOREX, SAXO_CRYPTO, SAXO_FOREX, OANDA_CRYPTO, OANDA_FOREX
+EXCHANGE := "OANDA" //改現在妳在的交易所的名子
 //*****var initialization*****//
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
 var countInfo = Count_Type.new(0,0,0,0,0) // levelcount count1 boscount Barcount,RmnBarcount
@@ -502,7 +526,7 @@ timeInfo.currentDay := dayofmonth(time)
 timeInfo.currentHr := hour(time) 
 timeInfo.currentMin := minute(time) 
 timeInfo.HrMin2Min := timeInfo.currentHr * 60 + timeInfo.currentMin
-if(timeInfo.HrMin2Min<FOREX_OANDATIME and timeInfo.HrMin2Min>=0)
+if(timeInfo.HrMin2Min<BASETIME and timeInfo.HrMin2Min>=0)
     timeInfo.HrMin2Min2 := timeInfo.HrMin2Min + DAY2MINUTE
 else
     timeInfo.HrMin2Min2 := timeInfo.HrMin2Min
@@ -515,12 +539,13 @@ if(arraysize == 0)
 flagInfo.SizeFlag := array.size(arrayclose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/timeInfo.currentperiod)
 Remainder := DAY2MINUTE%timeInfo.currentperiod
-Remainder2Bar := Remainder%timeInfo.currentperiod_div4+1
+Remainder2Bar := math.floor(Remainder/timeInfo.currentperiod_div4)+1
+fourminus_Remainger2Bar := 4-Remainder2Bar
 ////*****state init*****////
-if(timeInfo.HrMin2Min2 == FOREX_OANDATIME and flagInfo.GoFlag == false and str.contains(TICKERID,"OANDA"))
+if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false and str.contains(TICKERID,EXCHANGE))
     countInfo.Barcount := 0
     timeInfo.starttime := timeInfo.HrMin2Min2
-    timeInfo.lasttime := FOREX_OANDATIME
+    timeInfo.lasttime := BASETIME
     flagInfo.GoFlag := true
     nextstate := ARRAYGEN
 if(barstate.isfirst)
@@ -551,16 +576,18 @@ switch state
         init_count(countInfo)
     ARRAYGEN =>
         if(flagInfo.GoFlag)
-            if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 != FOREX_OANDATIME)
-                countInfo.Barcount := 1+(timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod
-                diff := (timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod
-                timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
+            if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 != BASETIME)
+                countInfo.Barcount := 1+(timeInfo.HrMin2Min2-BASETIME)/timeInfo.currentperiod
+                diff := (timeInfo.HrMin2Min2-BASETIME)/timeInfo.currentperiod
+                timeInfo.starttime := BASETIME + (countInfo.Barcount-1)*timeInfo.currentperiod
                 flagInfo.jumpFlag := true
-            else if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 == FOREX_OANDATIME)
+                flagInfo.diffFlag := false
+            else if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 == BASETIME)
                 countInfo.Barcount := 1
                 diff := 0
                 timeInfo.starttime := timeInfo.HrMin2Min2
                 flagInfo.jumpFlag := false
+                flagInfo.diffFlag := false
             else
                 if(timeInfo.starttime + timeInfo.currentperiod == timeInfo.HrMin2Min2)
                     diff := 1
@@ -568,94 +595,140 @@ switch state
                     timeInfo.lasttime := timeInfo.starttime
                     timeInfo.starttime += timeInfo.currentperiod
                     flagInfo.jumpFlag := false
+                    flagInfo.diffFlag := false
+                    testfloat2 := 999
                 else
                     timeInfo.lasttime := timeInfo.starttime
                     diff := (timeInfo.HrMin2Min2-timeInfo.lasttime)/timeInfo.currentperiod
                     flagInfo.jumpFlag := true
-                    if(diff<0)
-                        countInfo.RmnBarcount := (FOREX_OANDATIME + timeInfo.currentperiod*Quotient-timeInfo.lasttime)/timeInfo.currentperiod
-                        countInfo.count1 := (timeInfo.HrMin2Min2-FOREX_OANDATIME)/timeInfo.currentperiod
+                    if(diff<0)//跳過最後一根 從1700 or 1728 or more開始
+                        countInfo.RmnBarcount := (BASETIME + timeInfo.currentperiod*Quotient-timeInfo.lasttime)/timeInfo.currentperiod
+                        countInfo.count1 := (timeInfo.HrMin2Min2-BASETIME)/timeInfo.currentperiod
                         diff := countInfo.RmnBarcount
                         countInfo.Barcount += diff + countInfo.count1 + 1
                         flagInfo.diffFlag := true
+                        timeInfo.starttime := timeInfo.HrMin2Min2
                         //這個情況表示新的開市日有可能從17:00 或17:28之類的開始 要討論
                     else
                         countInfo.Barcount += diff
                         timeInfo.lasttime := timeInfo.HrMin2Min2
-                        timeInfo.starttime := FOREX_OANDATIME + (countInfo.Barcount-1)*timeInfo.currentperiod
+                        timeInfo.starttime := BASETIME + (countInfo.Barcount-1)*timeInfo.currentperiod
                         flagInfo.diffFlag := false
 
-        
-        if(flagInfo.diffFlag) //跳天 往前插值補滿
-            for i=0 to 4*(diff+countInfo.count1+1)-1
-                array.unshift(arrayclose,array.get(arrayclose,0))
-        else if(flagInfo.jumpFlag and countInfo.Barcount==Quotient+1) //跳 且 跳到當天最後一根
-            for i=0 to 4*(diff)-1
-                array.unshift(arrayclose,array.get(arrayclose,0))
-            for i= 0 to Remainder2Bar-1
-                array.push(arrayclose,array.get(arrayclose,arraysize-1))
-        else if(flagInfo.jumpFlag and countInfo.Barcount!=Quotient+1)//跳 但沒跳到最後一根
-            for i=0 to 4*(diff)-1
-                array.unshift(arrayclose,array.get(arrayclose,0))
-        else if(not(flagInfo.jumpFlag) and countInfo.Barcount==Quotient+1) //沒有跳 但是已經最後根
-            for i= 0 to Remainder2Bar-1
-                array.push(arrayclose,array.get(arrayclose,arraysize-1))
-        else //沒有跳 一根一根進來 且不是最後一根
-            label.new(bar_index,low,"one by one input")
-            //arrayclose := arrayclose    
-
+        if(arraysize!=4)
+            for i=0 to (3-arraysize)
+                array.push(arrayclose,close)
+//        if(flagInfo.diffFlag) //跳天 往前插值補滿
+//            for i=0 to 4*(diff+countInfo.count1+1)-1
+//                array.unshift(arrayclose,array.get(arrayclose,0))
+//        else if(flagInfo.jumpFlag and countInfo.Barcount==Quotient+1) //跳 且 跳到當天最後一根
+//            for i=0 to 4*(diff)-1
+//                array.unshift(arrayclose,array.get(arrayclose,0))
+//            for i= 0 to Remainder2Bar-1
+//                array.push(arrayclose,array.get(arrayclose,arraysize-1))
+//        else if(flagInfo.jumpFlag and countInfo.Barcount!=Quotient+1)//跳 但沒跳到最後一根
+//            for i=0 to 4*(diff)-1
+//                array.unshift(arrayclose,array.get(arrayclose,0))
+//        else if(not(flagInfo.jumpFlag) and countInfo.Barcount==Quotient+1) //沒有跳 但是已經最後根
+//            for i= 0 to fourminus_Remainger2Bar-1
+//                array.push(arrayclose,close)
+//        else //沒有跳 一根一根進來 且不是最後一根
+//            if(bar_index == 9075)
+//                label.new(bar_index,low-low/20,"one by one input")
+//            //arrayclose := arrayclose    
+        testfloat := countInfo.Barcount
+        testbool2 := flagInfo.jumpFlag
+        testbool3 := flagInfo.diffFlag
         flagInfo.bosFlag := true
-        if(bar_index<313 and bar_index>=0)
+//      testfloat2 := diff
+        testfloat3 := timeInfo.starttime
+        testfloat4 := timeInfo.lasttime
+        testfloat5 := countInfo.boscount
+        if(bar_index>=0)
             BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
-//        BOScal_level2(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
-//        BOScal_level3(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
-//        BOScal_level4(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
+            BOScal_level2(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
+            BOScal_level3(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
+            BOScal_level4(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
         countInfo.boscount := countInfo.Barcount
+        flagInfo.diffFlag := false
+        flagInfo.jumpFlag := false
         if(countInfo.boscount == Quotient+1) //當天資料已經處理完
-            timeInfo.lasttime := FOREX_OANDATIME
+            timeInfo.lasttime := BASETIME
             countInfo.Barcount := 0
             countInfo.boscount := 0
-            flagInfo.diffFlag := false
-            flagInfo.jumpFlag := false
         else if(countInfo.boscount > Quotient+1) //表示有跳天
-            timeInfo.lasttime := FOREX_OANDATIME
-            countInfo.Barcount := countInfo.boscount%(Quotient+1)
+            timeInfo.lasttime := BASETIME
+            countInfo.Barcount := countInfo.Barcount%(Quotient+1)
             countInfo.boscount := countInfo.Barcount
-            flagInfo.diffFlag := false
-            flagInfo.jumpFlag := false
         if bar_index == last_bar_index - numbershift-2 //state要等到倒數第二根跑完arraygen才會進入畫圖狀態，所以倒數第三根nextstate要提前準備
             flagInfo.plotFlag := true
             
     PLOT=>
-        if(not na(test))
-            label.delete(test)
-        test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n levelcount: "+str.tostring(countInfo.levelcount)+"\n arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n starttime : "+str.tostring(timeInfo.starttime)+"\n lasttime : "+str.tostring(timeInfo.lasttime)+"\n testfloat : "+str.tostring(testfloat),style = label.style_triangledown,color = color.green)
+//        if(not na(test))
+//            label.delete(test)
+//        test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 diff: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n this bar is not allowed to be cal,but is bar now...\nHrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat),style = label.style_triangledown,color = color.green)
     
 //1over4 start 
-        line.new(x1=bar_index, y1=BOSInfo.close_SBU_1over4, x2=bar_index +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.black)
-        line.new(x1=bar_index, y1=BOSInfo.close_SBD_1over4, x2=bar_index +100, y2=BOSInfo.close_SBD_1over4, width=2, color=color.black)
+        line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.red)
+        line.new(x1=BOSInfo.index_SBD_1over4, y1=BOSInfo.close_SBD_1over4, x2=BOSInfo.index_SBD_1over4 +100, y2=BOSInfo.close_SBD_1over4, width=2, color=color.red)
 
         if(na(Label_SBU_1over4)==false)
             label.delete(Label_SBU_1over4)
-        Label_SBU_1over4 := label.new(x=bar_index, y=BOSInfo.close_SBU_1over4, text="SBU_1over4: " + str.tostring(BOSInfo.close_SBU_1over4), xloc = xloc.bar_index, yloc=yloc.price,color=color.red) 
+        Label_SBU_1over4 := label.new(x=BOSInfo.index_SBU_1over4, y=BOSInfo.close_SBU_1over4, text="SBU_1over4: " + str.tostring(BOSInfo.close_SBU_1over4), xloc = xloc.bar_index, yloc=yloc.price,color=color.red) 
 
         if(na(Label_SBD_1over4)==false)
             label.delete(Label_SBD_1over4)
-        Label_SBD_1over4 := label.new(x=bar_index, y=BOSInfo.close_SBD_1over4, text="SBD_1over4: " + str.tostring(BOSInfo.close_SBD_1over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up)
+        Label_SBD_1over4 := label.new(x=BOSInfo.index_SBD_1over4, y=BOSInfo.close_SBD_1over4, text="SBD_1over4: " + str.tostring(BOSInfo.close_SBD_1over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up)
 //1over4 end
+//2over4 start        
+        line.new(x1=BOSInfo.index_SBU_2over4, y1=BOSInfo.close_SBU_2over4, x2=BOSInfo.index_SBU_2over4 +100, y2=BOSInfo.close_SBU_2over4, width=2, color=color.orange)
+        line.new(x1=BOSInfo.index_SBD_2over4, y1=BOSInfo.close_SBD_2over4, x2=BOSInfo.index_SBD_2over4 +100, y2=BOSInfo.close_SBD_2over4, width=2, color=color.orange)
+
+        if(na(Label_SBU_2over4)==false)
+            label.delete(Label_SBU_2over4)
+        Label_SBU_2over4 := label.new(x=BOSInfo.index_SBU_2over4, y=BOSInfo.close_SBU_2over4+0.01, text="SBU_2over4: " + str.tostring(BOSInfo.close_SBU_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange) 
+
+        if(na(Label_SBD_2over4)==false)
+            label.delete(Label_SBD_2over4)
+        Label_SBD_2over4 := label.new(x=BOSInfo.index_SBD_2over4, y=BOSInfo.close_SBD_2over4-0.01, text="SBD_2over4: " + str.tostring(BOSInfo.close_SBD_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up)
+//2over4 end
+//3over4 start
+        line.new(x1=BOSInfo.index_SBU_3over4, y1=BOSInfo.close_SBU_3over4, x2=BOSInfo.index_SBU_3over4 +100, y2=BOSInfo.close_SBU_3over4, width=2, color=color.yellow)
+        line.new(x1=BOSInfo.index_SBD_3over4, y1=BOSInfo.close_SBD_3over4, x2=BOSInfo.index_SBD_3over4 +100, y2=BOSInfo.close_SBD_3over4, width=2, color=color.yellow)
+
+        if(na(Label_SBU_3over4)==false)
+            label.delete(Label_SBU_3over4)
+        Label_SBU_3over4 := label.new(x=BOSInfo.index_SBU_3over4, y=BOSInfo.close_SBU_3over4+0.02, text="SBU_3over4: " + str.tostring(BOSInfo.close_SBU_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.yellow) 
+
+        if(na(Label_SBD_3over4)==false)
+            label.delete(Label_SBD_3over4)
+        Label_SBD_3over4 := label.new(x=BOSInfo.index_SBD_3over4, y=BOSInfo.close_SBD_3over4-0.02, text="SBD_3over4: " + str.tostring(BOSInfo.close_SBD_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.yellow,style = label.style_label_up)
+//3over4 end
+//4over4 start
+        line.new(x1=BOSInfo.index_SBU_4over4, y1=BOSInfo.close_SBU_4over4, x2=BOSInfo.index_SBU_4over4 +100, y2=BOSInfo.close_SBU_4over4, width=2, color=color.green)
+        line.new(x1=BOSInfo.index_SBD_4over4, y1=BOSInfo.close_SBD_4over4, x2=BOSInfo.index_SBD_4over4 +100, y2=BOSInfo.close_SBD_4over4, width=2, color=color.green)
+
+        if(na(Label_SBU_4over4)==false)
+            label.delete(Label_SBU_4over4)
+        Label_SBU_4over4 := label.new(x=BOSInfo.index_SBU_4over4, y=BOSInfo.close_SBU_4over4+0.03, text="SBU_4over4: " + str.tostring(BOSInfo.close_SBU_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.green) 
+
+        if(na(Label_SBD_4over4)==false)
+            label.delete(Label_SBD_4over4)
+        Label_SBD_4over4 := label.new(x=BOSInfo.index_SBD_4over4, y=BOSInfo.close_SBD_4over4-0.03, text="SBD_4over4: " + str.tostring(BOSInfo.close_SBD_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.green,style = label.style_label_up)
+//4over4 end
     =>
-        label.new(bar_index,low+0.1,"run into wrong state")
+        testfloat5 := testfloat5 //nothing happen
+//        label.new(bar_index,low+0.1,"run into wrong state")
+
 //plot end
 //*****test plot*****//
-if(bar_index==last_bar_index-1)
-    testfloat := countInfo.count1
-if bar_index == last_bar_index - numbershift
-    //label.new(last_bar_index-numbershift, high, str.tostring(arrayclose),color orange,size := size.normal)
-    buffyear := year(time)
-    buffmonth := month(time)
-    buffday := dayofmonth(time) 
-    buffhour := hour(time)
-    buffmin := minute(time)
-if bar_index == last_bar_index - numbershift
-    label.new(last_bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t OANDA?\t" + str.tostring(str.contains(syminfo.tickerid,"OANDA"))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(state)+"\n testint=\t" + str.tostring(testint)+"\n testfloat=\t" + str.tostring(testfloat),style=label.style_triangledown,color = color.green)
+//if bar_index == last_bar_index - numbershift
+//    //label.new(last_bar_index-numbershift, high, str.tostring(arrayclose),color orange,size := size.normal)
+//    buffyear := year(time)
+//    buffmonth := month(time)
+//    buffday := dayofmonth(time) 
+//    buffhour := hour(time)
+//    buffmin := minute(time)
+//if bar_index == last_bar_index
+//    label.new(last_bar_index, low-0.05, "\n label bufftime at : "+ str.tostring(buffyear)+ "\t" +str.tostring(buffmonth) +"\t" + str.tostring(buffday)+"\t" + str.tostring(buffhour)+"\t" + str.tostring(buffmin)+"\n\t EXCHANGE RIGHT??\t" + str.tostring(str.contains(syminfo.tickerid,EXCHANGE))+"\n period=\t" + str.tostring(timeInfo.currentperiod_div4) +"\n state=\t" + str.tostring(state)+"\n Go flag?=\t" + str.tostring(flagInfo.GoFlag)+"\n testint=\t" + str.tostring(testint)+"\n testfloat=\t" + str.tostring(testfloat),style=label.style_triangledown,color = color.green)
 index += 1
