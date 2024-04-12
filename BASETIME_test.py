@@ -677,7 +677,7 @@ switch state
         test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 4over4SBDindex: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n this bar is not allowed to be cal,but is bar now...\nHrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat),style = label.style_triangledown,color = color.green)
     
 //1over4 start 
-        line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.red)
+        line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.red,)
         line.new(x1=BOSInfo.index_SBD_1over4, y1=BOSInfo.close_SBD_1over4, x2=BOSInfo.index_SBD_1over4 +100, y2=BOSInfo.close_SBD_1over4, width=2, color=color.red)
 
         if(na(Label_SBU_1over4)==false)

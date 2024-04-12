@@ -677,8 +677,8 @@ switch state
 //        test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 4over4SBDindex: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n this bar is not allowed to be cal,but is bar now...\nHrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat),style = label.style_triangledown,color = color.green)
     
 //1over4 start 
-        line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=2, color=color.red)
-        line.new(x1=BOSInfo.index_SBD_1over4, y1=BOSInfo.close_SBD_1over4, x2=BOSInfo.index_SBD_1over4 +100, y2=BOSInfo.close_SBD_1over4, width=2, color=color.red)
+        line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=3, color=color.red, style=line.style_dashed)
+        line.new(x1=BOSInfo.index_SBD_1over4, y1=BOSInfo.close_SBD_1over4, x2=BOSInfo.index_SBD_1over4 +100, y2=BOSInfo.close_SBD_1over4, width=3, color=color.red, style=line.style_dashed)
 
         if(na(Label_SBU_1over4)==false)
             label.delete(Label_SBU_1over4)
@@ -701,8 +701,8 @@ switch state
         Label_SBD_2over4 := label.new(x=BOSInfo.index_SBD_2over4, y=BOSInfo.close_SBD_2over4-0.01, text="SBD_2over4: " + str.tostring(BOSInfo.close_SBD_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up)
 //2over4 end
 //3over4 start
-        line.new(x1=BOSInfo.index_SBU_3over4, y1=BOSInfo.close_SBU_3over4, x2=BOSInfo.index_SBU_3over4 +100, y2=BOSInfo.close_SBU_3over4, width=2, color=color.yellow)
-        line.new(x1=BOSInfo.index_SBD_3over4, y1=BOSInfo.close_SBD_3over4, x2=BOSInfo.index_SBD_3over4 +100, y2=BOSInfo.close_SBD_3over4, width=2, color=color.yellow)
+        line.new(x1=BOSInfo.index_SBU_3over4, y1=BOSInfo.close_SBU_3over4, x2=BOSInfo.index_SBU_3over4 +100, y2=BOSInfo.close_SBU_3over4, width=4, color=color.yellow, style=line.style_dotted)
+        line.new(x1=BOSInfo.index_SBD_3over4, y1=BOSInfo.close_SBD_3over4, x2=BOSInfo.index_SBD_3over4 +100, y2=BOSInfo.close_SBD_3over4, width=4, color=color.yellow, style=line.style_dotted)
 
         if(na(Label_SBU_3over4)==false)
             label.delete(Label_SBU_3over4)
