@@ -82,7 +82,7 @@ var int testint = 0
 var string teststr = na
 var bool testbool = na
 var float testfloat = na
-var testarray = array.new<int>(0)
+var testarray = array.new<float>(0)
 var float testcount = na
 var bool testbool2 = na
 var bool testbool3 = na
@@ -563,7 +563,8 @@ if(flagInfo.resetFlag) //Barcount := bar_index+1, example Barcount=1,bar_index=0
     state := RESET
 else
     state := nextstate
-
+if bar_index == last_bar_index - numbershift-1
+    flagInfo.plotFlag := true
 ////*****state ctrl*****////
 switch state
     RESET =>
@@ -651,6 +652,7 @@ switch state
         testfloat3 := timeInfo.starttime
         testfloat4 := timeInfo.lasttime
         testfloat5 := countInfo.boscount
+        testarray := arrayclose
         if(bar_index>=0)
             BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
             BOScal_level2(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
@@ -667,14 +669,12 @@ switch state
             timeInfo.lasttime := BASETIME
             countInfo.Barcount := countInfo.Barcount%(Quotient+1)
             countInfo.boscount := countInfo.Barcount
-        if bar_index == last_bar_index - numbershift-2 //state要等到倒數第二根跑完arraygen才會進入畫圖狀態，所以倒數第三根nextstate要提前準備
-            flagInfo.plotFlag := true
         index += 1
     PLOT=>
-//        testfloat2 := BOSInfo.index_SBD_4over4
-//        if(not na(test))
-//            label.delete(test)
-//        test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 4over4SBDindex: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n this bar is not allowed to be cal,but is bar now...\nHrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat),style = label.style_triangledown,color = color.green)
+        testfloat2 := countInfo.Barcount
+        if(not na(test))
+            label.delete(test)
+        test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 4over4SBDindex: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n newest arrayclose : "+str.tostring(arrayclose)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
     
 //1over4 start 
         line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=3, color=color.red, style=line.style_dashed)
