@@ -111,7 +111,7 @@ if(state==2)
         close_SBU := Buff_key1
         index_SBU := index_key1
     state := 1
-    if(barstate.islast)                               
+    if(bar_index==last_bar_index-1)                               
         state := 5
 
 if(state==3)
@@ -122,11 +122,10 @@ if(state==3)
     else
         Buff_key1 := Buff_key1
     state := 1
-    if(barstate.islast)                                
+    if(bar_index==last_bar_index-1)                                
         state := 5
 
 if(state==4)
-
     if(slope1!=slope2)
         Buff_key2 := Buff_close2
         index_key2 := barCount-2
@@ -148,7 +147,7 @@ if(state==4)
         close_SBD := na
         isbreakSBD := na
     state := 1
-    if(barstate.islast)                                
+    if(bar_index==last_bar_index-1)                                
         state := 5
 
 if(state==5)
