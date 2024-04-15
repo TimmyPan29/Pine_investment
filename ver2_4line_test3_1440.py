@@ -47,6 +47,8 @@ var string str_timeframe = na
 var float flt_timeframe = na 
 var string TICKERID = syminfo.tickerid
 var arrayclose = array.new<float>(0)
+var arraybuff = array.new<float>(0)
+var arrayswap = array.new<float>(0)
 var int BASETIME = 0
 var string EXCHANGE = na
 
@@ -514,7 +516,7 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
     //end while
 //end method      
 //*****custom option*****//
-numbershift := 1
+numbershift := last_bar_index
 BASETIME := OANDA_FOREX //改成妳想要的如右 EIGHTCAP_CRYPTO, EIGHTCAP_FOREX, SAXO_CRYPTO, SAXO_FOREX, OANDA_CRYPTO, OANDA_FOREX
 EXCHANGE := "OANDA" //改現在妳在的交易所的名子
 //*****var initialization*****//
@@ -540,6 +542,19 @@ else
 
 arrayclose := request.security_lower_tf(syminfo.tickerid,str_timeframe,close)
 arraysize := array.size(arrayclose)
+//if(timeInfo.currentperiod == 1440)
+//    if(barstate.isfirst)
+//        for i= 0 to 3
+//            array.push(arraybuff,array.get(arrayclose,i))
+//        //endfor
+//    else
+//        for i= 0 to 3
+//            array.push(arrayswap,array.shift(arraybuff))
+//        for i= 0 to 3    
+//            array.unshift(arrayclose,array.shift(arrayswap))
+//        for i= 0 to 3    
+//            array.push(arraybuff,array.pop(arrayclose))
+//        array.reverse(arraybuff)
 if(arraysize == 0)
     for i=0 to 3
         array.push(arrayclose,close)
@@ -554,7 +569,7 @@ if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false and str.contains
     countInfo.Barcount := 0
     timeInfo.starttime := timeInfo.HrMin2Min2
     timeInfo.lasttime := BASETIME
-    flagInfo.GoFlag := true
+    flagInfo.GoFlag := barstate.isfirst and timeInfo.currentperiod==1440?  false : true
     nextstate := ARRAYGEN
 if(barstate.isfirst)
     init_BOS(BOSInfo)
