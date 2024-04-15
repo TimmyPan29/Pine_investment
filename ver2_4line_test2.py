@@ -406,10 +406,12 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                         b.index_key1_3over4 := index-1
                     if(b.Buff_close3_3over4>b.close_SBU_3over4)
                         b.close_SBU_3over4 := na
+                        b.index_SBU_3over4 := na
                         b.close_SBD_3over4 := b.Buff_key1_3over4
                         b.index_SBD_3over4 := b.index_key1_3over4
                     else if(b.Buff_close3_3over4<b.close_SBD_3over4)
                         b.close_SBD_3over4 := na
+                        b.index_SBD_3over4 := na
                         b.close_SBU_3over4 := b.Buff_key1_3over4
                         b.index_SBU_3over4 := b.index_key1_3over4
 //                    else //maintain SURRD still in bounded box
@@ -443,9 +445,6 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
         //end while
         if(j>=4)
             break
-//        count := j%4==0? count+1 : count
-//        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
-//            break
     //end while
 //end method   
 method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
@@ -514,7 +513,7 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
     //end while
 //end method      
 //*****custom option*****//
-numbershift := 1
+numbershift := 0
 BASETIME := OANDA_FOREX //改成妳想要的如右 EIGHTCAP_CRYPTO, EIGHTCAP_FOREX, SAXO_CRYPTO, SAXO_FOREX, OANDA_CRYPTO, OANDA_FOREX
 EXCHANGE := "OANDA" //改現在妳在的交易所的名子
 //*****var initialization*****//
@@ -681,7 +680,7 @@ switch state
 if(barstate.islast)
     if(not na(test))
         label.delete(test)
-    test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
+    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
 
 //1over4 start 
     line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=3, color=color.red, style=line.style_dashed)
