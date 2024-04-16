@@ -25,7 +25,7 @@ type BOS_Type
     int slope1 = 0
     int slope2 = 0
 //end type
-var int x = 0
+var int x = na
 var int state = 1
 var int barindex = 0
 var line myLine = na
@@ -43,7 +43,7 @@ var string teststr = na
 var BOS = BOS_Type.new()
 
 //*****custom option*****//
-x := 0
+x := 0 
 //*****var initialization*****//
 
 if(state == 1) //從第一個close開始
@@ -67,11 +67,13 @@ if(state==2)
         BOS.index_key1 := bar_index==0? 0 : barindex - 1
     //else //Buff_key1維持原樣
     if(BOS.Buff_close3>=BOS.close_SBU)
-        BOS.close_SBU := na 
+        BOS.close_SBU := na
+        BOS.index_SBU := na
         BOS.close_SBD := BOS.Buff_key1
         BOS.index_SBD := BOS.index_key1
     if(BOS.Buff_close3<BOS.close_SBD)
         BOS.close_SBD := na 
+        BOS.index_SBD := na
         BOS.close_SBU := BOS.Buff_key1
         BOS.index_SBU := BOS.index_key1
     state := 1
@@ -117,7 +119,7 @@ if(state==5)
         line.delete(myLine)
     myLine := line.new(x1=last_bar_index-x, y1=low, x2=last_bar_index-x, y2=high, width=1, color=color.black, style=line.style_solid)
    
-    line.new(x1=BOS.index_SBU, y1=BOS.close_SBU, x2=BOS.index_SBU +100, y2=BOS.close_SBU, width=2, color=color.black)
+    line.new(x1=BOS.index_SBU, y1=BOS.close_SBU, x2=BOS.index_SBU+100, y2=BOS.close_SBU, width=2, color=color.black)
     line.new(x1=BOS.index_SBD, y1=BOS.close_SBD, x2=BOS.index_SBD +100, y2=BOS.close_SBD, width=2, color=color.black)
     if(na(label_SBU)==false)
         label.delete(label_SBU)

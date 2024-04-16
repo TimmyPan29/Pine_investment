@@ -46,9 +46,11 @@ var int index = 0
 var string str_timeframe = na
 var float flt_timeframe = na 
 var string TICKERID = syminfo.tickerid
+var string ITSTYPE = syminfo.type
 var arrayclose = array.new<float>(0)
 var int BASETIME = 0
 var string EXCHANGE = na
+var float ttlbar = na
 
 //figure variable 
 var label Label_SBU_1over4 = na
@@ -118,7 +120,7 @@ type Flag_Type
     bool jumpFlag
 //**
 type Count_Type
-    int levelcount = 0
+    float levelcount = 0
     float count1 = 0 
     float boscount = 0
     float Barcount = 0
@@ -245,8 +247,7 @@ method init_Flag(Flag_Type this) =>
     this.bosFlag := false
     this.jumpFlag := false
 //**
-method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
-    float count = c.boscount //if count == Barcount? if crossover day ?
+method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index, float Remainder, float ttlbar) => 
     int j = na
     j := 0
     while f.bosFlag 
@@ -306,13 +307,9 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
         //end while
         if(j>=4)
             break
-//        count := j%4==0? count+1 : count
-//        if(count==c.Barcount) //it means diff<0, jump over the day or today is at the end. 
-//            break
     //end while
 //end method   
-method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
-    float count = c.boscount //if count == Barcount? if crossover day ?
+method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index, float Remainder, float ttlbar) => 
     int j = 1
     while f.bosFlag 
         if((not na(b.close_SBU_2over4)) and (not na(b.close_SBD_2over4)) )//有天地 留在SURRD 依此類推
@@ -371,21 +368,29 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
         //end while
         if(j>=4)
             break
-//        count := j%4==0? count+1 : count
-//        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
-//            break //fix if j==4 break
     //end while
 //end method  
-method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index, CurrentTime_Type t) => 
+method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index, CurrentTime_Type t, float Remainder, float ttlbar) => 
     float count = c.boscount //if count == Barcount? if crossover day ?
-    float NowBar = count + 1
+    float NowBar = c.boscount+1+c.count1+c.RmnBarcount
     int j = na
-    if(NowBar>(Quotient+1))
-        NowBar := NowBar-(Quotient+1)
-    if(t.currentperiod!=1440)
-        j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
+    bool fg_whenlast = false
+    bool done = false
+    bool fg_whenRmn0 = false
+    c.levelcount := c.boscount///////////////////////
+    fg_whenRmn0 := DAY2MINUTE%(3*t.currentperiod_div4)==0? true : false
+    if(NowBar>ttlbar)
+        NowBar := NowBar-(ttlbar)
+    if(fg_whenlast)
+        done := true
     else
-        j := 2
+        j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
+    if(NowBar==c.Barcount and Remainder>0)
+        fg_whenlast := true
+    else if(NowBar==c.Barcount and Remainder==0)
+        fg_whenlast := fg_whenRmn0? true : false
+    else if(NowBar-1==c.Barcount and Remainder==0)
+        fg_whenlast := fg_whenRmn0? true : false
     while f.bosFlag 
         if((not na(b.close_SBU_3over4)) and (not na(b.close_SBD_3over4)) )//有天地 留在SURRD 依此類推
             b.state_3over4 := SURRD
@@ -440,15 +445,19 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
-            j += 3
+            if(fg_whenlast) //last in cycle
+                j := 3
+            else
+                j += 3
             break
         //end while
-        if(j>=4)
+        if(j>=4 or done)
             break
     //end while
 //end method   
-method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index) => 
+method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, float Quotient, int index, float Remainder, float ttlbar) => 
     float count = c.boscount //if count == Barcount? if crossover day ?
+    float NowBar = c.boscount+1+c.count1+c.RmnBarcount
     int j = 3
     while f.bosFlag 
         if((not na(b.close_SBU_4over4)) and (not na(b.close_SBD_4over4)) )//有天地 留在SURRD 依此類推
@@ -514,8 +523,21 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
 //end method      
 //*****custom option*****//
 numbershift := 0
-BASETIME := OANDA_FOREX //改成妳想要的如右 EIGHTCAP_CRYPTO, EIGHTCAP_FOREX, SAXO_CRYPTO, SAXO_FOREX, OANDA_CRYPTO, OANDA_FOREX
-EXCHANGE := "OANDA" //改現在妳在的交易所的名子
+EXCHANGE := str.contains(TICKERID,"OANDA")?  "OANDA" : str.contains(TICKERID,"SAXO")? "SAXO" : str.contains(TICKERID,"EIGHTCAP")? "EIGHTCAP" : na
+if(EXCHANGE=="OANDA" and ITSTYPE=="forex")
+    BASETIME := OANDA_FOREX
+else if(EXCHANGE=="OANDA" and ITSTYPE=="crypto")
+    BASETIME := OANDA_CRYPTO
+else if(EXCHANGE=="EIGHTCAP" and ITSTYPE=="forex")
+    BASETIME := EIGHTCAP_FOREX
+else if(EXCHANGE=="EIGHTCAP" and ITSTYPE=="crypto")
+    BASETIME := EIGHTCAP_CRYPTO
+else if(EXCHANGE=="SAXO" and ITSTYPE=="forex")
+    BASETIME := SAXO_FOREX
+else if(EXCHANGE=="SAXO" and ITSTYPE=="crypto")
+    BASETIME := SAXO_CRYPTO
+else
+    BASETIME := na
 //*****var initialization*****//
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
 var countInfo = Count_Type.new(0,0,0,0,0) // levelcount count1 boscount Barcount,RmnBarcount
@@ -545,6 +567,7 @@ if(arraysize == 0)
 flagInfo.SizeFlag := array.size(arrayclose)==4? true : false
 Quotient := math.floor(float(DAY2MINUTE)/timeInfo.currentperiod)
 Remainder := DAY2MINUTE%timeInfo.currentperiod
+ttlbar := Remainder==0? Quotient : Quotient+1
 //Remainder2Bar := math.floor(Remainder/timeInfo.currentperiod_div4)+1
 //fourminus_Remainger2Bar := 4-Remainder2Bar
 ////*****state init*****////
@@ -582,6 +605,8 @@ switch state
         init_BOS(BOSInfo)
         init_count(countInfo)
     ARRAYGEN =>
+        countInfo.RmnBarcount := 0
+        countInfo.count1 := 0
         if(flagInfo.GoFlag)
             if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 != BASETIME)
                 countInfo.Barcount := 1+(timeInfo.HrMin2Min2-BASETIME)/timeInfo.currentperiod
@@ -611,7 +636,7 @@ switch state
                         countInfo.RmnBarcount := (BASETIME + timeInfo.currentperiod*Quotient-timeInfo.lasttime)/timeInfo.currentperiod
                         countInfo.count1 := (timeInfo.HrMin2Min2-BASETIME)/timeInfo.currentperiod
                         diff := countInfo.RmnBarcount
-                        countInfo.Barcount += diff + countInfo.count1 + 1
+                        countInfo.Barcount := Remainder==0? countInfo.Barcount + diff + countInfo.count1 : countInfo.Barcount+ diff + countInfo.count1 + 1
                         flagInfo.diffFlag := true
                         timeInfo.starttime := timeInfo.HrMin2Min2
                         //這個情況表示新的開市日有可能從17:00 或17:28之類的開始 要討論
@@ -652,25 +677,22 @@ switch state
         testfloat5 := countInfo.boscount
         testarray := arrayclose
         if(bar_index>=0)
-            BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
-            BOScal_level2(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
-            BOScal_level3(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index,timeInfo)
-            BOScal_level4(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index)
+            BOScal_level1(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index,Remainder,ttlbar)
+            BOScal_level2(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index,Remainder,ttlbar)
+            BOScal_level3(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index,timeInfo,Remainder,ttlbar)
+            BOScal_level4(BOSInfo,countInfo,flagInfo,arrayclose,Quotient,index,Remainder,ttlbar)
         countInfo.boscount := countInfo.Barcount
         flagInfo.diffFlag := false
         flagInfo.jumpFlag := false
-        if(countInfo.boscount == Quotient+1 and timeInfo.currentperiod != 1440) //當天資料已經處理完
+        if(countInfo.boscount == ttlbar and timeInfo.currentperiod != DAY2MINUTE) //當天資料已經處理完
             timeInfo.lasttime := BASETIME
             countInfo.Barcount := 0
             countInfo.boscount := 0
-        else if(countInfo.boscount > Quotient+1 and timeInfo.currentperiod != 1440) //表示有跳天
+        else if(countInfo.boscount > ttlbar and timeInfo.currentperiod != DAY2MINUTE) //表示有跳天
             timeInfo.lasttime := BASETIME
-            countInfo.Barcount := countInfo.Barcount%(Quotient+1)
+            countInfo.Barcount := countInfo.Barcount%(ttlbar)
             countInfo.boscount := countInfo.Barcount
-        if(timeInfo.currentperiod == 1440) //special case
-            timeInfo.lasttime := BASETIME
-            countInfo.Barcount := 0
-            countInfo.boscount := 0
+
         index += 1
     PLOT=>
         testfloat2 := BOSInfo.close_SBU_3over4

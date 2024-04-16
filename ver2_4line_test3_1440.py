@@ -47,8 +47,6 @@ var string str_timeframe = na
 var float flt_timeframe = na 
 var string TICKERID = syminfo.tickerid
 var arrayclose = array.new<float>(0)
-var arraybuff = array.new<float>(0)
-var arrayswap = array.new<float>(0)
 var int BASETIME = 0
 var string EXCHANGE = na
 
@@ -516,9 +514,9 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
     //end while
 //end method      
 //*****custom option*****//
-numbershift := last_bar_index
-BASETIME := OANDA_FOREX //改成妳想要的如右 EIGHTCAP_CRYPTO, EIGHTCAP_FOREX, SAXO_CRYPTO, SAXO_FOREX, OANDA_CRYPTO, OANDA_FOREX
-EXCHANGE := "OANDA" //改現在妳在的交易所的名子
+numbershift := 0
+BASETIME := SAXO_FOREX //改成妳想要的如右 EIGHTCAP_CRYPTO, EIGHTCAP_FOREX, SAXO_CRYPTO, SAXO_FOREX, OANDA_CRYPTO, OANDA_FOREX
+EXCHANGE := "SAXO" //改現在妳在的交易所的名子
 //*****var initialization*****//
 var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
 var countInfo = Count_Type.new(0,0,0,0,0) // levelcount count1 boscount Barcount,RmnBarcount
@@ -542,19 +540,6 @@ else
 
 arrayclose := request.security_lower_tf(syminfo.tickerid,str_timeframe,close)
 arraysize := array.size(arrayclose)
-//if(timeInfo.currentperiod == 1440)
-//    if(barstate.isfirst)
-//        for i= 0 to 3
-//            array.push(arraybuff,array.get(arrayclose,i))
-//        //endfor
-//    else
-//        for i= 0 to 3
-//            array.push(arrayswap,array.shift(arraybuff))
-//        for i= 0 to 3    
-//            array.unshift(arrayclose,array.shift(arrayswap))
-//        for i= 0 to 3    
-//            array.push(arraybuff,array.pop(arrayclose))
-//        array.reverse(arraybuff)
 if(arraysize == 0)
     for i=0 to 3
         array.push(arrayclose,close)
@@ -569,7 +554,7 @@ if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false and str.contains
     countInfo.Barcount := 0
     timeInfo.starttime := timeInfo.HrMin2Min2
     timeInfo.lasttime := BASETIME
-    flagInfo.GoFlag := barstate.isfirst and timeInfo.currentperiod==1440?  false : true
+    flagInfo.GoFlag := true
     nextstate := ARRAYGEN
 if(barstate.isfirst)
     init_BOS(BOSInfo)
@@ -694,9 +679,9 @@ switch state
         testfloat5 := testfloat5 //nothing happen
 //        label.new(bar_index,low+0.1,"run into wrong state")
 if(barstate.islast)
-    if(not na(test))
-        label.delete(test)
-    test := label.new(last_bar_index-numbershift-1, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
+//    if(not na(test))
+//        label.delete(test)
+//    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
 
 //1over4 start 
     line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=3, color=color.red, style=line.style_dashed)
