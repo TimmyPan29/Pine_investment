@@ -73,10 +73,13 @@ var const int NOGRD = 6
 var const int DAY2MINUTE = 1440
 var const int EIGHTCAP_CRYPTO = 0
 var const int EIGHTCAP_FOREX = 0
+var const int EIGHTCAP_CFD = 60
 var const int SAXO_CRYPTO = 1020
 var const int SAXO_FOREX = 1020
+var const int SAXO_CFD = 1080
 var const int OANDA_CRYPTO = 1020
 var const int OANDA_FOREX = 1020
+var const int OANDA_CFD= 1020
 
 //test variable
 var label test = na
@@ -377,21 +380,26 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
     bool fg_whenlast = false
     bool done = false
     bool fg_whenRmn0 = false
-    c.levelcount := c.boscount///////////////////////
+    bool fg_first0 = true
+    
     fg_whenRmn0 := DAY2MINUTE%(3*t.currentperiod_div4)==0? true : false
     if(NowBar>ttlbar)
         NowBar := NowBar-(ttlbar)
-    if(fg_whenlast)
-        done := true
-    else
-        j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
-    if(NowBar==c.Barcount and Remainder>0)
-        fg_whenlast := true
-    else if(NowBar==c.Barcount and Remainder==0)
-        fg_whenlast := fg_whenRmn0? true : false
-    else if(NowBar-1==c.Barcount and Remainder==0)
-        fg_whenlast := fg_whenRmn0? true : false
     while f.bosFlag 
+        if(fg_whenlast)
+            done := true
+        if(not done)
+            if(fg_first0)
+                j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
+                fg_first0 := false
+            if(NowBar==ttlbar and Remainder>0)
+                fg_whenlast := true
+            else if(NowBar==ttlbar and Remainder==0)
+                fg_whenlast := true
+            else if(NowBar-1==ttlbar and Remainder==0)
+                fg_whenlast := true
+            else
+                fg_whenlast := false
         if((not na(b.close_SBU_3over4)) and (not na(b.close_SBD_3over4)) )//有天地 留在SURRD 依此類推
             b.state_3over4 := SURRD
         else if ((na(b.close_SBU_3over4)) and (not na(b.close_SBD_3over4)) )
@@ -445,10 +453,8 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
-            if(fg_whenlast) //last in cycle
-                j := 3
-            else
-                j += 3
+            c.levelcount := j
+            j := fg_whenlast? 3 : j+3
             break
         //end while
         if(j>=4 or done)
@@ -528,14 +534,20 @@ if(EXCHANGE=="OANDA" and ITSTYPE=="forex")
     BASETIME := OANDA_FOREX
 else if(EXCHANGE=="OANDA" and ITSTYPE=="crypto")
     BASETIME := OANDA_CRYPTO
+else if(EXCHANGE=="OANDA" and ITSTYPE=="cfd")
+    BASETIME := OANDA_CFD
 else if(EXCHANGE=="EIGHTCAP" and ITSTYPE=="forex")
     BASETIME := EIGHTCAP_FOREX
 else if(EXCHANGE=="EIGHTCAP" and ITSTYPE=="crypto")
     BASETIME := EIGHTCAP_CRYPTO
+else if(EXCHANGE=="EIGHTCAP" and ITSTYPE=="cfd")
+    BASETIME := EIGHTCAP_CFD    
 else if(EXCHANGE=="SAXO" and ITSTYPE=="forex")
     BASETIME := SAXO_FOREX
 else if(EXCHANGE=="SAXO" and ITSTYPE=="crypto")
     BASETIME := SAXO_CRYPTO
+else if(EXCHANGE=="SAXO" and ITSTYPE=="cfd")
+    BASETIME := SAXO_CFD
 else
     BASETIME := na
 //*****var initialization*****//
@@ -571,7 +583,7 @@ ttlbar := Remainder==0? Quotient : Quotient+1
 //Remainder2Bar := math.floor(Remainder/timeInfo.currentperiod_div4)+1
 //fourminus_Remainger2Bar := 4-Remainder2Bar
 ////*****state init*****////
-if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false and str.contains(TICKERID,EXCHANGE))//start!!!
+if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false)//start!!!
     index := bar_index
     countInfo.Barcount := 0
     timeInfo.starttime := timeInfo.HrMin2Min2
@@ -700,9 +712,9 @@ switch state
         testfloat5 := testfloat5 //nothing happen
 //        label.new(bar_index,low+0.1,"run into wrong state")
 if(barstate.islast)
-    if(not na(test))
-        label.delete(test)
-    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(flagInfo.GoFlag)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
+//    if(not na(test))
+//        label.delete(test)
+//    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(countInfo.levelcount)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\nRmnBarcount: "+str.tostring(countInfo.RmnBarcount)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
 
 //1over4 start 
     line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=3, color=color.red, style=line.style_dashed)

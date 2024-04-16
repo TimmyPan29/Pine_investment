@@ -34,7 +34,7 @@ var label mylabel2  = na
 var label label_SBU = na
 var label label_SBD = na
 var label test = na
-
+var int x = na
 var int testint = 0
 var string teststr = na
 
@@ -43,6 +43,10 @@ barCount := barCount+1
 ////**初始條件
 //  *先處理前三個點,初始化SBD SBU
 //  *// 
+
+//*****custom option*****//
+x := 1
+//*****var initialization*****//
 
 if (barCount == 1)
     Buff_close1 := close //Buff_close1 is generated first
@@ -111,7 +115,7 @@ if(state==2)
         close_SBU := Buff_key1
         index_SBU := index_key1
     state := 1
-    if(bar_index==last_bar_index-1)                               
+    if(bar_index==last_bar_index-x)                               
         state := 5
 
 if(state==3)
@@ -122,10 +126,11 @@ if(state==3)
     else
         Buff_key1 := Buff_key1
     state := 1
-    if(bar_index==last_bar_index-1)                                
+    if(bar_index==last_bar_index-x)                                
         state := 5
 
 if(state==4)
+
     if(slope1!=slope2)
         Buff_key2 := Buff_close2
         index_key2 := barCount-2
@@ -147,7 +152,7 @@ if(state==4)
         close_SBD := na
         isbreakSBD := na
     state := 1
-    if(bar_index==last_bar_index-1)                                
+    if(bar_index==last_bar_index-x)                                
         state := 5
 
 if(state==5)
@@ -160,7 +165,7 @@ if(state==5)
 
     if(na(mylabel)==false)
         label.delete(mylabel)
-    mylabel := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+    mylabel := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n tickertype " + str.tostring(syminfo.type),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
     if (na(myLine) == false)
         line.delete(myLine)
     myLine := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)

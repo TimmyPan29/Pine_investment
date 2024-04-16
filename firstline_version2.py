@@ -27,7 +27,7 @@ type BOS_Type
 //end type
 var int x = na
 var int state = 1
-var int barindex = 0
+var int index = 0
 var line myLine = na
 var label mylabel  = na
 var line myLine2 = na
@@ -43,7 +43,7 @@ var string teststr = na
 var BOS = BOS_Type.new()
 
 //*****custom option*****//
-x := 0 
+x := 1
 //*****var initialization*****//
 
 if(state == 1) //從第一個close開始
@@ -64,9 +64,9 @@ if(state == 1) //從第一個close開始
 if(state==2)
     if(BOS.slope1 != BOS.slope2)
         BOS.Buff_key1 := BOS.Buff_close2
-        BOS.index_key1 := bar_index==0? 0 : barindex - 1
+        BOS.index_key1 := bar_index==0? 0 : index - 1
     //else //Buff_key1維持原樣
-    if(BOS.Buff_close3>=BOS.close_SBU)
+    if(BOS.Buff_close3>BOS.close_SBU)
         BOS.close_SBU := na
         BOS.index_SBU := na
         BOS.close_SBD := BOS.Buff_key1
@@ -77,12 +77,12 @@ if(state==2)
         BOS.close_SBU := BOS.Buff_key1
         BOS.index_SBU := BOS.index_key1
     state := 1
-    if(barindex==last_bar_index-x)                               
+    if(index==last_bar_index-x)                               
         state := 5
 if(state==3)
     if(BOS.slope1 != BOS.slope2)
         BOS.Buff_key2 := BOS.Buff_close2
-        BOS.index_key2 := barindex-1
+        BOS.index_key2 := index-1
         BOS.close_SBU := BOS.Buff_key2
         BOS.index_SBU := BOS.index_key2
         BOS.Buff_key1 := BOS.Buff_key2
@@ -91,12 +91,12 @@ if(state==3)
         BOS.close_SBD := na
         BOS.index_SBD := na
     state := 1
-    if(barindex==last_bar_index-x)                                
+    if(index==last_bar_index-x)                                
         state := 5
 if(state==4)
     if(BOS.slope1 != BOS.slope2)
         BOS.Buff_key2 := BOS.Buff_close2
-        BOS.index_key2 := barindex-1
+        BOS.index_key2 := index-1
         BOS.close_SBD := BOS.Buff_key2
         BOS.index_SBD := BOS.index_key2
         BOS.Buff_key1 := BOS.Buff_key2
@@ -105,7 +105,7 @@ if(state==4)
         BOS.close_SBU := na
         BOS.index_SBU := na
     state := 1
-    if(barindex==last_bar_index-x)                                
+    if(index==last_bar_index-x)                                
         state := 5
 
 if(state==5)
@@ -114,7 +114,7 @@ if(state==5)
     testfloat1 := state
     if(na(mylabel)==false)
         label.delete(mylabel)
-    mylabel := label.new(x=last_bar_index-x, y=low, text="now k bar: " + str.   tostring(barindex+1)+"\n testfloat1 state: " + str.tostring(testfloat1),   xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label. style_arrowup)
+    mylabel := label.new(x=last_bar_index-x, y=low, text="now k bar: " + str.   tostring(index+1)+"\n tickerid: " + str.tostring(syminfo.tickerid),   xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label. style_arrowup)
     if (na(myLine) == false)
         line.delete(myLine)
     myLine := line.new(x1=last_bar_index-x, y1=low, x2=last_bar_index-x, y2=high, width=1, color=color.black, style=line.style_solid)
@@ -128,6 +128,6 @@ if(state==5)
         label.delete(label_SBD)
     label_SBD := label.new(x=BOS.index_SBD, y=BOS.close_SBD, text="SBD: " + str.tostring(BOS.close_SBD), xloc = xloc.bar_index,yloc=yloc.price,color=color.blue,style = label.style_label_up) 
     state := na
-barindex += 1
+index += 1
 
 
