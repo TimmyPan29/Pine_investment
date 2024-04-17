@@ -536,7 +536,34 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
 //        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
 //            break
     //end while
-//end method      
+//end method     
+
+method reorderSBlabel(BOS_Type b, Delta_Type d, close) =>
+    int x = na
+    float base = 0.05
+    arr = array.from(b.close_SBU_1over4, b.close_SBU_2over4, b.close_SBU_3over4, b.close_SBU_4over4,b.close_SBD_1over4, b.close_SBD_2over4, b.close_SBD_3over4, b.close_SBD_4over4)
+    arrd = array.new<float>(8,0)
+    arrindices = array.sort_indices(arr,order.ascending)
+    if(close>=10000)
+        x := 1000
+    else if(close>=1000 and close<10000)
+        x := 100
+    else if(close>=100 and close<1000)
+        x := 10
+    else
+        x := 1
+    for i=0 to 7
+        array.set(arrd,array.get(arrindices,i),base * x * i)
+    //end for
+    d.x_U1o4 := array.get(arrd,0)
+    d.x_U2o4 := array.get(arrd,1)
+    d.x_U3o4 := array.get(arrd,2)
+    d.x_U4o4 := array.get(arrd,3)
+    d.x_D1o4 := array.get(arrd,4)
+    d.x_D2o4 := array.get(arrd,5)
+    d.x_D3o4 := array.get(arrd,6)
+    d.x_D4o4 := array.get(arrd,7)
+//end method
 //*****custom option*****//
 numbershift := 0
 EXCHANGE := str.contains(TICKERID,"OANDA")?  "OANDA" : str.contains(TICKERID,"SAXO")? "SAXO" : str.contains(TICKERID,"EIGHTCAP")? "EIGHTCAP" : na
@@ -723,9 +750,10 @@ switch state
         testfloat5 := testfloat5 //nothing happen
 //        label.new(bar_index,low+0.1,"run into wrong state")
 if(barstate.islast)
-//    if(not na(test))
-//        label.delete(test)
-//    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(countInfo.levelcount)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\nRmnBarcount: "+str.tostring(countInfo.RmnBarcount)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
+    reorderSBlabel(BOSInfo, DeltaInfo, close)
+    if(not na(test))
+        label.delete(test)
+    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(countInfo.levelcount)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\nRmnBarcount: "+str.tostring(countInfo.RmnBarcount)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
 
 //1over4 start 
     line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=3, color=color.red, style=line.style_dashed)
@@ -737,7 +765,7 @@ if(barstate.islast)
 
     if(na(Label_SBD_1over4)==false)
         label.delete(Label_SBD_1over4)
-    Label_SBD_1over4 := label.new(x=BOSInfo.index_SBD_1over4, y=BOSInfo.close_SBD_1over4-DeltaInfo.x_D1o4, text="SBD_1over4: " + str.tostring(BOSInfo.close_SBD_1over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up)
+    Label_SBD_1over4 := label.new(x=BOSInfo.index_SBD_1over4, y=BOSInfo.close_SBD_1over4+DeltaInfo.x_D1o4, text="SBD_1over4: " + str.tostring(BOSInfo.close_SBD_1over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up)
 //1over4 end
 //2over4 start        
     line.new(x1=BOSInfo.index_SBU_2over4, y1=BOSInfo.close_SBU_2over4, x2=BOSInfo.index_SBU_2over4 +100, y2=BOSInfo.close_SBU_2over4, width=2, color=color.orange)
@@ -749,7 +777,7 @@ if(barstate.islast)
 
     if(na(Label_SBD_2over4)==false)
         label.delete(Label_SBD_2over4)
-    Label_SBD_2over4 := label.new(x=BOSInfo.index_SBD_2over4, y=BOSInfo.close_SBD_2over4-DeltaInfo.x_D2o4, text="SBD_2over4: " + str.tostring(BOSInfo.close_SBD_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up)
+    Label_SBD_2over4 := label.new(x=BOSInfo.index_SBD_2over4, y=BOSInfo.close_SBD_2over4+DeltaInfo.x_D2o4, text="SBD_2over4: " + str.tostring(BOSInfo.close_SBD_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up)
 //2over4 end
 //3over4 start
     line.new(x1=BOSInfo.index_SBU_3over4, y1=BOSInfo.close_SBU_3over4, x2=BOSInfo.index_SBU_3over4 +100, y2=BOSInfo.close_SBU_3over4, width=4, color=color.yellow, style=line.style_dotted)
@@ -761,7 +789,7 @@ if(barstate.islast)
 
     if(na(Label_SBD_3over4)==false)
         label.delete(Label_SBD_3over4)
-    Label_SBD_3over4 := label.new(x=BOSInfo.index_SBD_3over4, y=BOSInfo.close_SBD_3over4-DeltaInfo.x_D3o4, text="SBD_3over4: " + str.tostring(BOSInfo.close_SBD_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.yellow,style = label.style_label_up)
+    Label_SBD_3over4 := label.new(x=BOSInfo.index_SBD_3over4, y=BOSInfo.close_SBD_3over4+DeltaInfo.x_D3o4, text="SBD_3over4: " + str.tostring(BOSInfo.close_SBD_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.yellow,style = label.style_label_up)
 //3over4 end
 //4over4 start
     line.new(x1=BOSInfo.index_SBU_4over4, y1=BOSInfo.close_SBU_4over4, x2=BOSInfo.index_SBU_4over4 +100, y2=BOSInfo.close_SBU_4over4, width=2, color=color.green)
@@ -773,7 +801,7 @@ if(barstate.islast)
 
     if(na(Label_SBD_4over4)==false)
         label.delete(Label_SBD_4over4)
-    Label_SBD_4over4 := label.new(x=BOSInfo.index_SBD_4over4, y=BOSInfo.close_SBD_4over4-DeltaInfo.x_D4o4 , text="SBD_4over4: " + str.tostring(BOSInfo.close_SBD_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.green,style = label.style_label_up)
+    Label_SBD_4over4 := label.new(x=BOSInfo.index_SBD_4over4, y=BOSInfo.close_SBD_4over4+DeltaInfo.x_D4o4 , text="SBD_4over4: " + str.tostring(BOSInfo.close_SBD_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.green,style = label.style_label_up)
 //4over4 end
     
 

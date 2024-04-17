@@ -279,10 +279,9 @@ method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, array<float> arr, fl
 method reorderSBlabel(BOS_Type b, Delta_Type d, close) =>
     int x = na
     float base = 0.05
-    arrU = array.from(b.close_SBU_1over4, b.close_SBU_2over4, b.close_SBU_3over4, b.close_SBU_4over4)
-    arrD = array.from(b.close_SBD_1over4, b.close_SBD_2over4, b.close_SBD_3over4, b.close_SBD_4over4)
-    Uindices = array.sort_indices(arrU,ascending)
-    Dindices = array.sort_indices(arrD,descending)
+    arr = array.from(b.close_SBU_1over4, b.close_SBU_2over4, b.close_SBU_3over4, b.close_SBU_4over4,b.close_SBD_1over4, b.close_SBD_2over4, b.close_SBD_3over4, b.close_SBD_4over4)
+    arrd = array.new<float>(8,0)
+    arrindices = array.sort_indices(arr,ascending)
     if(close>=10000)
         x := 1000
     else if(close>=1000 and close<10000)
@@ -291,7 +290,15 @@ method reorderSBlabel(BOS_Type b, Delta_Type d, close) =>
         x := 10
     else
         x := 1
-    d.x_U1o4 := base*array.get()
-
-
+    for i=0 to 7
+        array.set(arrd,array.get(arrindices,i),base * x * i)
+    //end for
+    d.x_U1o4 := array.get(arrd,0)
+    d.x_U2o4 := array.get(arrd,1)
+    d.x_U3o4 := array.get(arrd,2)
+    d.x_U4o4 := array.get(arrd,3)
+    d.x_D1o4 := array.get(arrd,4)
+    d.x_D2o4 := array.get(arrd,5)
+    d.x_D3o4 := array.get(arrd,6)
+    d.x_D4o4 := array.get(arrd,7)
 //end method
