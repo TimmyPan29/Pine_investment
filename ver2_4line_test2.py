@@ -181,6 +181,16 @@ type BOS_Type
     float Buff_close2_4over4 = 0
     float Buff_close3_4over4 = 0
 //**
+type Delta_Type
+    float x_U1o4 = 0
+    float x_U2o4 = 0
+    float x_U3o4 = 0
+    float x_U4o4 = 0
+    float x_D1o4 = 0    
+    float x_D2o4 = 0    
+    float x_D3o4 = 0    
+    float x_D4o4 = 0    
+//**
 //*****custom define function*****//
 method init_count(Count_Type this) =>
     this.levelcount := 0
@@ -555,6 +565,7 @@ var timeInfo = CurrentTime_Type.new(na, na, na, na, na, na, na, na,na,na,na)
 var countInfo = Count_Type.new(0,0,0,0,0) // levelcount count1 boscount Barcount,RmnBarcount
 var flagInfo = Flag_Type.new(na,false,false,false,false,false) //size ,go,resetFlag,plotFlag, diffFlag, jumpFlag
 var BOSInfo = BOS_Type.new()
+var DeltaInfo = Delta_Type.new()
 if barstate.isfirst // execute once when script started
     timeInfo.currentperiod := str.tonumber(timeframe.period)
     timeInfo.currentperiod_div4 := timeInfo.currentperiod / 4
@@ -722,11 +733,11 @@ if(barstate.islast)
 
     if(na(Label_SBU_1over4)==false)
         label.delete(Label_SBU_1over4)
-    Label_SBU_1over4 := label.new(x=BOSInfo.index_SBU_1over4, y=BOSInfo.close_SBU_1over4, text="SBU_1over4: " + str.tostring(BOSInfo.close_SBU_1over4), xloc = xloc.bar_index, yloc=yloc.price,color=color.red) 
+    Label_SBU_1over4 := label.new(x=BOSInfo.index_SBU_1over4, y=BOSInfo.close_SBU_1over4+DeltaInfo.x_U1o4, text="SBU_1over4: " + str.tostring(BOSInfo.close_SBU_1over4), xloc = xloc.bar_index, yloc=yloc.price,color=color.red) 
 
     if(na(Label_SBD_1over4)==false)
         label.delete(Label_SBD_1over4)
-    Label_SBD_1over4 := label.new(x=BOSInfo.index_SBD_1over4, y=BOSInfo.close_SBD_1over4, text="SBD_1over4: " + str.tostring(BOSInfo.close_SBD_1over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up)
+    Label_SBD_1over4 := label.new(x=BOSInfo.index_SBD_1over4, y=BOSInfo.close_SBD_1over4-DeltaInfo.x_D1o4, text="SBD_1over4: " + str.tostring(BOSInfo.close_SBD_1over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.red,style = label.style_label_up)
 //1over4 end
 //2over4 start        
     line.new(x1=BOSInfo.index_SBU_2over4, y1=BOSInfo.close_SBU_2over4, x2=BOSInfo.index_SBU_2over4 +100, y2=BOSInfo.close_SBU_2over4, width=2, color=color.orange)
@@ -734,11 +745,11 @@ if(barstate.islast)
 
     if(na(Label_SBU_2over4)==false)
         label.delete(Label_SBU_2over4)
-    Label_SBU_2over4 := label.new(x=BOSInfo.index_SBU_2over4, y=BOSInfo.close_SBU_2over4+0.01, text="SBU_2over4: " + str.tostring(BOSInfo.close_SBU_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange) 
+    Label_SBU_2over4 := label.new(x=BOSInfo.index_SBU_2over4, y=BOSInfo.close_SBU_2over4+DeltaInfo.x_U2o4, text="SBU_2over4: " + str.tostring(BOSInfo.close_SBU_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange) 
 
     if(na(Label_SBD_2over4)==false)
         label.delete(Label_SBD_2over4)
-    Label_SBD_2over4 := label.new(x=BOSInfo.index_SBD_2over4, y=BOSInfo.close_SBD_2over4-0.01, text="SBD_2over4: " + str.tostring(BOSInfo.close_SBD_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up)
+    Label_SBD_2over4 := label.new(x=BOSInfo.index_SBD_2over4, y=BOSInfo.close_SBD_2over4-DeltaInfo.x_D2o4, text="SBD_2over4: " + str.tostring(BOSInfo.close_SBD_2over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.orange,style = label.style_label_up)
 //2over4 end
 //3over4 start
     line.new(x1=BOSInfo.index_SBU_3over4, y1=BOSInfo.close_SBU_3over4, x2=BOSInfo.index_SBU_3over4 +100, y2=BOSInfo.close_SBU_3over4, width=4, color=color.yellow, style=line.style_dotted)
@@ -746,11 +757,11 @@ if(barstate.islast)
 
     if(na(Label_SBU_3over4)==false)
         label.delete(Label_SBU_3over4)
-    Label_SBU_3over4 := label.new(x=BOSInfo.index_SBU_3over4, y=BOSInfo.close_SBU_3over4+0.02, text="SBU_3over4: " + str.tostring(BOSInfo.close_SBU_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.yellow) 
+    Label_SBU_3over4 := label.new(x=BOSInfo.index_SBU_3over4, y=BOSInfo.close_SBU_3over4+DeltaInfo.x_U3o4, text="SBU_3over4: " + str.tostring(BOSInfo.close_SBU_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.yellow) 
 
     if(na(Label_SBD_3over4)==false)
         label.delete(Label_SBD_3over4)
-    Label_SBD_3over4 := label.new(x=BOSInfo.index_SBD_3over4, y=BOSInfo.close_SBD_3over4-0.02, text="SBD_3over4: " + str.tostring(BOSInfo.close_SBD_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.yellow,style = label.style_label_up)
+    Label_SBD_3over4 := label.new(x=BOSInfo.index_SBD_3over4, y=BOSInfo.close_SBD_3over4-DeltaInfo.x_D3o4, text="SBD_3over4: " + str.tostring(BOSInfo.close_SBD_3over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.yellow,style = label.style_label_up)
 //3over4 end
 //4over4 start
     line.new(x1=BOSInfo.index_SBU_4over4, y1=BOSInfo.close_SBU_4over4, x2=BOSInfo.index_SBU_4over4 +100, y2=BOSInfo.close_SBU_4over4, width=2, color=color.green)
@@ -758,11 +769,11 @@ if(barstate.islast)
 
     if(na(Label_SBU_4over4)==false)
         label.delete(Label_SBU_4over4)
-    Label_SBU_4over4 := label.new(x=BOSInfo.index_SBU_4over4, y=BOSInfo.close_SBU_4over4+0.03, text="SBU_4over4: " + str.tostring(BOSInfo.close_SBU_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.green) 
+    Label_SBU_4over4 := label.new(x=BOSInfo.index_SBU_4over4, y=BOSInfo.close_SBU_4over4+DeltaInfo.x_U4o4, text="SBU_4over4: " + str.tostring(BOSInfo.close_SBU_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.green) 
 
     if(na(Label_SBD_4over4)==false)
         label.delete(Label_SBD_4over4)
-    Label_SBD_4over4 := label.new(x=BOSInfo.index_SBD_4over4, y=BOSInfo.close_SBD_4over4-0.03, text="SBD_4over4: " + str.tostring(BOSInfo.close_SBD_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.green,style = label.style_label_up)
+    Label_SBD_4over4 := label.new(x=BOSInfo.index_SBD_4over4, y=BOSInfo.close_SBD_4over4-DeltaInfo.x_D4o4 , text="SBD_4over4: " + str.tostring(BOSInfo.close_SBD_4over4), xloc = xloc.bar_index,yloc=yloc.price,color=color.green,style = label.style_label_up)
 //4over4 end
     
 
