@@ -436,15 +436,22 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
     //end while
 //end method  
 method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, array<float> arr, float Quotient, int index, float Remainder, float Remainder_3over4,float ttlbar, float diff) => 
-    float count = c.boscount //if count == Barcount? if crossover day ?
-    float NowBar = count + 1
+    float NowBar = na
     int j = na
-    if(NowBar>Quotient+1)
-        NowBar := NowBar-(Quotient+1)
-    if(t.currentperiod!=1440)
-        j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
-    else
-        j := 2
+    bool done = false
+    bool fg_whenlast = false
+    bool fg_whenRmn0 = false
+    bool fg_whenRmn0levle3 = false
+    int k = na
+
+    k := math.ceil(Remainder/t.currentperiod_div4)
+    fg_whenRmn0 := Remainder==0? true : false
+    fg_whenRmn0levle3 := Remainder_3over4==0? true : false
+    NowBar := c.boscount + diff + c.count1 + c. RmnBarcount
+    fg_whenlast := NowBar == ttlbar? true : false
+    j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
+    if(NowBar>ttlbar)
+        NowBar := NowBar-(ttlbar)
     while f.bosFlag 
         if((not na(b.close_SBU_3over4)) and (not na(b.close_SBD_3over4)) )//有天地 留在SURRD 依此類推
             b.state_3over4 := SURRD
@@ -465,10 +472,12 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
                         b.index_key1_3over4 := index-1
                     if(b.Buff_close3_3over4>b.close_SBU_3over4)
                         b.close_SBU_3over4 := na
+                        b.index_SBU_3over4 := na
                         b.close_SBD_3over4 := b.Buff_key1_3over4
                         b.index_SBD_3over4 := b.index_key1_3over4
                     else if(b.Buff_close3_3over4<b.close_SBD_3over4)
                         b.close_SBD_3over4 := na
+                        b.index_SBD_3over4 := na
                         b.close_SBU_3over4 := b.Buff_key1_3over4
                         b.index_SBU_3over4 := b.index_key1_3over4
 //                    else //maintain SURRD still in bounded box
@@ -497,18 +506,30 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
-            j += 3
+
+            if(not done)
+                if(fg_whenlast and fg_whenRmn0levle3 and fg_whenRmn0)
+                    j := 3
+                    done := true
+                else if(fg_whenlast and fg_whenRmn0levle3 and not fg_whenRmn0)
+                    j := 999
+                    done := true
+                else if(fg_whenlast and not fg_whenRmn0levle3 and fg_whenRmn0)
+                    j := 3
+                    done := true
+                else if(fg_whenlast and not fg_whenRmn0levle3 and not fg_whenRmn0)
+                    j := 3
+                    done := true
+                else 
+                    j += 3
+            else
+                j := 3333
             break
         //end while
         if(j>=4)
             break
-        else
-            continue
-//        count := j%4==0? count+1 : count
-//        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
-//            break
     //end while
-//end method     
+//end method   
 method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, array<float> arr, float Quotient, int index, float Remainder, float ttlbar, float diff) => 
     float count = c.boscount //if count == Barcount? if crossover day ?
     int j = 3
