@@ -165,7 +165,7 @@ if(state==5)
 
     if(na(mylabel)==false)
         label.delete(mylabel)
-    mylabel := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n tickertype " + str.tostring(syminfo.type),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
+    mylabel := label.new(x=bar_index, y=low, text="now k bar: " + str.tostring(bar_index+1)+"\n tickertype: " + str.tostring(syminfo.type),xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label.style_arrowup) 
     if (na(myLine) == false)
         line.delete(myLine)
     myLine := line.new(x1=bar_index, y1=low, x2=bar_index, y2=high, width=1, color=color.black, style=line.style_solid)

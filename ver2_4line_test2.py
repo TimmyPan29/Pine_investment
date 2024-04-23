@@ -446,13 +446,11 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
     fg_whenlast := NowBar == ttlbar? true : false
     if(NowBar>ttlbar)
         NowBar := NowBar-(ttlbar)
-    if(not fg_whenlast)
-        if(t.currentperiod!=1440)
-            j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
-        else
-            j := 2
-    else
-        
+    j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
+    if(fg_whenlast and k!=0)
+        j := j+1>k? k-1 : j
+    else if(fg_whenlast and k==0)
+        j := j
     while f.bosFlag 
         if((not na(b.close_SBU_3over4)) and (not na(b.close_SBD_3over4)) )//有天地 留在SURRD 依此類推
             b.state_3over4 := SURRD
@@ -507,20 +505,18 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
             //end switch
             if(fg_whenlast)
                 if(fg_whenRmn0 and fg_whenRmn0levle3)
-                    j := 999               
+                    j += 3              
                 else if (fg_whenRmn0 and not fg_whenRmn0levle3)  
-                    j := 999
-                    done := true
+                    j := j==3? 999 : 3 
                 else if (not fg_whenRmn0 and fg_whenRmn0levle3)
-                    j := 999 
+                    j := j==k-1? 999 : k-1
                 else
                     j := 999
-                    done := true
             else
                 j += 3
             break
         //end while
-        if(j>=4 or done)
+        if(j>=4)
             break
     //end while
 //end method     

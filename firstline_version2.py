@@ -114,7 +114,7 @@ if(state==5)
     testfloat1 := state
     if(na(mylabel)==false)
         label.delete(mylabel)
-    mylabel := label.new(x=last_bar_index-x, y=low, text="now k bar: " + str.   tostring(index+1)+"\n tickerid: " + str.tostring(syminfo.tickerid),   xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label. style_arrowup)
+    mylabel := label.new(x=last_bar_index-x, y=low, text="now k bar: " + str.   tostring(index+1)+"\n tickerid: " + str.tostring(syminfo.tickerid)+"\n typeis: " + str.tostring(syminfo.type),   xloc=xloc.bar_index,yloc = yloc.belowbar, color=color.black,style = label. style_arrowup)
     if (na(myLine) == false)
         line.delete(myLine)
     myLine := line.new(x1=last_bar_index-x, y1=low, x2=last_bar_index-x, y2=high, width=1, color=color.black, style=line.style_solid)
