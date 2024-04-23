@@ -331,16 +331,17 @@ method BOScal_level1(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
-            if(fg_whenlast)
-                if(fg_whenRmn0 and fg_whenRmn0levle1)
-                    j += 1                   
-//impossible               else if (fg_whenRmn0 and not fg_whenRmn0levle1)  
-                else if (not fg_whenRmn0 and fg_whenRmn0levle1)
-                    j := (j+1)==k? 999 : j+1 
+            if(not done)
+                if(fg_whenlast and not fg_whenRmn0)
+                    j += 1
+                    done := j==k? true : false
+                else if(fg_whenlast and fg_whenRmn0)
+                    j := 3
+                    done := true
                 else
-                    j := (j+1)==k? 9999 : j+1
+                    j += 1
             else
-                j += 1
+                j += 999
             break
         //end while
         c.levelcount := j
@@ -415,16 +416,20 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
-            if(fg_whenlast)
-                if(fg_whenRmn0 and fg_whenRmn0levle2)
-                    j += 2                   
-//impossible               else if (fg_whenRmn0 and not fg_whenRmn0levle2)  
-                else if (not fg_whenRmn0 and fg_whenRmn0levle2)
-                    j := k>2? 2 : 999
+            if(not done)
+                if(fg_whenlast and not fg_whenRmn0levle2)
+                    j := k
+                    done := true
+                else if(fg_whenlast and fg_whenRmn0levle2 and fg_whenRmn0)
+                    j += 2
+                    done := true
+                else if(fg_whenlast and fg_whenRmn0levle2 and not fg_whenRmn0)
+                    j := 999
+                    done := true
                 else
-                    j := k>2? 2 : 888
+                    j += 2
             else
-                j += 2 
+                j := 2222
             break
         //end while
         if(j>=4)
@@ -432,27 +437,15 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
     //end while
 //end method  
 method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, array<float> arr, float Quotient, int index, float Remainder, float Remainder_3over4,float ttlbar, float diff) => 
-    float NowBar = na
+    float count = c.boscount //if count == Barcount? if crossover day ?
+    float NowBar = count + 1
     int j = na
-    bool fg_whenlast = false
-    bool fg_whenRmn0 = false
-    bool fg_whenRmn0levle3 = false
-    bool done = false
-    int k = na
-    k := math.ceil(Remainder/t.currentperiod_div4)
-    fg_whenRmn0 := Remainder==0? true : false
-    fg_whenRmn0levle3 := Remainder_3over4==0? true : false
-    NowBar := c.boscount + diff + c.count1 + c. RmnBarcount
-    fg_whenlast := NowBar == ttlbar? true : false
-    if(NowBar>ttlbar)
-        NowBar := NowBar-(ttlbar)
-    if(not fg_whenlast)
-        if(t.currentperiod!=1440)
-            j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
-        else
-            j := 2
+    if(NowBar>Quotient+1)
+        NowBar := NowBar-(Quotient+1)
+    if(t.currentperiod!=1440)
+        j := NowBar%3==1? 2 : NowBar%3==2? 1 : 0
     else
-        
+        j := 2
     while f.bosFlag 
         if((not na(b.close_SBU_3over4)) and (not na(b.close_SBD_3over4)) )//有天地 留在SURRD 依此類推
             b.state_3over4 := SURRD
@@ -505,23 +498,16 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
                 =>
                     label.new(bar_index,low,"something wrong")
             //end switch
-            if(fg_whenlast)
-                if(fg_whenRmn0 and fg_whenRmn0levle3)
-                    j := 999               
-                else if (fg_whenRmn0 and not fg_whenRmn0levle3)  
-                    j := 999
-                    done := true
-                else if (not fg_whenRmn0 and fg_whenRmn0levle3)
-                    j := 999 
-                else
-                    j := 999
-                    done := true
-            else
-                j += 3
+            j += 3
             break
         //end while
-        if(j>=4 or done)
+        if(j>=4)
             break
+        else
+            continue
+//        count := j%4==0? count+1 : count
+//        if((count == c.Barcount and f.diffFlag) or (count == Quotient+1 and not(f.diffFlag))) //it means diff<0, jump over the day or today is at the end. 
+//            break
     //end while
 //end method     
 method BOScal_level4(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, array<float> arr, float Quotient, int index, float Remainder, float ttlbar, float diff) => 
@@ -594,11 +580,11 @@ method reorderSBlabel(BOS_Type b, Delta_Type d, close) =>
     arrd = array.new<float>(8,0)
     arrindices = array.sort_indices(arr,order.ascending)
     if(close>=10000)
-        x := 500
+        x := 400
     else if(close>=1000 and close<10000)
-        x := 50
+        x := 40
     else if(close>=100 and close<1000)
-        x := 5
+        x := 4
     else
         x := 1
     for i=0 to 7
@@ -672,6 +658,8 @@ Remainder_3over4 := DAY2MINUTE%(3*timeInfo.currentperiod_div4)
 Remainder_2over4 := DAY2MINUTE%(2*timeInfo.currentperiod_div4)
 Remainder_1over4 := DAY2MINUTE%(timeInfo.currentperiod_div4)
 ttlbar := Remainder==0? Quotient : Quotient+1
+//Remainder2Bar := math.floor(Remainder/timeInfo.currentperiod_div4)+1
+//fourminus_Remainger2Bar := 4-Remainder2Bar
 ////*****state init*****////
 if(timeInfo.HrMin2Min2 == BASETIME and flagInfo.GoFlag == false)//start!!!
     index := bar_index
@@ -718,7 +706,7 @@ switch state
                 flagInfo.diffFlag := false
             else if(countInfo.Barcount == 0 and timeInfo.HrMin2Min2 == BASETIME)
                 countInfo.Barcount := 1
-                diff := 1
+                diff := 0
                 timeInfo.starttime := timeInfo.HrMin2Min2
                 flagInfo.jumpFlag := false
                 flagInfo.diffFlag := false
@@ -803,9 +791,9 @@ switch state
 //        label.new(bar_index,low+0.1,"run into wrong state")
 if(barstate.islast)
     reorderSBlabel(BOSInfo, DeltaInfo, close)
-    if(not na(test))
-        label.delete(test)
-    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(countInfo.levelcount)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\nRmnBarcount: "+str.tostring(countInfo.RmnBarcount)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
+//    if(not na(test))
+//        label.delete(test)
+//    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(countInfo.levelcount)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\nRmnBarcount: "+str.tostring(countInfo.RmnBarcount)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
 
 //1over4 start 
     line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=3, color=color.red, style=line.style_dashed)
