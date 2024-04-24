@@ -363,6 +363,10 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
     NowBar := c.boscount + diff + c.count1 + c. RmnBarcount
     fg_whenlast := NowBar == ttlbar? true : false
     j := 1
+    if(fg_whenlast and k!=0)
+        j := j+1>k? k-1 : j
+    else if(fg_whenlast and k==0)
+        j := j
     while f.bosFlag 
         if((not na(b.close_SBU_2over4)) and (not na(b.close_SBD_2over4)) )//有天地 留在SURRD 依此類推
             b.state_2over4 := SURRD
@@ -420,9 +424,9 @@ method BOScal_level2(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
                     j += 2                   
 //impossible               else if (fg_whenRmn0 and not fg_whenRmn0levle2)  
                 else if (not fg_whenRmn0 and fg_whenRmn0levle2)
-                    j := k>2? 2 : 999
+                    j := j>1? 1 : j==1? 999 : 1
                 else
-                    j := k>2? 2 : 888
+                    j := j>k-1? k-1 : j==k-1? 999 : k-1
             else
                 j += 2 
             break
@@ -509,9 +513,9 @@ method BOScal_level3(BOS_Type b, Count_Type c, Flag_Type f, CurrentTime_Type t, 
                 else if (fg_whenRmn0 and not fg_whenRmn0levle3)  
                     j := j==3? 999 : 3 
                 else if (not fg_whenRmn0 and fg_whenRmn0levle3)
-                    j := j==k-1? 999 : k-1
+                    j := j>k-1? k-1 : j==k-1? 999 : k-1
                 else
-                    j := 999
+                    j := j==3? 999 : 3
             else
                 j += 3
             break
@@ -799,9 +803,9 @@ switch state
 //        label.new(bar_index,low+0.1,"run into wrong state")
 if(barstate.islast)
     reorderSBlabel(BOSInfo, DeltaInfo, close)
-    if(not na(test))
-        label.delete(test)
-    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(countInfo.levelcount)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\nRmnBarcount: "+str.tostring(countInfo.RmnBarcount)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
+//    if(not na(test))
+//        label.delete(test)
+//    test := label.new(last_bar_index-numbershift, low, "GoFlag=\t" + str.tostring(countInfo.levelcount)+"\n jumpFlag: "+str.tostring(testbool2)+"\n diffFlag: "+str.tostring(testbool3)+"\n testfloat2 close_SBU_3over4: "+str.tostring(testfloat2)+"\n state: "+str.tostring(state)+"\n Barcount: "+str.tostring(countInfo.Barcount)+"\n count1: "+str.tostring(countInfo.count1)+"\nRmnBarcount: "+str.tostring(countInfo.RmnBarcount)+"\n testarray @this pos is arrayclose  : "+str.tostring(testarray)+"\n resetFlag : "+str.tostring(flagInfo.resetFlag)+"\n testfloat3 starttime : "+str.tostring(testfloat3)+"\n testfloat4 lasttime : "+str.tostring(testfloat4)+"\n testfloat5 not updated boscount : "+str.tostring(testfloat5)+"\n testfloat now is barcount : "+str.tostring(testfloat)+"\n this bar is not allowed to be cal,but is bar now...\nnewest time.HrMin2Min2: "+str.tostring(timeInfo.HrMin2Min2)+"\n newest arrayclose : "+str.tostring(arrayclose),style = label.style_triangledown,color = color.green)
 
 //1over4 start 
     line.new(x1=BOSInfo.index_SBU_1over4, y1=BOSInfo.close_SBU_1over4, x2=BOSInfo.index_SBU_1over4 +100, y2=BOSInfo.close_SBU_1over4, width=3, color=color.red, style=line.style_dashed)
