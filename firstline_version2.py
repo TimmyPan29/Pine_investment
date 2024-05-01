@@ -43,7 +43,7 @@ var string teststr = na
 var BOS = BOS_Type.new()
 
 //*****custom option*****//
-x := 1
+x := 0
 //*****var initialization*****//
 
 if(state == 1) //從第一個close開始
