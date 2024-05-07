@@ -175,7 +175,7 @@ htf_6                       = input.timeframe("1W", "", inline="htf6")
 htf6.settings.htf           := htf_6
 htf6.settings.max_display   := input.int(10, "", inline="htf6")
 
-settings.max_sets        := input.int(6, "Limit to next HTFs only", minval=1, maxval=6)
+settings.max_sets        := input.int(6, "Limit to next HTFs only", minval=1, maxval=8)
 
 settings.bull_body       := input.color(color.new(color.green, 10), "Body  ", inline="body")
 settings.bear_body       := input.color(color.new(color.red, 10), "", inline="body")
@@ -197,10 +197,10 @@ settings.htf_timer_show  := input.bool(true, "Remaining time      ",
 settings.htf_timer_color := input.color(color.new(color.black, 10), "", inline='timer')
 settings.htf_timer_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="timer")
 
-settings.fvg_show        := input.bool(true, "Fair Value Gap   ", group="Imbalance", inline="fvg")
+settings.fvg_show        := input.bool(true, "Fair Value Gap   ",inline="fvg", group="Imbalance")
 settings.fvg_color       := input.color(color.new(color.gray, 80), "", inline='fvg', group="Imbalance")
 
-settings.vi_show         := input.bool(true, "Volume Imbalance", group="Imbalance", inline="vi")
+settings.vi_show         := input.bool(true, "Volume Imbalance", inline="vi", group="Imbalance")
 settings.vi_color        := input.color(color.new(color.red, 50), "", inline='vi', group="Imbalance")
 
 settings.trace_show      := input.bool(true, "Trace lines", group="trace")
@@ -241,9 +241,12 @@ method LineStyle(Helper helper, string style) =>
         '----' => line.style_dashed
         '····' => line.style_dotted
         => line.style_solid
+    out2 = switch style
+        '----' => line.style_dashed
+        '····' => line.style_dotted
+        => line.style_solid
 
-
-method ValidTimeframe(Helper helper, string HTF) =>
+method ValidTimeframe(Helper helper, string HTF) => //HTF表示週期的意思 higher timeframe
     helper.name := HTF
     if timeframe.in_seconds(HTF) >= timeframe.in_seconds("D") and timeframe.in_seconds(HTF) > timeframe.in_seconds()
         true
@@ -251,7 +254,7 @@ method ValidTimeframe(Helper helper, string HTF) =>
         n1 = timeframe.in_seconds()
         n2 = timeframe.in_seconds(HTF)
         n3 = n1 % n2
-        (n1 < n2 and math.round(n2/n1) == n2/n1)
+        (n1 < n2 and math.round(n2/n1) == n2/n1) // 驗證整數倍
 
 
 method RemainingTime(Helper helper, string HTF) =>
@@ -274,7 +277,7 @@ method RemainingTime(Helper helper, string HTF) =>
     else
         "n/a"
 
-method HTFName(Helper helper, string HTF) =>
+method HTFName(Helper helper, string HTF) => 
     helper.name := "HTFName"
     formatted = HTF
 
