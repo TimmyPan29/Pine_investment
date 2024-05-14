@@ -175,7 +175,7 @@ htf_6                       = input.timeframe("1W", "", inline="htf6")
 htf6.settings.htf           := htf_6
 htf6.settings.max_display   := input.int(10, "", inline="htf6")
 
-settings.max_sets        := input.int(6, "Limit to next HTFs only", minval=1, maxval=8)
+settings.max_sets        := input.int(6, "Limit to next HTFs only", minval=1, maxval=6)
 
 settings.bull_body       := input.color(color.new(color.green, 10), "Body  ", inline="body")
 settings.bear_body       := input.color(color.new(color.red, 10), "", inline="body")
@@ -197,10 +197,10 @@ settings.htf_timer_show  := input.bool(true, "Remaining time      ",
 settings.htf_timer_color := input.color(color.new(color.black, 10), "", inline='timer')
 settings.htf_timer_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="timer")
 
-settings.fvg_show        := input.bool(true, "Fair Value Gap   ",inline="fvg", group="Imbalance")
+settings.fvg_show        := input.bool(true, "Fair Value Gap   ", group="Imbalance", inline="fvg")
 settings.fvg_color       := input.color(color.new(color.gray, 80), "", inline='fvg', group="Imbalance")
 
-settings.vi_show         := input.bool(true, "Volume Imbalance", inline="vi", group="Imbalance")
+settings.vi_show         := input.bool(true, "Volume Imbalance", group="Imbalance", inline="vi")
 settings.vi_color        := input.color(color.new(color.red, 50), "", inline='vi', group="Imbalance")
 
 settings.trace_show      := input.bool(true, "Trace lines", group="trace")
@@ -241,20 +241,17 @@ method LineStyle(Helper helper, string style) =>
         '----' => line.style_dashed
         '····' => line.style_dotted
         => line.style_solid
-    out2 = switch style
-        '----' => line.style_dashed
-        '····' => line.style_dotted
-        => line.style_solid
 
-method ValidTimeframe(Helper helper, string HTF) => //HTF表示週期的意思 higher timeframe
+
+method ValidTimeframe(Helper helper, string HTF) => //兩個部分 一個是檢查更高週期的是不是大於天，這個部分用轉成秒數的方式來判斷，第二個部分則是如果週期不是以天為單位，則一樣 使用秒的方式 判斷是不是整數倍 以及高週期的輸入要大於當前週期
     helper.name := HTF
     if timeframe.in_seconds(HTF) >= timeframe.in_seconds("D") and timeframe.in_seconds(HTF) > timeframe.in_seconds()
-        true
+        true 
     else
         n1 = timeframe.in_seconds()
         n2 = timeframe.in_seconds(HTF)
-        n3 = n1 % n2
-        (n1 < n2 and math.round(n2/n1) == n2/n1) // 驗證整數倍
+        n3 = n1 % n2 //it is wrong, it should be n2%n1
+        (n1 < n2 and math.round(n2/n1) == n2/n1)
 
 
 method RemainingTime(Helper helper, string HTF) =>
@@ -277,7 +274,7 @@ method RemainingTime(Helper helper, string HTF) =>
     else
         "n/a"
 
-method HTFName(Helper helper, string HTF) => 
+method HTFName(Helper helper, string HTF) =>
     helper.name := "HTFName"
     formatted = HTF
 
@@ -360,20 +357,20 @@ method Reorder(CandleSet candleSet, int offset) =>
             line.set_x2(candle.wick_down, bar_index+((settings.width)/2) + t_buffer)
     candleSet
 
-    top     = helper.CandlesHigh(candleSet.candles)
+    top     = helper.CandlesHigh(candleSet.candles) //六個HTF中的candle的最高的那根 包含引線
     left    = bar_index + offset + ((settings.width+settings.buffer)*(size-1))/2
 
     if settings.htf_label_show
-        var label l = candleSet.tfName
+        var label l = candleSet.tfName //局部變數的用法
 
-        string lbl = helper.HTFName(candleSet.settings.htf)
+        string lbl = helper.HTFName(candleSet.settings.htf) //局部變數的用法
         if settings.htf_timer_show
             lbl += "\n"
    
         if not na(l)
             label.set_xy(l, left, top)            
         else
-            l := label.new(left, top, lbl, color=color_transparent, textcolor = settings.htf_label_color, style=label.style_label_down, size = settings.htf_label_size)
+            l := label.new(left, top+100, lbl, color=color_transparent, textcolor = settings.htf_label_color, style=label.style_label_down, size = settings.htf_label_size)
 
     if settings.htf_timer_show
         var label t = candleSet.tfTimer
