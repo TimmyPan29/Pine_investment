@@ -300,7 +300,7 @@ method HTFEnabled(Helper helper) =>
 
     last
 
-method CandleSetHigh(Helper helper, Candle[] candles, float h) =>
+method CandleSetHigh(Helper helper, Candle[] candles, float h) =>//判斷某個HTF的蠟燭組中的最高的地方
     helper.name := "CandlesSetHigh"
     float _h = h
     if array.size(candles) > 0
@@ -310,7 +310,7 @@ method CandleSetHigh(Helper helper, Candle[] candles, float h) =>
                 _h := c.h
     _h
 
-method CandlesHigh(Helper helper, Candle[] candles) =>
+method CandlesHigh(Helper helper, Candle[] candles) => //這個函數是要找六個HTF中的candle的最高的地方
     helper.name := "CandlesHigh"
     h   = 0.0
     int cnt = 0
@@ -347,7 +347,7 @@ method Reorder(CandleSet candleSet, int offset) =>
 
     if size > 0
         for i = size-1 to 0
-            Candle candle = candleSet.candles.get(i)
+            Candle candle = candleSet.candles.get(i) //把最新的一根變成index0
             t_buffer = offset + ((settings.width+settings.buffer)*(size-i-1))
             box.set_left(candle.body, bar_index + t_buffer)
             box.set_right(candle.body, bar_index + settings.width + t_buffer)
@@ -396,7 +396,7 @@ method FindImbalance(CandleSet candleSet) =>
                 candle2 = candleSet.candles.get(i+2)
                 candle3 = candleSet.candles.get(i+1)
 
-                if (candle1.l > candle2.h and math.min(candle1.o, candle1.c) > math.max(candle2.o, candle2.c))
+                if (candle1.l > candle2.h and math.min(candle1.o, candle1.c) > math.max(candle2.o, candle2.c))// 上升的表示式，其實後面那個判斷式可以不用
                     Imbalance imb = Imbalance.new()
                     imb.b := box.new(box.get_left(candle2.body), candle2.h, box.get_right(candle1.body), candle1.l, bgcolor=settings.fvg_color, border_color = color_transparent, xloc=xloc.bar_index)
                     candleSet.imbalances.push(imb)
@@ -443,9 +443,9 @@ method Monitor(CandleSet candleSet) =>
         candle.wick_up      := line.new(bar_index+1, candle.h, bar_index, math.max(candle.o, candle.c), color=bull ? settings.bull_wick : settings.bear_wick)
         candle.wick_down    := line.new(bar_index+1, math.min(candle.o, candle.c), bar_index, candle.l, color=bull ? settings.bull_wick : settings.bear_wick)
 
-        candleSet.candles.unshift(candle)
+        candleSet.candles.unshift(candle) //從這句話可以知道 index越靠近零 資料越新
 
-        if candleSet.candles.size() > candleSet.settings.max_display
+        if candleSet.candles.size() > candleSet.settings.max_display //清除舊candle
             Candle delCandle = array.pop(candleSet.candles)
             box.delete(delCandle.body)
             line.delete(delCandle.wick_up)
@@ -453,7 +453,7 @@ method Monitor(CandleSet candleSet) =>
 
     candleSet
 
-method Update(CandleSet candleSet, int offset, bool showTrace) =>
+method Update(CandleSet candleSet, int offset, bool showTrace) =>//更新最新一根的價格動態 分別是 c,o, h, l
     if candleSet.candles.size() > 0
         Candle candle   = candleSet.candles.first()
         candle.h_idx    := high > candle.h ? bar_index : candle.h_idx
