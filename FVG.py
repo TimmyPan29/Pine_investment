@@ -347,7 +347,7 @@ method Reorder(CandleSet candleSet, int offset) =>
 
     if size > 0
         for i = size-1 to 0
-            Candle candle = candleSet.candles.get(i) //把最舊的一根變成index0
+            Candle candle = candleSet.candles.get(i) //從最舊的開始處理 reorder函數主要是要處理到達最後一根時 要把candle的位子資訊處理好 以便文字訊息 以及box定位可以順利進行
             t_buffer = offset + ((settings.width+settings.buffer)*(size-i-1))
             box.set_left(candle.body, bar_index + t_buffer)
             box.set_right(candle.body, bar_index + settings.width + t_buffer)
@@ -357,7 +357,7 @@ method Reorder(CandleSet candleSet, int offset) =>
             line.set_x2(candle.wick_down, bar_index+((settings.width)/2) + t_buffer)
     candleSet
 
-    top     = helper.CandlesHigh(candleSet.candles) //六個HTF中的candle的最高的那根 包含引線
+    top     = helper.CandlesHigh(candleSet.candles) //六個HTF中的candle的最高的那根 目的是為了後面要在最高的那根上面打一些文字 包含引線
     left    = bar_index + offset + ((settings.width+settings.buffer)*(size-1))/2
 
     if settings.htf_label_show
@@ -386,7 +386,7 @@ method FindImbalance(CandleSet candleSet) =>
     if barstate.isrealtime or barstate.islast
         if candleSet.imbalances.size() > 0
             for i = candleSet.imbalances.size()-1 to 0
-                Imbalance del = candleSet.imbalances.get(i)
+                Imbalance del = candleSet.imbalances.get(i) //圖形歸圖形 刪掉數據 圖型還是會在 所以要刪box
                 box.delete(del.b)
                 candleSet.imbalances.pop()
 
@@ -453,9 +453,9 @@ method Monitor(CandleSet candleSet) =>
 
     candleSet
 
-method Update(CandleSet candleSet, int offset, bool showTrace) =>//更新最新一根的價格動態 分別是 c,o, h, l
+method Update(CandleSet candleSet, int offset, bool showTrace) =>//更新最新一根的價格動態 分別是 c,o, h, l 並且在圖形上加上trace
     if candleSet.candles.size() > 0
-        Candle candle   = candleSet.candles.first()
+        Candle candle   = candleSet.candles.first() //取得candle向量的第一個candle對象
         candle.h_idx    := high > candle.h ? bar_index : candle.h_idx
         candle.h        := high > candle.h ? high : candle.h
         candle.l_idx    := low < candle.l ? bar_index : candle.l_idx
@@ -540,7 +540,7 @@ int cnt = 0
 int last = helper.HTFEnabled()
 
 int offset = settings.offset
-if htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)
+if  .settings.show and helper.ValidTimeframe(htf1.settings.htf)
     bool showTrace = false
     if settings.trace_anchor == "First Timeframe"
         showTrace := true
