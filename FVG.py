@@ -347,7 +347,7 @@ method Reorder(CandleSet candleSet, int offset) =>
 
     if size > 0
         for i = size-1 to 0
-            Candle candle = candleSet.candles.get(i) //把最新的一根變成index0
+            Candle candle = candleSet.candles.get(i) //把最舊的一根變成index0
             t_buffer = offset + ((settings.width+settings.buffer)*(size-i-1))
             box.set_left(candle.body, bar_index + t_buffer)
             box.set_right(candle.body, bar_index + settings.width + t_buffer)
