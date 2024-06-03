@@ -540,7 +540,7 @@ int cnt = 0
 int last = helper.HTFEnabled()
 
 int offset = settings.offset
-if  .settings.show and helper.ValidTimeframe(htf1.settings.htf)
+if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)
     bool showTrace = false
     if settings.trace_anchor == "First Timeframe"
         showTrace := true
