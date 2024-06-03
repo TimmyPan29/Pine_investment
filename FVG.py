@@ -146,7 +146,7 @@ htf6.imbalances             := imbalances_6
 //+------------------------------------------------------------------------------------------------------------+//
 
 htf1.settings.show          := input.bool(true, "HTF 1      ", inline="htf1")
-htf_1                       = input.timeframe("5", "", inline="htf1")
+htf_1                       = input.timeframe("1", "", inline="htf1")
 htf1.settings.htf           := htf_1
 htf1.settings.max_display   := input.int(10, "", inline="htf1")
 
