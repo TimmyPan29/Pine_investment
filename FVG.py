@@ -447,7 +447,7 @@ method Monitor(CandleSet candleSet) =>
 
         if candleSet.candles.size() > candleSet.settings.max_display //清除舊candle
             Candle delCandle = array.pop(candleSet.candles)
-            box.delete(delCandle.body)
+            box.delete(delCandle.body) //但舊的candle的圖還在畫面上 所以要刪掉
             line.delete(delCandle.wick_up)
             line.delete(delCandle.wick_down)
 
