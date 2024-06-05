@@ -28,6 +28,14 @@ type BOSdata
     float           regclose1 = 0
     float           regclose2 = 0
     float           regclose3 = 0
+    label           sbu_l
+    label           sbu_date
+    label           sbu_price
+    line            sbu_line
+    label           sbd_l
+    label           sbd_date
+    label           sbd_price
+    line            sbd_line          
 
 
 type CandleSettings
@@ -37,16 +45,42 @@ type CandleSettings
 
 type Settings
     int             offset
-    int             buffer
-    int             htf_buffer
-    int             width
+    int             text_buffer
+    string          sbu_label_size 
+    color           sbu_label_color
+    bool            sbu_label_show
+    string          sbd_label_size 
+    color           sbd_label_color
+    bool            sbd_label_show
+
+    string          htf_timer_size
+    color           htf_timer_color
+    string          htf_label_size 
+    color           htf_label_color
+    string          date_label_size
+    color           date_label_color
+    string          price_label_size
+    color           price_label_color
+
+    int             l1trace_c_size 
+    color           l1trace_c_color 
+    string          l1trace_c_style 
+    int             l2trace_c_size 
+    color           l2trace_c_color 
+    string          l2trace_c_style 
+    int             l3trace_c_size 
+    color           l3trace_c_color 
+    string          l3trace_c_style 
+    int             l4trace_c_size 
+    color           l4trace_c_color 
+    string          l4trace_c_style 
 
 
 type CandleSet
     Candle[]        candles
     CandleSettings  settings
     label           tfName
-    label           tfTimer
+    label           tfTimer       
     BOSdata         bosdata
 
 type CandleSet_add
@@ -161,6 +195,44 @@ htf4.settings.max_memory   := input.int(10, "", inline="htf4")
 
 settings.max_sets        := input.int(4, "Limit to next HTFs only", minval=1, maxval=4)
 
+settings.offset          := input.int(10, "padding from current candles", minval = 1)
+settings.text_buffer      := input.int(10, "space between text features", minval = 1, maxval = 10)
+// sbu sbd, period, date happen, remain time, price, line color
+
+settings.sbu_label_color := input.color(color.new(color.black, 10), "", inline='SBULabel')
+settings.sbu_label_size  := input.string(size.large, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="SBULabel")
+
+settings.sbd_label_color := input.color(color.new(color.black, 10), "", inline='SBDLabel')
+settings.sbd_label_size  := input.string(size.large, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="SBDLabel")
+
+settings.htf_label_color := input.color(color.new(color.black, 10), "", inline='HTFlabel')
+settings.htf_label_size  := input.string(size.large, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="HTFlabel")
+
+settings.date_label_color := input.color(color.new(color.black, 10), "", inline='DATElabel')
+settings.date_label_size  := input.string(size.large, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="DATElabel")
+
+settings.htf_timer_color := input.color(color.new(color.black, 10), "", inline='timer')
+settings.htf_timer_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="timer")
+
+settings.price_label_color     := input.color(color.new(color.black, 10), "", inline='label')
+settings.price_label_size      := input.string(size.small, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="label")
+
+settings.l1trace_c_color   := input.color(color.new(color.gray, 50), "level1    ", inline='level 1', group="trace")
+settings.l1trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 1', group="trace")
+settings.l1trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='level 1', group="trace")
+
+settings.l2trace_c_color   := input.color(color.new(color.gray, 50), "level2    ", inline='level 2', group="trace")
+settings.l2trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 2', group="trace")
+settings.l2trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='level 2', group="trace")
+
+settings.l3trace_c_color   := input.color(color.new(color.gray, 50), "level3    ", inline='level 3', group="trace")
+settings.l3trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 3', group="trace")
+settings.l3trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='level 3', group="trace")
+
+settings.l4trace_c_color   := input.color(color.new(color.gray, 50), "level4    ", inline='level 4', group="trace")
+settings.l4trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 4', group="trace")
+settings.l4trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='level 4', group="trace")
+
 
 
 
@@ -215,6 +287,11 @@ method RemainingTime(Helper helper, string HTF) =>
     else
         "n/a"
 
+method formattedtime(Helper helper) =>
+    helper.name = "THE DATE OF BAR"
+    r = str.format("{0,date,yyyy-MM-dd HH:mm}", time)
+    r
+    
 method HTFName(Helper helper, string HTF) =>
     helper.name := "HTFName"
     formatted = HTF
@@ -339,8 +416,45 @@ method BOSJudge(CandleSet candleSet)
                 bosdata.sbu_idx:= na
             state := 1
 
-        if barstate.isrealtime or barstate.islast
+    candleSet
 
+method plotdata(CandleSet candleSet, int offset, int delta) =>
+    int cnt = 0
+    BOSdata bosdata = candleSet.bosdata
+    var label l = candleSet.tfName
+    var label l2
+    var label lt = candleSet.tfTimer
+    var label l_sbu = bosdata.sbu_l
+    var label l_sbd = bosdata.sbd_l
+    var label l_datesbu = bosdata.sbu_date
+    var label l_datesbd = bosdata.sbd_date
+    var label l_pricesbu = bosdata.sbu_price
+    var label l_pricesbd = bosdata.sbd_price
+    var line  li_sbu   = bosdata.sbu_line
+    var line  li_sbd   = bosdata.sbd_line
+    string lbn  = candleSet.settings.htf 
+    string tmr  = "(" + helper.RemainingTime(candleSet.settings.htf) + ")"
+    if candleSet.settings.show
+        if not na(l_sbu)
+            label.set_xy(l_sbu, offset+cnt*delta,bosdata.sbu)
+        else
+            l_sbu := label.new(offset+cnt*delta, bosdata.sbu, "SBU", color = color_transparent, textcolor = settings.sbu_label_color, size = settings.sbu_label_size,)
+        if not na(l_sbd)
+            label.set_xy(l_sbd, offset+cnt*delta,bosdata.sbd)
+        else
+            l_sbd := label.new(offset+cnt*delta, bosdata.sbd, "SBD", color = color_transparent, textcolor = settings.sbd_label_color, size = settings.sbd_label_size,)
+        cnt += 1
+        if not na(l)
+            label.set_xy(l, offset+cnt*delta,bosdata.sbu)
+        else
+            l := label.new(offset+cnt*delta, bosdata.sbu, lbn, color = color_transparent, textcolor = settings.sbu_label_color, size = settings.sbu_label_size,)
+        if not na(l2)
+            label.set_xy(l2, offset+cnt*delta,bosdata.sbd)
+        else
+            l2 := label.new(offset+cnt*delta, bosdata.sbd, lbn, color = color_transparent, textcolor = settings.sbu_label_color, size = settings.sbu_label_size,)
+        cnt += 1
+            
+    cnt = 0
 
 
 
