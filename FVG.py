@@ -364,7 +364,7 @@ method Reorder(CandleSet candleSet, int offset) =>
         var label l = candleSet.tfName //局部變數的用法
 
         string lbl = helper.HTFName(candleSet.settings.htf) //局部變數的用法
-        if settings.htf_timer_show
+        if settings.htf_timer_show //時間和週期一組 一起掛在同個label \n是為了把他們分隔開來
             lbl += "\n"
    
         if not na(l)
@@ -422,7 +422,7 @@ method FindImbalance(CandleSet candleSet) =>
                     candleSet.imbalances.push(imb)
     candleSet
 
-method Monitor(CandleSet candleSet) =>
+method Monitor(CandleSet candleSet) => //先把基本candle的box畫出來 再經過之後的函數來重新設定位置 蠻聰明的
     HTFBarTime = time(candleSet.settings.htf)
     isNewHTFCandle = ta.change(HTFBarTime)
 
@@ -440,8 +440,8 @@ method Monitor(CandleSet candleSet) =>
         bull = candle.c > candle.o
 
         candle.body         := box.new(bar_index, math.max(candle.o, candle.c), bar_index+2, math.min(candle.o, candle.c), bull ? settings.bull_border : settings.bear_border, 1, bgcolor = bull ? settings.bull_body : settings.bear_body)
-        candle.wick_up      := line.new(bar_index+1, candle.h, bar_index, math.max(candle.o, candle.c), color=bull ? settings.bull_wick : settings.bear_wick)
-        candle.wick_down    := line.new(bar_index+1, math.min(candle.o, candle.c), bar_index, candle.l, color=bull ? settings.bull_wick : settings.bear_wick)
+        candle.wick_up      := line.new(bar_index+1, candle.h, bar_index+1, math.max(candle.o, candle.c), color=bull ? settings.bull_wick : settings.bear_wick)
+        candle.wick_down    := line.new(bar_index+1, math.min(candle.o, candle.c), bar_index+1, candle.l, color=bull ? settings.bull_wick : settings.bear_wick)
 
         candleSet.candles.unshift(candle) //從這句話可以知道 index越靠近零 資料越新
 
@@ -461,7 +461,7 @@ method Update(CandleSet candleSet, int offset, bool showTrace) =>//更新最新�
         candle.l_idx    := low < candle.l ? bar_index : candle.l_idx
         candle.l        := low < candle.l ? low : candle.l
         candle.c        := close
-        candle.c_idx   := bar_index
+        candle.c_idx    := bar_index
 
         bull = candle.c > candle.o
 
