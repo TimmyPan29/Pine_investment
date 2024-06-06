@@ -30,10 +30,12 @@ type BOSdata
     float           regclose3 = 0
     label           sbu_l
     label           sbu_date
+    string          s_dateu
     label           sbu_price
     line            sbu_line
     label           sbd_l
     label           sbd_date
+    string          s_dated
     label           sbd_price
     line            sbd_line          
 
@@ -46,6 +48,7 @@ type CandleSettings
 type Settings
     int             offset
     int             text_buffer
+    int             max_sets
     string          sbu_label_size 
     color           sbu_label_color
     bool            sbu_label_show
@@ -62,19 +65,10 @@ type Settings
     string          price_label_size
     color           price_label_color
 
-    int             l1trace_c_size 
-    color           l1trace_c_color 
-    string          l1trace_c_style 
-    int             l2trace_c_size 
-    color           l2trace_c_color 
-    string          l2trace_c_style 
-    int             l3trace_c_size 
-    color           l3trace_c_color 
-    string          l3trace_c_style 
-    int             l4trace_c_size 
-    color           l4trace_c_color 
-    string          l4trace_c_style 
-
+type Trace
+    int             trace_c_size 
+    color           trace_c_color 
+    string          trace_c_style 
 
 type CandleSet
     Candle[]        candles
@@ -82,6 +76,7 @@ type CandleSet
     label           tfName
     label           tfTimer       
     BOSdata         bosdata
+    Trace           trace
 
 type CandleSet_add
     Candle[]        candles
@@ -108,64 +103,73 @@ var BOSdata bosdata_2       = BOSdata.new()
 var BOSdata bosdata_3       = BOSdata.new()
 var BOSdata bosdata_4       = BOSdata.new()
 
+var Trace   trace_1         = Trace.new()
+var Trace   trace_2         = Trace.new()
+var Trace   trace_3         = Trace.new()
+var Trace   trace_4         = Trace.new()
+
 var CandleSet htf1          = CandleSet.new()
 htf1.settings               := SettingsHTF1
 htf1.candles                := candles_1
 htf1.bosdata                := bosdata_1
+htf1.trace                  := trace_1
 
 var CandleSet htf2          = CandleSet.new()
 htf2.settings               := SettingsHTF2
 htf2.candles                := candles_2
 htf2.bosdata                := bosdata_2
+htf2.trace                  := trace_2
 
 var CandleSet htf3          = CandleSet.new()
 htf3.settings               := SettingsHTF3
 htf3.candles                := candles_3
 htf3.bosdata                := bosdata_3
+htf3.trace                  := trace_3
 
 var CandleSet htf4          = CandleSet.new()
 htf4.settings               := SettingsHTF4
 htf4.candles                := candles_4
 htf4.bosdata                := bosdata_4
+htf4.trace                  := trace_4
 
 //+-----add line-----+//
-var Candle[] candles_1_add        = array.new<Candle>(0)
-var Candle[] candles_2_add        = array.new<Candle>(0)
-var Candle[] candles_3_add        = array.new<Candle>(0)
-var Candle[] candles_4_add        = array.new<Candle>(0)
-var Candle[] candles_3_add        = array.new<Candle>(0)
-var Candle[] candles_4_add        = array.new<Candle>(0)
+//var Candle[] candles_1_add        = array.new<Candle>(0)
+//var Candle[] candles_2_add        = array.new<Candle>(0)
+//var Candle[] candles_3_add        = array.new<Candle>(0)
+//var Candle[] candles_4_add        = array.new<Candle>(0)
+//var Candle[] candles_5_add        = array.new<Candle>(0)
+//var Candle[] candles_6_add        = array.new<Candle>(0)
+//
+//var CandleSettings SettingsHTF1_add = CandleSettings.new()
+//var CandleSettings SettingsHTF2_add = CandleSettings.new()
+//var CandleSettings SettingsHTF3_add = CandleSettings.new()
+//var CandleSettings SettingsHTF4_add = CandleSettings.new()
+//var CandleSettings SettingsHTF5_add = CandleSettings.new()
+//var CandleSettings SettingsHTF6_add = CandleSettings.new()
 
-var CandleSettings SettingsHTF1_add = CandleSettings.new()
-var CandleSettings SettingsHTF2_add = CandleSettings.new()
-var CandleSettings SettingsHTF3_add = CandleSettings.new()
-var CandleSettings SettingsHTF4_add = CandleSettings.new()
-var CandleSettings SettingsHTF5_add = CandleSettings.new()
-var CandleSettings SettingsHTF6_add = CandleSettings.new()
-
-var CandleSet_add htf1_add   = CandleSet_add.new()
-htf1_add.settings               := SettingsHTF1_add
-htf1_add.candles                := candles_1_add
-
-var CandleSet_add htf2_add   = CandleSet_add.new()
-htf2_add.settings               := SettingsHTF2_add
-htf2_add.candles                := candles_2_add
-
-var CandleSet_add htf3_add   = CandleSet_add.new()
-htf3_add.settings               := SettingsHTF3_add
-htf3_add.candles                := candles_3_add
-
-var CandleSet_add htf4_add   = CandleSet_add.new()
-htf4_add.settings               := SettingsHTF4_add
-htf4_add.candles                := candles_4_add
-
-var CandleSet_add htf5_add   = CandleSet_add.new()
-htf5_add.settings               := SettingsHTF5_add
-htf5_add.candles                := candles_5_add
-
-var CandleSet_add htf6_add   = CandleSet_add.new()
-htf6_add.settings               := SettingsHTF6_add
-htf6_add.candles                := candles_6_add
+//var CandleSet_add htf1_add   = CandleSet_add.new()
+//htf1_add.settings               := SettingsHTF1_add
+//htf1_add.candles                := candles_1_add
+//
+//var CandleSet_add htf2_add   = CandleSet_add.new()
+//htf2_add.settings               := SettingsHTF2_add
+//htf2_add.candles                := candles_2_add
+//
+//var CandleSet_add htf3_add   = CandleSet_add.new()
+//htf3_add.settings               := SettingsHTF3_add
+//htf3_add.candles                := candles_3_add
+//
+//var CandleSet_add htf4_add   = CandleSet_add.new()
+//htf4_add.settings               := SettingsHTF4_add
+//htf4_add.candles                := candles_4_add
+//
+//var CandleSet_add htf5_add   = CandleSet_add.new()
+//htf5_add.settings               := SettingsHTF5_add
+//htf5_add.candles                := candles_5_add
+//
+//var CandleSet_add htf6_add   = CandleSet_add.new()
+//htf6_add.settings               := SettingsHTF6_add
+//htf6_add.candles                := candles_6_add
 
 //+----------------------------------------+//
 //+-settings    
@@ -174,7 +178,7 @@ htf6_add.candles                := candles_6_add
 
 
 htf1.settings.show          := input.bool(true, "HTF 1      ", inline="htf1")
-htf_1                       = input.timeframe("1", "", inline="htf1")
+htf_1                       = input.timeframe("10", "", inline="htf1")
 htf1.settings.htf           := htf_1
 htf1.settings.max_memory   := input.int(10, "", inline="htf1")
 
@@ -199,39 +203,39 @@ settings.offset          := input.int(10, "padding from current candles", minval
 settings.text_buffer      := input.int(10, "space between text features", minval = 1, maxval = 10)
 // sbu sbd, period, date happen, remain time, price, line color
 
-settings.sbu_label_color := input.color(color.new(color.black, 10), "", inline='SBULabel')
-settings.sbu_label_size  := input.string(size.large, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="SBULabel")
+settings.sbu_label_color := input.color(color.new(color.black, 10), "sbu_label", inline='11')
+settings.sbu_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="11")
 
-settings.sbd_label_color := input.color(color.new(color.black, 10), "", inline='SBDLabel')
-settings.sbd_label_size  := input.string(size.large, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="SBDLabel")
+settings.sbd_label_color := input.color(color.new(color.black, 10), "sbd_label", inline='11')
+settings.sbd_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="11")
 
-settings.htf_label_color := input.color(color.new(color.black, 10), "", inline='HTFlabel')
-settings.htf_label_size  := input.string(size.large, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="HTFlabel")
+settings.htf_label_color := input.color(color.new(color.black, 10), "htf_label", inline='21')
+settings.htf_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="21")
 
-settings.date_label_color := input.color(color.new(color.black, 10), "", inline='DATElabel')
-settings.date_label_size  := input.string(size.large, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="DATElabel")
+settings.date_label_color := input.color(color.new(color.black, 10), "date_label", inline='21')
+settings.date_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="21")
 
-settings.htf_timer_color := input.color(color.new(color.black, 10), "", inline='timer')
-settings.htf_timer_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="timer")
+settings.htf_timer_color := input.color(color.new(color.black, 10), "htf_timer", inline='31')
+settings.htf_timer_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="31")
 
-settings.price_label_color     := input.color(color.new(color.black, 10), "", inline='label')
-settings.price_label_size      := input.string(size.small, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="label")
+settings.price_label_color     := input.color(color.new(color.black, 10), "price_label", inline='31')
+settings.price_label_size      := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="31")
 
-settings.l1trace_c_color   := input.color(color.new(color.gray, 50), "level1    ", inline='level 1', group="trace")
-settings.l1trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 1', group="trace")
-settings.l1trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='level 1', group="trace")
+htf1.trace.trace_c_color   := input.color(color.new(color.red, 50), "level1    ", inline='level 1', group="trace")
+htf1.trace.trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 1', group="trace")
+htf1.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 1', group="trace")
 
-settings.l2trace_c_color   := input.color(color.new(color.gray, 50), "level2    ", inline='level 2', group="trace")
-settings.l2trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 2', group="trace")
-settings.l2trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='level 2', group="trace")
+htf2.trace.trace_c_color   := input.color(color.new(color.orange, 50), "level2    ", inline='level 2', group="trace")
+htf2.trace.trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 2', group="trace")
+htf2.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 2', group="trace")
 
-settings.l3trace_c_color   := input.color(color.new(color.gray, 50), "level3    ", inline='level 3', group="trace")
-settings.l3trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 3', group="trace")
-settings.l3trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='level 3', group="trace")
+htf3.trace.trace_c_color   := input.color(color.new(color.yellow, 50), "level3    ", inline='level 3', group="trace")
+htf3.trace.trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 3', group="trace")
+htf3.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 3', group="trace")
 
-settings.l4trace_c_color   := input.color(color.new(color.gray, 50), "level4    ", inline='level 4', group="trace")
-settings.l4trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 4', group="trace")
-settings.l4trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='level 4', group="trace")
+htf4.trace.trace_c_color   := input.color(color.new(color.green, 50), "level4    ", inline='level 4', group="trace")
+htf4.trace.trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 4', group="trace")
+htf4.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 4', group="trace")
 
 
 
@@ -241,7 +245,7 @@ settings.l4trace_c_size    := input.int(1, '', options = [1,2,3,4], inline='leve
 
 //+----------------------------------------+//
 Helper    helper        = Helper.new()
-var Trace trace         = Trace.new()
+
 color color_transparent = #ffffff00
 var index               = 0
 //+----------------------------------------+//
@@ -288,7 +292,7 @@ method RemainingTime(Helper helper, string HTF) =>
         "n/a"
 
 method formattedtime(Helper helper) =>
-    helper.name = "THE DATE OF BAR"
+    helper.name := "THE DATE OF BAR"
     r = str.format("{0,date,yyyy-MM-dd HH:mm}", time)
     r
     
@@ -316,24 +320,24 @@ method HTFEnabled(Helper helper) =>
 
     last
 
-method HTFaddEnabled(Helper helper) =>
-    helper.name := "HTFEnabled"
-    int enabled =0
-    enabled += htf1_add.settings.show ? 1 : 0
-    enabled += htf2_add.settings.show ? 1 : 0
-    enabled += htf3_add.settings.show ? 1 : 0
-    enabled += htf4_add.settings.show ? 1 : 0
-    enabled += htf5_add.settings.show ? 1 : 0
-    enabled += htf6_add.settings.show ? 1 : 0
-    int last = math.min(enabled, settings.max_sets)
-
-    last
+//method HTFaddEnabled(Helper helper) =>
+//    helper.name := "HTFEnabled"
+//    int enabled =0
+//    enabled += htf1_add.settings.show ? 1 : 0
+//    enabled += htf2_add.settings.show ? 1 : 0
+//    enabled += htf3_add.settings.show ? 1 : 0
+//    enabled += htf4_add.settings.show ? 1 : 0
+//    enabled += htf5_add.settings.show ? 1 : 0
+//    enabled += htf6_add.settings.show ? 1 : 0
+//    int last = math.min(enabled, settings.max_sets)
+//
+//    last
 
 method Monitor(CandleSet candleSet) =>
     HTFBarTime = time(candleSet.settings.htf)
     isNewHTFCandle = ta.change(HTFBarTime)
 
-    if isNewHTFCandle 
+    if isNewHTFCandle != 0
         Candle candle    = Candle.new()
         candle.c        := close
         candle.c_idx    := bar_index
@@ -345,17 +349,25 @@ method Monitor(CandleSet candleSet) =>
 
     candleSet
 
-method Update(CandleSet candleSet) =>//更新最新一根的價格動態 
+method Update(CandleSet candleSet) =>//更新最新一根的價格動態
+    var label lt = candleSet.tfTimer 
     if candleSet.candles.size() > 0
         Candle candle   = candleSet.candles.first() //取得candle向量的第一個candle對象
         candle.c       := close
         candle.c_idx   := bar_index
+        if barstate.isrealtime or barstate.islast
+            string tmr  = "(" + helper.RemainingTime(candleSet.settings.htf) + ")"
+            label.set_text(lt,tmr)
     candleSet    
 
-method BOSJudge(CandleSet candleSet)
-    Candle candle = candleSet.candles
+method BOSJudge(CandleSet candleSet) =>
     BOSdata bosdata = candleSet.bosdata
-    if candleSet.candles.size() > 0
+    HTFBarTime = time(candleSet.settings.htf)
+    isNewHTFCandle = ta.change(HTFBarTime)
+    int tempsbu_idx = bosdata.sbu_idx
+    int tempsbd_idx = bosdata.sbd_idx
+    if candleSet.candles.size() > 0 and isNewHTFCandle != 0
+        Candle candle = candleSet.candles.get(0)
         if(candleSet.bosdata.state == 1)
             bosdata.regclose1 := bosdata.regclose2
             bosdata.regclose2 := bosdata.regclose3
@@ -363,15 +375,15 @@ method BOSJudge(CandleSet candleSet)
             bosdata.slope1 := bosdata.regclose2 - bosdata.regclose1>0? 1 : -1
             bosdata.slope2 := bosdata.regclose3 - bosdata.regclose2>0? 1 : -1
             if((not na(bosdata.sbd)) and (not na(bosdata.sbu)))
-                state := 2 //
+                bosdata.state := 2 //
             else if(not na(bosdata.sbd) and na(bosdata.sbu))
-                state := 3
+                bosdata.state := 3
             else if(na(bosdata.sbd) and (not na(bosdata.sbu)))
-                state := 4
+                bosdata.state := 4
             else
                 label.new(bar_index,high,text="GG")
 
-        if(candleSet.bosdata.state == 2)
+        if(bosdata.state == 2)
             if(bosdata.slope1 != bosdata.slope2)
                 bosdata.reg1key := bosdata.regclose2
                 bosdata.reg1key_idx := bar_index==0? 0 : index - 1
@@ -386,10 +398,10 @@ method BOSJudge(CandleSet candleSet)
                 bosdata.sbd_idx := na
                 bosdata.sbu := bosdata.reg1key
                 bosdata.sbu_idx := bosdata.reg1key_idx
-            state := 1
+            bosdata.state := 1
 
 
-        if(candleSet.bosdata.state == 3)
+        if(bosdata.state == 3)
             if(bosdata.slope1 != bosdata.slope2)
                 bosdata.reg2key := bosdata.regclose2
                 bosdata.reg2key_idx := index-1
@@ -400,10 +412,10 @@ method BOSJudge(CandleSet candleSet)
             if(bosdata.regclose3<bosdata.sbd)
                 bosdata.sbd := na
                 bosdata.sbd_idx:= na
-            state := 1
+            bosdata.state := 1
 
 
-        if(candleSet.bosdata.state == 4)
+        if(bosdata.state == 4)
             if(bosdata.slope1 != bosdata.slope2)
                 bosdata.reg2key := bosdata.regclose2
                 bosdata.reg2key_idx := index-1
@@ -414,59 +426,115 @@ method BOSJudge(CandleSet candleSet)
             if(bosdata.regclose3>bosdata.sbu)
                 bosdata.sbu := na
                 bosdata.sbu_idx:= na
-            state := 1
-
+            bosdata.state := 1
+        if(tempsbu_idx != bosdata.sbu_idx)
+            bosdata.s_dateu := helper.formattedtime()
+        if(tempsbd_idx != bosdata.sbd_idx)
+            bosdata.s_dated := helper.formattedtime()
     candleSet
 
 method plotdata(CandleSet candleSet, int offset, int delta) =>
-    int cnt = 0
+    int pcnt = 0
     BOSdata bosdata = candleSet.bosdata
+    Trace   trace   = candleSet.trace
     var label l = candleSet.tfName
-    var label l2
-    var label lt = candleSet.tfTimer
+    var label l2 = na
     var label l_sbu = bosdata.sbu_l
     var label l_sbd = bosdata.sbd_l
     var label l_datesbu = bosdata.sbu_date
     var label l_datesbd = bosdata.sbd_date
+    var label lt = candleSet.tfTimer
+    var label lt2 = na
     var label l_pricesbu = bosdata.sbu_price
     var label l_pricesbd = bosdata.sbd_price
     var line  li_sbu   = bosdata.sbu_line
     var line  li_sbd   = bosdata.sbd_line
-    string lbn  = candleSet.settings.htf 
-    string tmr  = "(" + helper.RemainingTime(candleSet.settings.htf) + ")"
+    string lbn  = helper.HTFName(candleSet.settings.htf)
     if candleSet.settings.show
-        if not na(l_sbu)
-            label.set_xy(l_sbu, offset+cnt*delta,bosdata.sbu)
+        if not na(l_pricesbu)
+            label.set_xy(l_pricesbu, offset+pcnt*delta,bosdata.sbu)
+            label.set_text(l_pricesbu, str.tostring(bosdata.sbu))
         else
-            l_sbu := label.new(offset+cnt*delta, bosdata.sbu, "SBU", color = color_transparent, textcolor = settings.sbu_label_color, size = settings.sbu_label_size,)
-        if not na(l_sbd)
-            label.set_xy(l_sbd, offset+cnt*delta,bosdata.sbd)
+            l_pricesbu := label.new(offset+pcnt*delta, bosdata.sbu, str.tostring(bosdata.sbu), color = color_transparent, textcolor = settings.price_label_color, size = settings.price_label_size, textalign = text.align_center)
+        if not na(l_pricesbd)
+            label.set_xy(l_pricesbd, offset+pcnt*delta,bosdata.sbd)
+            label.set_text(l_pricesbd, str.tostring(bosdata.sbd))
         else
-            l_sbd := label.new(offset+cnt*delta, bosdata.sbd, "SBD", color = color_transparent, textcolor = settings.sbd_label_color, size = settings.sbd_label_size,)
-        cnt += 1
+            l_pricesbd := label.new(offset+pcnt*delta, bosdata.sbd, str.tostring(bosdata.sbd), color = color_transparent, textcolor = settings.price_label_color, size = settings.price_label_size, textalign = text.align_center)
+        
+        pcnt += 1
         if not na(l)
-            label.set_xy(l, offset+cnt*delta,bosdata.sbu)
+            label.set_xy(l, offset+pcnt*delta,bosdata.sbu)
         else
-            l := label.new(offset+cnt*delta, bosdata.sbu, lbn, color = color_transparent, textcolor = settings.sbu_label_color, size = settings.sbu_label_size,)
+            l := label.new(offset+pcnt*delta, bosdata.sbu, lbn, color = color_transparent, textcolor = settings.htf_label_color, size = settings.htf_label_size, textalign = text.align_center)
         if not na(l2)
-            label.set_xy(l2, offset+cnt*delta,bosdata.sbd)
+            label.set_xy(l2, offset+pcnt*delta,bosdata.sbd)
         else
-            l2 := label.new(offset+cnt*delta, bosdata.sbd, lbn, color = color_transparent, textcolor = settings.sbu_label_color, size = settings.sbu_label_size,)
-        cnt += 1
-            
-    cnt = 0
+            l2 := label.new(offset+pcnt*delta, bosdata.sbd, lbn, color = color_transparent, textcolor = settings.htf_label_color, size = settings.htf_label_size, textalign = text.align_center)
+        pcnt += 1
+        if not na(l_datesbu)
+            label.set_xy(l_datesbu, offset+pcnt*delta,bosdata.sbu)
+            label.set_text(l_datesbu, bosdata.s_dateu)
+        else
+            l_datesbu := label.new(offset+pcnt*delta, bosdata.sbu, "ini", color = color_transparent, textcolor = settings.date_label_color, size = settings.date_label_size, textalign = text.align_center)
+        if not na(l_datesbd)
+            label.set_xy(l_datesbd, offset+pcnt*delta,bosdata.sbd)
+            label.set_text(l_datesbd, bosdata.s_dated)
+        else
+            l_datesbd := label.new(offset+pcnt*delta, bosdata.sbd, "ini", color = color_transparent, textcolor = settings.date_label_color, size = settings.date_label_size, textalign = text.align_center)
+        pcnt += 1
+        if not na(lt)
+            label.set_xy(lt, offset+pcnt*delta,bosdata.sbu)
+            label.set_text(lt,helper.RemainingTime(candleSet.settings.htf))
+        else
+            lt := label.new(offset+pcnt*delta, bosdata.sbu, helper.RemainingTime(candleSet.settings.htf), color = color_transparent, textcolor = settings.htf_timer_color, size = settings.htf_timer_size, textalign = text.align_center)
+        if not na(lt2)
+            label.set_xy(lt2, offset+pcnt*delta,bosdata.sbd)
+            label.set_text(lt2,helper.RemainingTime(candleSet.settings.htf))
+        else
+            lt2 := label.new(offset+pcnt*delta, bosdata.sbd, helper.RemainingTime(candleSet.settings.htf), color = color_transparent, textcolor = settings.htf_timer_color, size = settings.htf_timer_size, textalign = text.align_center)
+        pcnt += 1
+        if not na(l_sbu)
+            label.set_xy(l_sbu, offset+pcnt*delta,bosdata.sbu)
+        else
+            l_sbu := label.new(offset+pcnt*delta, bosdata.sbu, "SBU", color = color_transparent, textcolor = settings.sbu_label_color, size = settings.sbu_label_size, textalign = text.align_center)
+        if not na(l_sbd)
+            label.set_xy(l_sbd, offset+pcnt*delta,bosdata.sbd)
+        else
+            l_sbd := label.new(offset+pcnt*delta, bosdata.sbd, "SBD", color = color_transparent, textcolor = settings.sbd_label_color, size = settings.sbd_label_size, textalign = text.align_center)
+        pcnt += 1    
+        if not na(li_sbu)
+            line.set_xy1(li_sbu, bosdata.sbu_idx, bosdata.sbu)
+            line.set_xy2(li_sbu, offset, bosdata.sbu)
+        else
+            li_sbu := line.new(bosdata.sbu_idx, bosdata.sbu, offset, bosdata.sbu, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
+        if not na(li_sbd)
+            line.set_xy1(li_sbd, bosdata.sbd_idx, bosdata.sbd)
+            line.set_xy2(li_sbd, offset, bosdata.sbd)
+        else
+            li_sbd := line.new(bosdata.sbd_idx, bosdata.sbd, offset, bosdata.sbd, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
+    candleSet
 
+int cnt = 0
+int last = helper.HTFEnabled()
+int delta = settings.text_buffer
+int offset = settings.offset + bar_index
 
-
-
-
-
-
-
-
-
-
-
-
-
+if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)
+    htf1.Monitor().Update().BOSJudge()
+    plotdata(htf1, offset, delta)
+    cnt +=1
+if  htf2.settings.show and helper.ValidTimeframe(htf2.settings.htf)
+    htf2.Monitor().Update().BOSJudge()
+    plotdata(htf2, offset, delta)
+    cnt +=1
+if  htf3.settings.show and helper.ValidTimeframe(htf3.settings.htf)
+    htf3.Monitor().Update().BOSJudge()
+    plotdata(htf3, offset, delta)
+    cnt +=1
+if  htf4.settings.show and helper.ValidTimeframe(htf4.settings.htf)
+    htf4.Monitor().Update().BOSJudge()
+    plotdata(htf4, offset, delta)
+    cnt +=1
+index += 1
 

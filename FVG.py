@@ -251,7 +251,7 @@ method ValidTimeframe(Helper helper, string HTF) => //兩個部分 一個是檢�
         n1 = timeframe.in_seconds()
         n2 = timeframe.in_seconds(HTF)
         n3 = n1 % n2 //it is wrong, it should be n2%n1
-        (n1 < n2 and math.round(n2/n1) == n2/n1)
+        (n1 <= n2 and math.round(n2/n1) == n2/n1)
 
 
 method RemainingTime(Helper helper, string HTF) =>
@@ -423,8 +423,8 @@ method FindImbalance(CandleSet candleSet) =>
     candleSet
 
 method Monitor(CandleSet candleSet) => //先把基本candle的box畫出來 再經過之後的函數來重新設定位置 蠻聰明的
-    HTFBarTime = time(candleSet.settings.htf)
-    isNewHTFCandle = ta.change(HTFBarTime)
+    HTFBarTime = time(candleSet.settings.htf)//
+    isNewHTFCandle = ta.change(HTFBarTime)//這兩行超強 用倍數關係去想 當開1分鐘週期時 假如htf是兩分鐘 則當兩分鐘一跳的時候 會換到不同的HTFBarTime 這樣程式就知道該存這跟兩分鐘的時機到了
 
     if isNewHTFCandle 
         Candle candle = Candle.new()
