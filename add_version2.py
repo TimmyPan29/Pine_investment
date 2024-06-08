@@ -527,24 +527,23 @@ int cnt = 0
 int last = helper.HTFEnabled()
 int delta = settings.text_buffer
 int offset = settings.offset + bar_index
-if bar_index<30
-    if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)
-        htf1.Monitor().BOSJudge()
-        plotdata(htf1, offset, delta)
-        cnt +=1
-    if  htf2.settings.show and helper.ValidTimeframe(htf2.settings.htf)
-        htf2.Monitor().BOSJudge()
-        plotdata(htf2, offset, delta)
-        cnt +=1
-    if  htf3.settings.show and helper.ValidTimeframe(htf3.settings.htf)
-        htf3.Monitor().BOSJudge()
-        plotdata(htf3, offset, delta)
-        cnt +=1
-    if  htf4.settings.show and helper.ValidTimeframe(htf4.settings.htf)
-        htf4.Monitor().BOSJudge()
-        plotdata(htf4, offset, delta)
-        cnt +=1
 
+if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)
+    htf1.Monitor().BOSJudge()
+    plotdata(htf1, offset, delta)
+    cnt +=1
+if  htf2.settings.show and helper.ValidTimeframe(htf2.settings.htf)
+    htf2.Monitor().BOSJudge()
+    plotdata(htf2, offset, delta)
+    cnt +=1
+if  htf3.settings.show and helper.ValidTimeframe(htf3.settings.htf)
+    htf3.Monitor().BOSJudge()
+    plotdata(htf3, offset, delta)
+    cnt +=1
+if  htf4.settings.show and helper.ValidTimeframe(htf4.settings.htf)
+    htf4.Monitor().BOSJudge()
+    plotdata(htf4, offset, delta)
+    cnt +=1
 //    if barstate.islast
 //        plotdata(htf1, offset, delta)
 //        plotdata(htf2, offset, delta)
