@@ -138,6 +138,7 @@ htf4.trace                  := trace_4
 
 //+---------------ADD------------------+//
 var CandleSet mulhtf           = CandleSet.new()
+var CandleSet mulhtf2          = CandleSet.new()
 var BOSdata   mulbosdata       = BOSdata.new()
 var Candle[]  mulcandle        = array.new<Candle>(0)
 var CandleSettings mulSettings = CandleSettings.new()
@@ -146,7 +147,12 @@ mulhtf.bosdata                 := mulbosdata
 mulhtf.candles                 := mulcandle
 mulhtf.settings                := mulSettings
 
+mulhtf2.bosdata                 := mulbosdata
+mulhtf2.candles                 := mulcandle
+mulhtf2.settings                := mulSettings
+
 mulhtf.settings.htf := "1"
+mulhtf2.settings.htf := "45"
 //+---------------ADDEND------------------+//
 
 //+---------------ValueDeicsion------------------+//
@@ -510,7 +516,7 @@ method MaxNormalSet(ValueDecisionReg maxnormal, CandleSet candleSet) =>
 method MinNormalSet(ValueDecisionReg minnormal, CandleSet candleSet) =>
     ValueDecisionReg m1 = minnormal
     CandleSet        cs = candleSet
-    m1.value            := 0
+    m1.value            := 99999999
     m1.vtext            := "minprice: "
     m1.vdecisionname    := "MinNormalSet"
     if cs.bosdata.temp < m1.value
@@ -559,9 +565,17 @@ method addplot (ValueDecisionReg decision, int offset) =>
         else
             m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
     if m1.vdecisionname == "MaxNormalSet"
-        "not yet"
+        if not na(m1.vlb)
+            label.set_xy(m1.vlb, offset, m1.value)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "HTF= " + m1.vname)
+        else
+            m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
     if m1.vdecisionname == "MinNormalSet"
-        "not yet"
+        if not na(m1.vlb)
+            label.set_xy(m1.vlb, offset, m1.value)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value)  + "\n" + "HTF= " + m1.vname)
+        else
+            m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
     decision
 
 
@@ -592,11 +606,15 @@ if cnt>last
 mulhtf.Monitor().BOSJudge()
 //+------value ValueDecisionReg-----+//
 if settings.add_show 
-    for i = 0 to 1439
+    for i = 0 to 0
         MaxNormalSet(maxnormal,mulhtf)
         MinNormalSet(minnormal,mulhtf)
         HighestsbdSet(highestsbd,mulhtf)
         LowestsbuSet(lowestsbu,mulhtf)
+        MaxNormalSet(maxnormal,mulhtf2)
+        MinNormalSet(minnormal,mulhtf2)
+        HighestsbdSet(highestsbd,mulhtf2)
+        LowestsbuSet(lowestsbu,mulhtf2)
     maxnormal.addplot(offset)
     minnormal.addplot(offset)
     highestsbd.addplot(offset)
