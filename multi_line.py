@@ -6,7 +6,6 @@ indicator("4line_", overlay=true, max_boxes_count = 500, max_lines_count = 500, 
 type Candle //for fourline candle
     float           c
     int             c_idx
-type 
 
 type BOSdata
     float           sbu = 0
@@ -36,6 +35,7 @@ type BOSdata
     float           temp      = 0
     string          strtemp1
     string          strtemp2
+    int             dateinnumber
 
 
 type CandleSettings
@@ -62,6 +62,7 @@ type Settings
     color           date_label_color
     string          price_label_size
     color           price_label_color
+    bool            add_show
 
 type Trace
     int             trace_c_size 
@@ -71,10 +72,20 @@ type Trace
 type CandleSet
     Candle[]        candles
     CandleSettings  settings
-    label           tfName
-    label           tfTimer       
     BOSdata         bosdata
     Trace           trace
+    label           tfName
+    label           tfTimer        
+type ValueDecisionReg
+    float           value = 0
+    int             vidx  = 0
+    string          vdate
+    string          vname
+    string          vtext
+    int             vtime
+    string          vdecisionname
+    label           vlb
+    line            vln
 
 type Helper
     string name             = "Helper"
@@ -126,16 +137,31 @@ htf4.bosdata                := bosdata_4
 htf4.trace                  := trace_4
 
 //+---------------ADD------------------+//
-var CandleSet[] mulhtf      = array.new<CandleSet>(1440)
-var BOSdata[] mulbosdata    = array.new<BOSdata>(1440)
-var Candle[]  mulcandle     = araay.new<Candle>(1440)
+var CandleSet mulhtf           = CandleSet.new()
+var BOSdata   mulbosdata       = BOSdata.new()
+var Candle[]  mulcandle        = array.new<Candle>(0)
+var CandleSettings mulSettings = CandleSettings.new()
+
+mulhtf.bosdata                 := mulbosdata
+mulhtf.candles                 := mulcandle
+mulhtf.settings                := mulSettings
+
+mulhtf.settings.htf := "1"
+//+---------------ADDEND------------------+//
+
+//+---------------ValueDeicsion------------------+//
+var ValueDecisionReg maxnormal  = ValueDecisionReg.new()
+var ValueDecisionReg minnormal  = ValueDecisionReg.new()
+var ValueDecisionReg highestsbd = ValueDecisionReg.new()
+var ValueDecisionReg lowestsbu  = ValueDecisionReg.new()
+//+---------------ValueDeicsionEND------------------+//
 
 //+----------------------------------------+//
 //+-settings    
 
 //+----------------------------------------+//
 
-
+settings.add_show         := input.bool(true, "add function enable?       ", inline="add enable")
 htf1.settings.show          := input.bool(true, "HTF 1      ", inline="htf1")
 htf_1                       = input.timeframe("15", "", inline="htf1")
 htf1.settings.htf           := htf_1
@@ -211,7 +237,6 @@ var index               = 0
 //+- Internal functions   
 
 //+----------------------------------------+//
-
 method LineStyle(Helper helper, string style) =>
     helper.name := style
     out = switch style
@@ -280,19 +305,6 @@ method HTFEnabled(Helper helper) =>
 
     last
 
-//method HTFaddEnabled(Helper helper) =>
-//    helper.name := "HTFEnabled"
-//    int enabled =0
-//    enabled += htf1_add.settings.show ? 1 : 0
-//    enabled += htf2_add.settings.show ? 1 : 0
-//    enabled += htf3_add.settings.show ? 1 : 0
-//    enabled += htf4_add.settings.show ? 1 : 0
-//    enabled += htf5_add.settings.show ? 1 : 0
-//    enabled += htf6_add.settings.show ? 1 : 0
-//    int last = math.min(enabled, settings.max_sets)
-//
-//    last
-
 method Monitor(CandleSet candleSet) =>
     BOSdata bosdata = candleSet.bosdata
     HTFBarTime = time(candleSet.settings.htf)
@@ -306,7 +318,7 @@ method Monitor(CandleSet candleSet) =>
 
         if candleSet.candles.size() > candleSet.settings.max_memory //清除舊candle
             Candle delCandle = array.pop(candleSet.candles)
-    bosdata.temp := close
+    bosdata.temp := close //in fact "temp" is the lastest close price
     candleSet
 
 //method Update(CandleSet candleSet) =>//更新最新一根的價格動態
@@ -328,6 +340,9 @@ method BOSJudge(CandleSet candleSet) =>
     int tp = timeframe.in_seconds(timeframe.period)
     int tn = timeframe.in_seconds(candleSet.settings.htf)
     int k  = tn/tp
+    if not barstate.isrealtime
+        bosdata.dateinnumber := tf-tp*2000*k+tp*(k-1)*1000
+    string strresult = helper.formattedtime(bosdata.dateinnumber)
     if candleSet.candles.size() > 0 and isNewHTFCandle != 0
         Candle candle = candleSet.candles.first()
         if(bosdata.state == 1)
@@ -349,7 +364,7 @@ method BOSJudge(CandleSet candleSet) =>
             if(bosdata.slope1 != bosdata.slope2)
                 bosdata.reg1key := bosdata.regclose2
                 bosdata.reg1key_idx := index==0? 0 : index - 1 - k
-                bosdata.strtemp1    := helper.formattedtime(tf-tp*2000*k+tp*(k-1)*1000)
+                bosdata.strtemp1    := strresult
             //else //Buff_key1維持原樣
             if(bosdata.regclose3>bosdata.sbu)
                 bosdata.sbu := na
@@ -364,10 +379,10 @@ method BOSJudge(CandleSet candleSet) =>
                 bosdata.sbu_idx := bosdata.reg1key_idx
                 bosdata.s_dateu := bosdata.strtemp1
             bosdata.state := 1
-
+            
         if(bosdata.state == 3)//no sky
             if(bosdata.slope1 != bosdata.slope2) // build sky
-                bosdata.strtemp2    := helper.formattedtime(tf-tp*2000*k+tp*(k-1)*1000)
+                bosdata.strtemp2    := strresult
                 bosdata.reg2key := bosdata.regclose2
                 bosdata.reg2key_idx := index - 1 - k
                 bosdata.sbu := bosdata.reg2key
@@ -380,10 +395,10 @@ method BOSJudge(CandleSet candleSet) =>
                 bosdata.sbd := na
                 bosdata.sbd_idx:= na
             bosdata.state := 1
-
+            
         if(bosdata.state == 4)
             if(bosdata.slope1 != bosdata.slope2)
-                bosdata.strtemp2    := helper.formattedtime(tf-tp*2000*k+tp*(k-1)*1000)
+                bosdata.strtemp2    := strresult
                 bosdata.reg2key := bosdata.regclose2
                 bosdata.reg2key_idx := index - 1 - k
                 bosdata.sbd := bosdata.reg2key
@@ -396,6 +411,7 @@ method BOSJudge(CandleSet candleSet) =>
                 bosdata.sbu := na
                 bosdata.sbu_idx:= na
             bosdata.state := 1
+            
     candleSet
 
 method plotdata(CandleSet candleSet, int offset, int delta) =>
@@ -479,6 +495,76 @@ method plotdata(CandleSet candleSet, int offset, int delta) =>
         else
             li_sbd := line.new(bar_index, bosdata.sbd, offset, bosdata.sbd, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
     candleSet
+
+method MaxNormalSet(ValueDecisionReg maxnormal, CandleSet candleSet) =>
+    ValueDecisionReg m1 = maxnormal
+    CandleSet        cs = candleSet
+    m1.value            := 0
+    m1.vtext            := "maxprice: "
+    m1.vdecisionname    := "MaxNormalSet"
+    if cs.bosdata.temp > m1.value
+        m1.value  := cs.bosdata.temp
+        m1.vname  := cs.settings.htf
+    maxnormal
+
+method MinNormalSet(ValueDecisionReg minnormal, CandleSet candleSet) =>
+    ValueDecisionReg m1 = minnormal
+    CandleSet        cs = candleSet
+    m1.value            := 0
+    m1.vtext            := "minprice: "
+    m1.vdecisionname    := "MinNormalSet"
+    if cs.bosdata.temp < m1.value
+        m1.value  := cs.bosdata.temp
+        m1.vname  := cs.settings.htf
+    minnormal
+
+method HighestsbdSet(ValueDecisionReg highestsbd, CandleSet candleSet) =>
+    ValueDecisionReg m1 = highestsbd
+    CandleSet        cs = candleSet
+    m1.value            := 0
+    m1.vtext            := "highestsbd: "
+    m1.vdecisionname    := "HighestsbdSet"
+    if cs.bosdata.sbd > m1.value
+        m1.value := cs.bosdata.sbd
+        m1.vidx  := cs.bosdata.sbd_idx
+        m1.vname := cs.settings.htf
+        m1.vdate := cs.bosdata.s_dated
+    highestsbd
+
+method LowestsbuSet (ValueDecisionReg lowestsbu, CandleSet candleSet) =>
+    ValueDecisionReg m1 = lowestsbu
+    CandleSet        cs = candleSet
+    m1.value            := 99999999
+    m1.vtext            := "lowestsbu: "
+    m1.vdecisionname    := "LowestsbuSet"
+    if cs.bosdata.sbu < m1.value
+        m1.value := cs.bosdata.sbu
+        m1.vidx  := cs.bosdata.sbu_idx
+        m1.vname := cs.settings.htf
+        m1.vdate := cs.bosdata.s_dateu
+    lowestsbu
+
+method addplot (ValueDecisionReg decision, int offset) =>
+    ValueDecisionReg m1 = decision
+    if m1.vdecisionname == "LowestsbuSet"
+        if not na(m1.vlb)
+            label.set_xy(m1.vlb, offset, m1.value)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname)
+        else
+            m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+    if m1.vdecisionname == "HighestsbdSet"
+        if not na(m1.vlb)
+            label.set_xy(m1.vlb, offset, m1.value)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname)
+        else
+            m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+    if m1.vdecisionname == "MaxNormalSet"
+        "not yet"
+    if m1.vdecisionname == "MinNormalSet"
+        "not yet"
+    decision
+
+
 int cnt = 0
 int last = helper.HTFEnabled()
 int delta = settings.text_buffer
@@ -499,11 +585,34 @@ if  htf3.settings.show and helper.ValidTimeframe(htf3.settings.htf)
 if  htf4.settings.show and helper.ValidTimeframe(htf4.settings.htf)
     htf4.Monitor().BOSJudge()
     plotdata(htf4, offset, delta)
-    cnt +=1
-//    if barstate.islast
-//        plotdata(htf1, offset, delta)
-//        plotdata(htf2, offset, delta)
-//        plotdata(htf3, offset, delta)
-//        plotdata(htf4, offset, delta)
+if cnt>last
+    label.new(bar_index,high,"over the 4line count limit")
+//+-----add-----+//
+
+mulhtf.Monitor().BOSJudge()
+//+------value ValueDecisionReg-----+//
+if settings.add_show 
+    for i = 0 to 1439
+        MaxNormalSet(maxnormal,mulhtf)
+        MinNormalSet(minnormal,mulhtf)
+        HighestsbdSet(highestsbd,mulhtf)
+        LowestsbuSet(lowestsbu,mulhtf)
+    maxnormal.addplot(offset)
+    minnormal.addplot(offset)
+    highestsbd.addplot(offset)
+    lowestsbu.addplot(offset)
 index += 1
+
+
+
+
+
+
+
+
+
+
+
+
+
 

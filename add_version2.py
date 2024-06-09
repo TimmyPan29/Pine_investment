@@ -513,12 +513,12 @@ method plotdata(CandleSet candleSet, int offset, int delta) =>
             l_sbd := label.new(offset+pcnt*delta, bosdata.sbd, "SBD", color = color_transparent, textcolor = settings.sbd_label_color, size = settings.sbd_label_size, textalign = text.align_center)
         pcnt += 1    
         if not na(li_sbu)
-            line.set_xy1(li_sbu, bosdata.sbu_idx, bosdata.sbu)
+            line.set_xy1(li_sbu, bar_index, bosdata.sbu)
             line.set_xy2(li_sbu, offset, bosdata.sbu)
         else
             li_sbu := line.new(bar_index, bosdata.sbu, offset, bosdata.sbu, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
         if not na(li_sbd)
-            line.set_xy1(li_sbd, bosdata.sbd_idx, bosdata.sbd)
+            line.set_xy1(li_sbd, bar_index, bosdata.sbd)
             line.set_xy2(li_sbd, offset, bosdata.sbd)
         else
             li_sbd := line.new(bar_index, bosdata.sbd, offset, bosdata.sbd, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
