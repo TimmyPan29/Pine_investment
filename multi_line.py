@@ -8,20 +8,20 @@ type Candle //for fourline candle
     int             c_idx
 
 type BOSdata
-    float           sbu = 0
-    float           sbd = 0
-    int             sbu_idx = 0
-    int             sbd_idx = 0
-    float           slope1 = 0
-    float           slope2 = 0
-    int             state  = 1 //ini
-    float           reg1key = 0
+    float           sbu         = 0
+    float           sbd         = 0
+    int             sbu_idx     = 0
+    int             sbd_idx     = 0
+    float           slope1      = 0
+    float           slope2      = 0
+    int             state       = 1 //ini
+    float           reg1key     = 0
     int             reg1key_idx = 0
-    float           reg2key = 0
+    float           reg2key     = 0
     int             reg2key_idx = 0
-    float           regclose1 = 0
-    float           regclose2 = 0
-    float           regclose3 = 0
+    float           regclose1   = 0
+    float           regclose2   = 0
+    float           regclose3   = 0
     label           sbu_l
     label           sbu_date
     string          s_dateu
@@ -32,10 +32,12 @@ type BOSdata
     string          s_dated
     label           sbd_price
     line            sbd_line       
-    float           temp      = 0
+    float           temp        = 0
+    float           temp2
+    float           temp3
     string          strtemp1
     string          strtemp2
-    int             dateinnumber
+    int             dateinnumber = 0
 
 
 type CandleSettings
@@ -77,15 +79,17 @@ type CandleSet
     label           tfName
     label           tfTimer        
 type ValueDecisionReg
-    float           value = 0
-    int             vidx  = 0
+    float           value
+    int             vidx 
     string          vdate
     string          vname
     string          vtext
-    int             vtime
+    string          vremntime
     string          vdecisionname
     label           vlb
     line            vln
+    float           vtemp
+
 
 type Helper
     string name             = "Helper"
@@ -136,25 +140,6 @@ htf4.candles                := candles_4
 htf4.bosdata                := bosdata_4
 htf4.trace                  := trace_4
 
-//+---------------ADD------------------+//
-var CandleSet mulhtf           = CandleSet.new()
-var CandleSet mulhtf2          = CandleSet.new()
-var BOSdata   mulbosdata       = BOSdata.new()
-var Candle[]  mulcandle        = array.new<Candle>(0)
-var CandleSettings mulSettings = CandleSettings.new()
-
-mulhtf.bosdata                 := mulbosdata
-mulhtf.candles                 := mulcandle
-mulhtf.settings                := mulSettings
-
-mulhtf2.bosdata                 := mulbosdata
-mulhtf2.candles                 := mulcandle
-mulhtf2.settings                := mulSettings
-
-mulhtf.settings.htf := "1"
-mulhtf2.settings.htf := "45"
-//+---------------ADDEND------------------+//
-
 //+---------------ValueDeicsion------------------+//
 var ValueDecisionReg maxnormal  = ValueDecisionReg.new()
 var ValueDecisionReg minnormal  = ValueDecisionReg.new()
@@ -167,50 +152,50 @@ var ValueDecisionReg lowestsbu  = ValueDecisionReg.new()
 
 //+----------------------------------------+//
 
-settings.add_show         := input.bool(true, "add function enable?       ", inline="add enable")
-htf1.settings.show          := input.bool(true, "HTF 1      ", inline="htf1")
-htf_1                       = input.timeframe("15", "", inline="htf1")
-htf1.settings.htf           := htf_1
+settings.add_show          := input.bool(true, "add function enable?       ", inline="add enable")
+htf1.settings.show         := input.bool(true, "HTF 1      ", inline="htf1")
+htf_1                       = input.timeframe("1", "", inline="htf1")
+htf1.settings.htf          := htf_1
 htf1.settings.max_memory   := input.int(10, "", inline="htf1")
 
-htf2.settings.show          := input.bool(true, "HTF 2      ", inline="htf2")
-htf_2                       = input.timeframe("45", "", inline="htf2")
-htf2.settings.htf           := htf_2
+htf2.settings.show         := input.bool(true, "HTF 2      ", inline="htf2")
+htf_2                       = input.timeframe("60", "", inline="htf2")
+htf2.settings.htf          := htf_2
 htf2.settings.max_memory   := input.int(10, "", inline="htf2")
 
-htf3.settings.show          := input.bool(true, "HTF 3      ", inline="htf3")
+htf3.settings.show         := input.bool(true, "HTF 3      ", inline="htf3")
 htf_3                       = input.timeframe("120", "", inline="htf3")
-htf3.settings.htf           := htf_3
+htf3.settings.htf          := htf_3
 htf3.settings.max_memory   := input.int(10, "", inline="htf3")
 
-htf4.settings.show          := input.bool(true, "HTF 4      ", inline="htf4")
+htf4.settings.show         := input.bool(true, "HTF 4      ", inline="htf4")
 htf_4                       = input.timeframe("240", "", inline="htf4")
-htf4.settings.htf           := htf_4
+htf4.settings.htf          := htf_4
 htf4.settings.max_memory   := input.int(10, "", inline="htf4")
 
-settings.max_sets        := input.int(4, "Limit to next HTFs only", minval=1, maxval=4)
+settings.max_sets          := input.int(4, "Limit to next HTFs only", minval=1, maxval=4)
 
-settings.offset          := input.int(10, "padding from current candles", minval = 1)
-settings.text_buffer      := input.int(10, "space between text features", minval = 1, maxval = 10)
+settings.offset            := input.int(10, "padding from current candles", minval = 1)
+settings.text_buffer       := input.int(10, "space between text features", minval = 1, maxval = 10)
 // sbu sbd, period, date happen, remain time, price, line color
 
-settings.sbu_label_color := input.color(color.new(color.black, 10), "sbu_label", inline='11')
-settings.sbu_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="11")
+settings.sbu_label_color   := input.color(color.new(color.black, 10), "sbu_label", inline='11')
+settings.sbu_label_size    := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="11")
 
-settings.sbd_label_color := input.color(color.new(color.black, 10), "sbd_label", inline='11')
-settings.sbd_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="11")
+settings.sbd_label_color   := input.color(color.new(color.black, 10), "sbd_label", inline='11')
+settings.sbd_label_size    := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="11")
 
-settings.htf_label_color := input.color(color.new(color.black, 10), "htf_label", inline='21')
-settings.htf_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="21")
+settings.htf_label_color   := input.color(color.new(color.black, 10), "htf_label", inline='21')
+settings.htf_label_size    := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="21")
 
-settings.date_label_color := input.color(color.new(color.black, 10), "date_label", inline='21')
-settings.date_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="21")
+settings.date_label_color  := input.color(color.new(color.black, 10), "date_label", inline='21')
+settings.date_label_size   := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="21")
 
-settings.htf_timer_color := input.color(color.new(color.black, 10), "htf_timer", inline='31')
-settings.htf_timer_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="31")
+settings.htf_timer_color   := input.color(color.new(color.black, 10), "htf_timer", inline='31')
+settings.htf_timer_size    := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="31")
 
-settings.price_label_color     := input.color(color.new(color.black, 10), "price_label", inline='31')
-settings.price_label_size      := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="31")
+settings.price_label_color := input.color(color.new(color.black, 10), "price_label", inline='31')
+settings.price_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="31")
 
 htf1.trace.trace_c_color   := input.color(color.new(color.red, 50), "level1    ", inline='level 1', group="trace")
 htf1.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='level 1', group="trace")
@@ -228,9 +213,6 @@ htf4.trace.trace_c_color   := input.color(color.new(color.green, 50), "level4 
 htf4.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='level 4', group="trace")
 htf4.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 4', group="trace")
 
-
-
-
 //+----------------------------------------+//
 //+- Variables   
 
@@ -238,11 +220,17 @@ htf4.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='leve
 Helper    helper        = Helper.new()
 
 color color_transparent = #ffffff00
-var index               = 0
+var index               = 0  //不要動
+var InitialPeriod       = 1  //你想從第幾分鐘開始
+var totaladdPeriod      = 60 //總共想要做幾條等差的週期?  預設60條 你也可以1440條 但我電腦會爆掉,1440條的話 間隔要設定成1
+var Interval            = 1  //間隔 也就是等差
+
 //+----------------------------------------+//
 //+- Internal functions   
 
 //+----------------------------------------+//
+
+
 method LineStyle(Helper helper, string style) =>
     helper.name := style
     out = switch style
@@ -319,24 +307,12 @@ method Monitor(CandleSet candleSet) =>
         Candle candle    = Candle.new()
         candle.c        := bar_index==0? close : bosdata.temp
         candle.c_idx    := bar_index
-
         candleSet.candles.unshift(candle) //從這句話可以知道 index越靠近零 資料越新
 
         if candleSet.candles.size() > candleSet.settings.max_memory //清除舊candle
             Candle delCandle = array.pop(candleSet.candles)
     bosdata.temp := close //in fact "temp" is the lastest close price
     candleSet
-
-//method Update(CandleSet candleSet) =>//更新最新一根的價格動態
-//    var label lt = candleSet.tfTimer 
-//    if candleSet.candles.size() > 0
-//        Candle candle   = candleSet.candles.first() //取得candle向量的第一個candle對象
-//        candle.c       := close
-//        candle.c_idx   := bar_index
-//        if barstate.isrealtime or barstate.islast
-//            string tmr  = "(" + helper.RemainingTime(candleSet.settings.htf) + ")"
-//            label.set_text(lt,tmr)
-//    candleSet    
  
 method BOSJudge(CandleSet candleSet) =>
     HTFBarTime = time(candleSet.settings.htf)
@@ -358,8 +334,8 @@ method BOSJudge(CandleSet candleSet) =>
             bosdata.slope1 := bosdata.regclose2 - bosdata.regclose1>0? 1 : -1
             bosdata.slope2 := bosdata.regclose3 - bosdata.regclose2>0? 1 : -1
             if((not na(bosdata.sbd)) and (not na(bosdata.sbu)))
-                bosdata.state := 2 //
-            else if(not na(bosdata.sbd) and na(bosdata.sbu))
+                bosdata.state := 2 
+            else if(not na(bosdata.sbd) and na(bosdata.sbu))  //no sky
                 bosdata.state := 3
             else if(na(bosdata.sbd) and (not na(bosdata.sbu)))
                 bosdata.state := 4
@@ -378,12 +354,14 @@ method BOSJudge(CandleSet candleSet) =>
                 bosdata.sbd := bosdata.reg1key
                 bosdata.sbd_idx := bosdata.reg1key_idx
                 bosdata.s_dated := bosdata.strtemp1
+                bosdata.temp2   := bosdata.regclose3
             if(bosdata.regclose3<bosdata.sbd)
                 bosdata.sbd := na 
                 bosdata.sbd_idx := na
                 bosdata.sbu := bosdata.reg1key
                 bosdata.sbu_idx := bosdata.reg1key_idx
                 bosdata.s_dateu := bosdata.strtemp1
+                bosdata.temp3   := bosdata.regclose3
             bosdata.state := 1
             
         if(bosdata.state == 3)//no sky
@@ -398,8 +376,9 @@ method BOSJudge(CandleSet candleSet) =>
                 bosdata.s_dateu := bosdata.strtemp2
                 bosdata.strtemp1 := bosdata.strtemp2
             if(bosdata.regclose3<bosdata.sbd)
-                bosdata.sbd := na
+                bosdata.sbd    := na
                 bosdata.sbd_idx:= na
+                bosdata.temp3  := bosdata.regclose3
             bosdata.state := 1
             
         if(bosdata.state == 4)
@@ -416,6 +395,7 @@ method BOSJudge(CandleSet candleSet) =>
             if(bosdata.regclose3>bosdata.sbu)
                 bosdata.sbu := na
                 bosdata.sbu_idx:= na
+                bosdata.temp2   := bosdata.regclose3
             bosdata.state := 1
             
     candleSet
@@ -505,84 +485,165 @@ method plotdata(CandleSet candleSet, int offset, int delta) =>
 method MaxNormalSet(ValueDecisionReg maxnormal, CandleSet candleSet) =>
     ValueDecisionReg m1 = maxnormal
     CandleSet        cs = candleSet
-    m1.value            := 0
-    m1.vtext            := "maxprice: "
-    m1.vdecisionname    := "MaxNormalSet"
-    if cs.bosdata.temp > m1.value
-        m1.value  := cs.bosdata.temp
-        m1.vname  := cs.settings.htf
+    var bool         fg = true 
+    if fg
+        m1.value            := 0
+        m1.vtext            := "maxprice (possible sbd): "
+        m1.vdecisionname    := "MaxNormalSet"
+        fg                  := false
+    m1.vtemp  := cs.bosdata.temp3
+    if m1.vtemp > m1.value
+        m1.value        := m1.vtemp
+        m1.vname        := cs.settings.htf
+    m1.vremntime    := helper.RemainingTime(m1.vname)
     maxnormal
 
 method MinNormalSet(ValueDecisionReg minnormal, CandleSet candleSet) =>
     ValueDecisionReg m1 = minnormal
     CandleSet        cs = candleSet
-    m1.value            := 99999999
-    m1.vtext            := "minprice: "
-    m1.vdecisionname    := "MinNormalSet"
-    if cs.bosdata.temp < m1.value
-        m1.value  := cs.bosdata.temp
+    var bool         fg = true 
+    if fg
+        m1.value            := 99999999
+        m1.vtext            := "minprice (possible sbu): "
+        m1.vdecisionname    := "MinNormalSet"
+        fg                  := false
+    m1.vtemp  := cs.bosdata.temp2
+    if m1.vtemp < m1.value
+        m1.value  := m1.vtemp
         m1.vname  := cs.settings.htf
+    m1.vremntime    := helper.RemainingTime(m1.vname)
     minnormal
 
 method HighestsbdSet(ValueDecisionReg highestsbd, CandleSet candleSet) =>
     ValueDecisionReg m1 = highestsbd
     CandleSet        cs = candleSet
-    m1.value            := 0
-    m1.vtext            := "highestsbd: "
-    m1.vdecisionname    := "HighestsbdSet"
+    var bool         fg = true 
+    if fg
+        m1.value            := 0
+        m1.vtext            := "highestsbd: "
+        m1.vdecisionname    := "HighestsbdSet"
+        fg                  := false
     if cs.bosdata.sbd > m1.value
         m1.value := cs.bosdata.sbd
         m1.vidx  := cs.bosdata.sbd_idx
         m1.vname := cs.settings.htf
         m1.vdate := cs.bosdata.s_dated
+    m1.vremntime    := helper.RemainingTime(m1.vname)
     highestsbd
 
 method LowestsbuSet (ValueDecisionReg lowestsbu, CandleSet candleSet) =>
     ValueDecisionReg m1 = lowestsbu
     CandleSet        cs = candleSet
-    m1.value            := 99999999
-    m1.vtext            := "lowestsbu: "
-    m1.vdecisionname    := "LowestsbuSet"
+    var bool         fg = true 
+    if fg
+        m1.value            := 99999999
+        m1.vtext            := "lowestsbu: "
+        m1.vdecisionname    := "LowestsbuSet"
+        fg                  := false
     if cs.bosdata.sbu < m1.value
         m1.value := cs.bosdata.sbu
         m1.vidx  := cs.bosdata.sbu_idx
         m1.vname := cs.settings.htf
         m1.vdate := cs.bosdata.s_dateu
+    m1.vremntime    := helper.RemainingTime(m1.vname)
     lowestsbu
 
 method addplot (ValueDecisionReg decision, int offset) =>
     ValueDecisionReg m1 = decision
     if m1.vdecisionname == "LowestsbuSet"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname)
+            label.set_xy(m1.vlb, offset+5, m1.value)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
             m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+        if not na(m1.vln)
+            line.set_xy1(m1.vln, bar_index, m1.value)
+            line.set_xy2(m1.vln, offset, m1.value)
+        else
+            m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
+        m1.value            := 99999999
     if m1.vdecisionname == "HighestsbdSet"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
             m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+        if not na(m1.vln)
+            line.set_xy1(m1.vln, bar_index, m1.value)
+            line.set_xy2(m1.vln, offset, m1.value)
+        else
+            m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
+        m1.value            := 0
     if m1.vdecisionname == "MaxNormalSet"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "HTF= " + m1.vname)
+            label.set_xy(m1.vlb, offset+5, m1.value)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
             m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+        if not na(m1.vln)
+            line.set_xy1(m1.vln, bar_index, m1.value)
+            line.set_xy2(m1.vln, offset, m1.value)
+        else
+            m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
+        m1.value            := 0
     if m1.vdecisionname == "MinNormalSet"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value)  + "\n" + "HTF= " + m1.vname)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value)  + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
             m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+        if not na(m1.vln)
+            line.set_xy1(m1.vln, bar_index, m1.value)
+            line.set_xy2(m1.vln, offset, m1.value)
+        else
+            m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
+        m1.value            := 99999999
     decision
 
-
+//+---------------Main------------------+//
 int cnt = 0
 int last = helper.HTFEnabled()
 int delta = settings.text_buffer
 int offset = settings.offset + bar_index
+//+---------------ADD------------------+//
+var CandleSet[] mulhtf                          = array.new<CandleSet>(totaladdPeriod)
+var Candle[] mulcandles                         = array.new<Candle>(0)
+for i = 0 to (totaladdPeriod-1) //這邊初始化很重要 背起來
+    if barstate.isfirst
+        BOSdata addBosdata                          = BOSdata.new()   
+        Candle  addcandle                           = Candle.new()
+        CandleSettings addsettings                  = CandleSettings.new()
+        addsettings.htf                             := str.tostring(InitialPeriod+Interval*i)
+        addsettings.max_memory                      := 10            
+        CandleSet addCandleSet                      = CandleSet.new()
+        mulcandles.unshift(addcandle)
+        addCandleSet.bosdata                        := addBosdata     
+        addCandleSet.candles                        := mulcandles
+        addCandleSet.settings                       := addsettings  
+        mulhtf.set(i,addCandleSet) 
+    //end if
+    mulhtf.get(i).Monitor().BOSJudge()
+
+    HighestsbdSet(highestsbd, mulhtf.get(i))
+    LowestsbuSet(lowestsbu, mulhtf.get(i)) 
+    MaxNormalSet(maxnormal, mulhtf.get(i))
+    MinNormalSet(minnormal, mulhtf.get(i))
+    
+//end for
+if settings.add_show and barstate.isrealtime
+    maxnormal.addplot(offset)
+    minnormal.addplot(offset)
+    highestsbd.addplot(offset)
+    lowestsbu.addplot(offset)
+    var line nowcloseline = na
+    if not na(nowcloseline)
+        line.set_xy1(nowcloseline, bar_index, close)
+        line.set_xy2(nowcloseline, bar_index+2, close)
+    else
+        nowcloseline := line.new(bar_index, close, bar_index, close, xloc= xloc.bar_index, color = color.new(color.gray, 10), style = line.style_dotted , width = 4)       
+if barstate.islast
+    label.new(bar_index,close, str.tostring(mulhtf.get(8).bosdata.sbu))
+//+---------------ADD END------------------+//
 
 if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)
     htf1.Monitor().BOSJudge()
@@ -601,36 +662,20 @@ if  htf4.settings.show and helper.ValidTimeframe(htf4.settings.htf)
     plotdata(htf4, offset, delta)
 if cnt>last
     label.new(bar_index,high,"over the 4line count limit")
-//+-----add-----+//
 
-mulhtf.Monitor().BOSJudge()
-//+------value ValueDecisionReg-----+//
-if settings.add_show 
-    for i = 0 to 0
-        MaxNormalSet(maxnormal,mulhtf)
-        MinNormalSet(minnormal,mulhtf)
-        HighestsbdSet(highestsbd,mulhtf)
-        LowestsbuSet(lowestsbu,mulhtf)
-        MaxNormalSet(maxnormal,mulhtf2)
-        MinNormalSet(minnormal,mulhtf2)
-        HighestsbdSet(highestsbd,mulhtf2)
-        LowestsbuSet(lowestsbu,mulhtf2)
-    maxnormal.addplot(offset)
-    minnormal.addplot(offset)
-    highestsbd.addplot(offset)
-    lowestsbu.addplot(offset)
+////+------value ValueDecisionReg-----+//
+//if settings.add_show 
+//    for i = 0 to (totaladdPeriod-1)
+//        MaxNormalSet(maxnormal, mulhtf.get(i))
+//        MinNormalSet(minnormal, mulhtf.get(i))
+//        HighestsbdSet(highestsbd, mulhtf.get(i))
+//        LowestsbuSet(lowestsbu, mulhtf.get(i))
+//    maxnormal.addplot(offset)
+//    minnormal.addplot(offset)
+//    highestsbd.addplot(offset)
+//    lowestsbu.addplot(offset)
+//if barstate.islast
+//    label.new(bar_index, high, str.tostring(mulhtf.get(0).bosdata.sbu))
 index += 1
-
-
-
-
-
-
-
-
-
-
-
-
 
 
