@@ -40,7 +40,7 @@ var float testfloat1 = na
 var int testint = 0
 var string teststr = na
 
-var BOS = BOS_Type.new()
+var BOS_Type BOS = BOS_Type.new()
 
 //*****custom option*****//
 x := 0
@@ -77,8 +77,7 @@ if(state==2)
         BOS.close_SBU := BOS.Buff_key1
         BOS.index_SBU := BOS.index_key1
     state := 1
-    if(index==last_bar_index-x)                               
-        state := 5
+    
 if(state==3)
     if(BOS.slope1 != BOS.slope2)
         BOS.Buff_key2 := BOS.Buff_close2
@@ -91,8 +90,7 @@ if(state==3)
         BOS.close_SBD := na
         BOS.index_SBD := na
     state := 1
-    if(index==last_bar_index-x)                                
-        state := 5
+    
 if(state==4)
     if(BOS.slope1 != BOS.slope2)
         BOS.Buff_key2 := BOS.Buff_close2
@@ -105,10 +103,9 @@ if(state==4)
         BOS.close_SBU := na
         BOS.index_SBU := na
     state := 1
-    if(index==last_bar_index-x)                                
-        state := 5
+    
 
-if(state==5)
+if barstate.islast or barstate.isrealtime
 //    if((not na(close_SBU)) and na(close_SBD)) // ⎻⎻📉
 //    if((not na(close_SBD)) and na(close_SBU)) // __📈
     testfloat1 := state

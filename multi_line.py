@@ -601,10 +601,11 @@ method addplot (ValueDecisionReg decision, int offset) =>
     decision
 
 //+---------------Main------------------+//
-int cnt = 0
-int last = helper.HTFEnabled()
-int delta = settings.text_buffer
+int cnt    = 0
+int last   = helper.HTFEnabled()
+int delta  = settings.text_buffer
 int offset = settings.offset + bar_index
+var int n      = 1
 //+---------------ADD------------------+//
 var CandleSet[] mulhtf                          = array.new<CandleSet>(totaladdPeriod)
 var Candle[] mulcandles                         = array.new<Candle>(0)
@@ -613,7 +614,7 @@ for i = 0 to (totaladdPeriod-1) //這邊初始化很重要 背起來
         BOSdata addBosdata                          = BOSdata.new()   
         Candle  addcandle                           = Candle.new()
         CandleSettings addsettings                  = CandleSettings.new()
-        addsettings.htf                             := str.tostring(InitialPeriod+Interval*i)
+        addsettings.htf                             := htf_
         addsettings.max_memory                      := 10            
         CandleSet addCandleSet                      = CandleSet.new()
         mulcandles.unshift(addcandle)
@@ -621,6 +622,7 @@ for i = 0 to (totaladdPeriod-1) //這邊初始化很重要 背起來
         addCandleSet.candles                        := mulcandles
         addCandleSet.settings                       := addsettings  
         mulhtf.set(i,addCandleSet) 
+        n                                           +=1
     //end if
     mulhtf.get(i).Monitor().BOSJudge()
 
@@ -628,7 +630,18 @@ for i = 0 to (totaladdPeriod-1) //這邊初始化很重要 背起來
     LowestsbuSet(lowestsbu, mulhtf.get(i)) 
     MaxNormalSet(maxnormal, mulhtf.get(i))
     MinNormalSet(minnormal, mulhtf.get(i))
-    
+var CandleSet htftest                    = CandleSet.new()
+var CandleSettings SettingsHTFtest       = CandleSettings.new()
+var Candle[] candles_test                = array.new<Candle>(0)
+var BOSdata bosdata_test                 = BOSdata.new()
+var Trace   trace_test                   = Trace.new()
+htftest.settings               := SettingsHTFtest
+htftest.candles                := candles_test
+htftest.bosdata                := bosdata_test
+htftest.trace                  := trace_test
+htftest.settings.htf              := '15'
+htftest.settings.max_memory       := 10
+htftest.Monitor().BOSJudge()
 //end for
 if settings.add_show and barstate.isrealtime
     maxnormal.addplot(offset)
@@ -642,7 +655,7 @@ if settings.add_show and barstate.isrealtime
     else
         nowcloseline := line.new(bar_index, close, bar_index, close, xloc= xloc.bar_index, color = color.new(color.gray, 10), style = line.style_dotted , width = 4)       
 if barstate.islast
-    label.new(bar_index,close, str.tostring(mulhtf.get(8).bosdata.sbu))
+    label.new(bar_index,close, str.tostring(mulhtf.get(14).bosdata.sbu) + "\n" + str.tostring(htftest.bosdata.sbu) + "\n" + str.tostring(n))
 //+---------------ADD END------------------+//
 
 if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)

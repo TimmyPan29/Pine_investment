@@ -178,22 +178,22 @@ htf4.trace                  := trace_4
 
 
 htf1.settings.show          := input.bool(true, "HTF 1      ", inline="htf1")
-htf_1                       = input.timeframe("10", "", inline="htf1")
+htf_1                       = input.timeframe("1", "", inline="htf1")
 htf1.settings.htf           := htf_1
 htf1.settings.max_memory   := input.int(10, "", inline="htf1")
 
 htf2.settings.show          := input.bool(true, "HTF 2      ", inline="htf2")
-htf_2                       = input.timeframe("15", "", inline="htf2")
+htf_2                       = input.timeframe("99", "", inline="htf2")
 htf2.settings.htf           := htf_2
 htf2.settings.max_memory   := input.int(10, "", inline="htf2")
 
 htf3.settings.show          := input.bool(true, "HTF 3      ", inline="htf3")
-htf_3                       = input.timeframe("60", "", inline="htf3")
+htf_3                       = input.timeframe("198", "", inline="htf3")
 htf3.settings.htf           := htf_3
 htf3.settings.max_memory   := input.int(10, "", inline="htf3")
 
 htf4.settings.show          := input.bool(true, "HTF 4      ", inline="htf4")
-htf_4                       = input.timeframe("240", "", inline="htf4")
+htf_4                       = input.timeframe("297", "", inline="htf4")
 htf4.settings.htf           := htf_4
 htf4.settings.max_memory   := input.int(10, "", inline="htf4")
 
@@ -222,19 +222,19 @@ settings.price_label_color     := input.color(color.new(color.black, 10), "price
 settings.price_label_size      := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="31")
 
 htf1.trace.trace_c_color   := input.color(color.new(color.red, 50), "level1    ", inline='level 1', group="trace")
-htf1.trace.trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 1', group="trace")
+htf1.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='level 1', group="trace")
 htf1.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 1', group="trace")
 
 htf2.trace.trace_c_color   := input.color(color.new(color.orange, 50), "level2    ", inline='level 2', group="trace")
-htf2.trace.trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 2', group="trace")
-htf2.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 2', group="trace")
+htf2.trace.trace_c_style   := input.string('----', '', options = ['⎯⎯⎯', '----', '····'], inline='level 2', group="trace")
+htf2.trace.trace_c_size    := input.int(3, '', options = [1,2,3,4], inline='level 2', group="trace")
 
 htf3.trace.trace_c_color   := input.color(color.new(color.yellow, 50), "level3    ", inline='level 3', group="trace")
 htf3.trace.trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 3', group="trace")
-htf3.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 3', group="trace")
+htf3.trace.trace_c_size    := input.int(4, '', options = [1,2,3,4], inline='level 3', group="trace")
 
 htf4.trace.trace_c_color   := input.color(color.new(color.green, 50), "level4    ", inline='level 4', group="trace")
-htf4.trace.trace_c_style   := input.string('····', '', options = ['⎯⎯⎯', '----', '····'], inline='level 4', group="trace")
+htf4.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='level 4', group="trace")
 htf4.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 4', group="trace")
 
 
@@ -452,12 +452,12 @@ method plotdata(CandleSet candleSet, int offset, int delta) =>
     string lbn  = helper.HTFName(candleSet.settings.htf)
     if candleSet.settings.show
         if not na(l_pricesbu)
-            label.set_xy(l_pricesbu, offset+pcnt*delta,bosdata.sbu)
+            label.set_xy(l_pricesbu, offset+pcnt*delta, bosdata.sbu)
             label.set_text(l_pricesbu, str.tostring(bosdata.sbu))
         else
             l_pricesbu := label.new(offset+pcnt*delta, bosdata.sbu, str.tostring(bosdata.sbu), color = color_transparent, textcolor = settings.price_label_color, size = settings.price_label_size, textalign = text.align_center)
         if not na(l_pricesbd)
-            label.set_xy(l_pricesbd, offset+pcnt*delta,bosdata.sbd)
+            label.set_xy(l_pricesbd, offset+pcnt*delta, bosdata.sbd)
             label.set_text(l_pricesbd, str.tostring(bosdata.sbd))
         else
             l_pricesbd := label.new(offset+pcnt*delta, bosdata.sbd, str.tostring(bosdata.sbd), color = color_transparent, textcolor = settings.price_label_color, size = settings.price_label_size, textalign = text.align_center)
