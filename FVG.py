@@ -383,7 +383,7 @@ method Reorder(CandleSet candleSet, int offset) =>
     candleSet
 
 method FindImbalance(CandleSet candleSet) =>
-    if barstate.isrealtime or barstate.islast
+    if barstate.isrealtime or barstate.islast  //islast 已經包含isrealtime
         if candleSet.imbalances.size() > 0
             for i = candleSet.imbalances.size()-1 to 0
                 Imbalance del = candleSet.imbalances.get(i) //圖形歸圖形 刪掉數據 圖型還是會在 所以要刪box
