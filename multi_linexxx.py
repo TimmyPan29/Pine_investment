@@ -63,7 +63,6 @@ type Settings
     color           price_label_color
     bool            add_show
 
-
 type Trace
     int             trace_c_size 
     color           trace_c_color 
@@ -76,6 +75,7 @@ type CandleSet
     Trace           trace
     label           tfName
     label           tfTimer        
+
 type ValueDecisionReg
     float           value
     int             vidx 
@@ -87,7 +87,6 @@ type ValueDecisionReg
     label           vlb
     line            vln
     float           vtemp
-
 
 type Helper
     string name             = "Helper"
@@ -143,6 +142,7 @@ var ValueDecisionReg maxnormal  = ValueDecisionReg.new()
 var ValueDecisionReg minnormal  = ValueDecisionReg.new()
 var ValueDecisionReg highestsbd = ValueDecisionReg.new()
 var ValueDecisionReg lowestsbu  = ValueDecisionReg.new()
+var ValueDecisionReg predictor  = ValueDecisionReg.new()
 //+---------------ValueDeicsionEND------------------+//
 
 //+----------------------------------------+//
@@ -537,6 +537,12 @@ method LowestsbuSet (ValueDecisionReg lowestsbu, CandleSet candleSet) =>
         m1.vdate := cs.bosdata.s_dateu
     lowestsbu
 
+method Predictor (CandleSet candleSet, ValueDecisionReg predictor) =>
+    CandleSet        cs = candleSet
+    ValueDecisionReg pt = predictor
+    
+
+
 method addplot (ValueDecisionReg decision, int offset) =>
     ValueDecisionReg m1 = decision
     m1.vremntime := helper.RemainingTime(m1.vname)
@@ -875,7 +881,7 @@ htfadd90.bosdata                  := bosdataadd90
 htfadd90.settings.htf             := '90'
 htfadd90.settings.max_memory      := 10
 
-if bar_index < last_bar_index
+if bar_index <= last_bar_index
     htfadd60.Monitor().BOSJudge()
     htfadd61.Monitor().BOSJudge()
     htfadd62.Monitor().BOSJudge()
