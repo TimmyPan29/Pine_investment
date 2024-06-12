@@ -305,7 +305,7 @@ method Monitor(CandleSet candleSet) =>
     isNewHTFCandle = ta.change(HTFBarTime)
     if isNewHTFCandle != 0 or barstate.isrealtime
         Candle candle    = Candle.new()
-        candle.c        := bar_index==0 or barstate.isrealtime ? close : bosdata.temp
+        candle.c        := bar_index==0 ? close : bosdata.temp
         candle.c_idx    := bar_index
         candleSet.candles.unshift(candle) //從這句話可以知道 index越靠近零 資料越新
 
@@ -325,7 +325,7 @@ method BOSJudge(CandleSet candleSet) =>
     if not barstate.isrealtime
         bosdata.dateinnumber := tf-tp*2000*k+tp*(k-1)*1000
     string strresult = helper.formattedtime(bosdata.dateinnumber)
-    if candleSet.candles.size() > 0 and (isNewHTFCandle != 0 or barstate.isrealtime)
+    if candleSet.candles.size() > 0 
         Candle candle = candleSet.candles.first()
         if(bosdata.state == 1)
             bosdata.regclose1 := bosdata.regclose2
@@ -354,14 +354,12 @@ method BOSJudge(CandleSet candleSet) =>
                 bosdata.sbd := bosdata.reg1key
                 bosdata.sbd_idx := bosdata.reg1key_idx
                 bosdata.s_dated := bosdata.strtemp1
-                bosdata.temp2   := bosdata.regclose3
             if(bosdata.regclose3<bosdata.sbd)
                 bosdata.sbd := na 
                 bosdata.sbd_idx := na
                 bosdata.sbu := bosdata.reg1key
                 bosdata.sbu_idx := bosdata.reg1key_idx
                 bosdata.s_dateu := bosdata.strtemp1
-                bosdata.temp3   := bosdata.regclose3
             bosdata.state := 1
             
         if(bosdata.state == 3)//no sky
@@ -378,7 +376,6 @@ method BOSJudge(CandleSet candleSet) =>
             if(bosdata.regclose3<bosdata.sbd)
                 bosdata.sbd    := na
                 bosdata.sbd_idx:= na
-                bosdata.temp3  := bosdata.regclose3
             bosdata.state := 1
             
         if(bosdata.state == 4)
@@ -395,9 +392,11 @@ method BOSJudge(CandleSet candleSet) =>
             if(bosdata.regclose3>bosdata.sbu)
                 bosdata.sbu := na
                 bosdata.sbu_idx:= na
-                bosdata.temp2   := bosdata.regclose3
             bosdata.state := 1
-            
+    if(not na(bosdata.sbd) and na(bosdata.sbu))  //no sky
+        bosdata.temp2   := bosdata.regclose3
+    else if(na(bosdata.sbd) and (not na(bosdata.sbu)))
+        bosdata.temp3   := bosdata.regclose3
     candleSet
 
 method plotdata(CandleSet candleSet, int offset, int delta) =>
@@ -471,12 +470,12 @@ method plotdata(CandleSet candleSet, int offset, int delta) =>
             l_sbd := label.new(offset+pcnt*delta, bosdata.sbd, "SBD", color = color_transparent, textcolor = settings.sbd_label_color, size = settings.sbd_label_size, textalign = text.align_center)
         pcnt += 1    
         if not na(li_sbu)
-            line.set_xy1(li_sbu, bosdata.sbu_idx, bosdata.sbu)
+            line.set_xy1(li_sbu, bar_index, bosdata.sbu)
             line.set_xy2(li_sbu, offset, bosdata.sbu)
         else
             li_sbu := line.new(bar_index, bosdata.sbu, offset, bosdata.sbu, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
         if not na(li_sbd)
-            line.set_xy1(li_sbd, bosdata.sbd_idx, bosdata.sbd)
+            line.set_xy1(li_sbd, bar_index, bosdata.sbd)
             line.set_xy2(li_sbd, offset, bosdata.sbd)
         else
             li_sbd := line.new(bar_index, bosdata.sbd, offset, bosdata.sbd, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
@@ -488,7 +487,7 @@ method MaxNormalSet(ValueDecisionReg maxnormal, CandleSet candleSet) =>
     var bool         fg = true 
     if fg
         m1.value            := 0
-        m1.vtext            := "maxprice (possible sbd): "
+        m1.vtext            := "maxprice \n(possible sbd): "
         m1.vdecisionname    := "MaxNormalSet"
         fg                  := false
     m1.vtemp  := cs.bosdata.temp3
@@ -504,7 +503,7 @@ method MinNormalSet(ValueDecisionReg minnormal, CandleSet candleSet) =>
     var bool         fg = true 
     if fg
         m1.value            := 99999999
-        m1.vtext            := "minprice (possible sbu): "
+        m1.vtext            := "minprice \n(possible sbu): "
         m1.vdecisionname    := "MinNormalSet"
         fg                  := false
     m1.vtemp  := cs.bosdata.temp2
@@ -552,10 +551,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
     ValueDecisionReg m1 = decision
     if m1.vdecisionname == "LowestsbuSet"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset+5, m1.value)
+            label.set_xy(m1.vlb, offset-5, m1.value)
             label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new( offset-5,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -564,10 +563,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
         m1.value            := 99999999
     if m1.vdecisionname == "HighestsbdSet"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset, m1.value)
+            label.set_xy(m1.vlb, offset-2, m1.value)
             label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset-2,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -576,10 +575,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
         m1.value            := 0
     if m1.vdecisionname == "MaxNormalSet"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset+5, m1.value)
+            label.set_xy(m1.vlb, offset+3, m1.value)
             label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset+3,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -588,10 +587,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
         m1.value            := 0
     if m1.vdecisionname == "MinNormalSet"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset, m1.value)
+            label.set_xy(m1.vlb, offset+3, m1.value)
             label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value)  + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset+3,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -609,1009 +608,6 @@ int offset = settings.offset + bar_index
 
 //+---------------add var------------------+//
 
-var CandleSet htfadd1                     = CandleSet.new()
-var CandleSettings SettingsHTFadd1        = CandleSettings.new()
-var Candle[] candlesadd1                  = array.new<Candle>(0)
-var BOSdata bosdataadd1                   = BOSdata.new()
-
-htfadd1.settings                 := SettingsHTFadd1
-htfadd1.candles                  := candlesadd1
-htfadd1.bosdata                  := bosdataadd1
-htfadd1.settings.htf             := '1'
-htfadd1.settings.max_memory      := 10
-htfadd1.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd1)
-    LowestsbuSet(lowestsbu, htfadd1) 
-    MaxNormalSet(maxnormal, htfadd1)
-    MinNormalSet(minnormal, htfadd1)
-
-var CandleSet htfadd2                     = CandleSet.new()
-var CandleSettings SettingsHTFadd2        = CandleSettings.new()
-var Candle[] candlesadd2                  = array.new<Candle>(0)
-var BOSdata bosdataadd2                   = BOSdata.new()
-
-htfadd2.settings                 := SettingsHTFadd2
-htfadd2.candles                  := candlesadd2
-htfadd2.bosdata                  := bosdataadd2
-htfadd2.settings.htf             := '2'
-htfadd2.settings.max_memory      := 10
-htfadd2.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd2)
-    LowestsbuSet(lowestsbu, htfadd2) 
-    MaxNormalSet(maxnormal, htfadd2)
-    MinNormalSet(minnormal, htfadd2)
-
-var CandleSet htfadd3                     = CandleSet.new()
-var CandleSettings SettingsHTFadd3        = CandleSettings.new()
-var Candle[] candlesadd3                  = array.new<Candle>(0)
-var BOSdata bosdataadd3                   = BOSdata.new()
-
-htfadd3.settings                 := SettingsHTFadd3
-htfadd3.candles                  := candlesadd3
-htfadd3.bosdata                  := bosdataadd3
-htfadd3.settings.htf             := '3'
-htfadd3.settings.max_memory      := 10
-htfadd3.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd3)
-    LowestsbuSet(lowestsbu, htfadd3) 
-    MaxNormalSet(maxnormal, htfadd3)
-    MinNormalSet(minnormal, htfadd3)
-
-var CandleSet htfadd4                     = CandleSet.new()
-var CandleSettings SettingsHTFadd4        = CandleSettings.new()
-var Candle[] candlesadd4                  = array.new<Candle>(0)
-var BOSdata bosdataadd4                   = BOSdata.new()
-
-htfadd4.settings                 := SettingsHTFadd4
-htfadd4.candles                  := candlesadd4
-htfadd4.bosdata                  := bosdataadd4
-htfadd4.settings.htf             := '4'
-htfadd4.settings.max_memory      := 10
-htfadd4.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd4)
-    LowestsbuSet(lowestsbu, htfadd4) 
-    MaxNormalSet(maxnormal, htfadd4)
-    MinNormalSet(minnormal, htfadd4)
-
-var CandleSet htfadd5                     = CandleSet.new()
-var CandleSettings SettingsHTFadd5        = CandleSettings.new()
-var Candle[] candlesadd5                  = array.new<Candle>(0)
-var BOSdata bosdataadd5                   = BOSdata.new()
-
-htfadd5.settings                 := SettingsHTFadd5
-htfadd5.candles                  := candlesadd5
-htfadd5.bosdata                  := bosdataadd5
-htfadd5.settings.htf             := '5'
-htfadd5.settings.max_memory      := 10
-htfadd5.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd5)
-    LowestsbuSet(lowestsbu, htfadd5) 
-    MaxNormalSet(maxnormal, htfadd5)
-    MinNormalSet(minnormal, htfadd5)
-
-var CandleSet htfadd6                     = CandleSet.new()
-var CandleSettings SettingsHTFadd6        = CandleSettings.new()
-var Candle[] candlesadd6                  = array.new<Candle>(0)
-var BOSdata bosdataadd6                   = BOSdata.new()
-
-htfadd6.settings                 := SettingsHTFadd6
-htfadd6.candles                  := candlesadd6
-htfadd6.bosdata                  := bosdataadd6
-htfadd6.settings.htf             := '6'
-htfadd6.settings.max_memory      := 10
-htfadd6.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd6)
-    LowestsbuSet(lowestsbu, htfadd6) 
-    MaxNormalSet(maxnormal, htfadd6)
-    MinNormalSet(minnormal, htfadd6)
-
-var CandleSet htfadd7                     = CandleSet.new()
-var CandleSettings SettingsHTFadd7        = CandleSettings.new()
-var Candle[] candlesadd7                  = array.new<Candle>(0)
-var BOSdata bosdataadd7                   = BOSdata.new()
-
-htfadd7.settings                 := SettingsHTFadd7
-htfadd7.candles                  := candlesadd7
-htfadd7.bosdata                  := bosdataadd7
-htfadd7.settings.htf             := '7'
-htfadd7.settings.max_memory      := 10
-htfadd7.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd7)
-    LowestsbuSet(lowestsbu, htfadd7) 
-    MaxNormalSet(maxnormal, htfadd7)
-    MinNormalSet(minnormal, htfadd7)
-
-var CandleSet htfadd8                     = CandleSet.new()
-var CandleSettings SettingsHTFadd8        = CandleSettings.new()
-var Candle[] candlesadd8                  = array.new<Candle>(0)
-var BOSdata bosdataadd8                   = BOSdata.new()
-
-htfadd8.settings                 := SettingsHTFadd8
-htfadd8.candles                  := candlesadd8
-htfadd8.bosdata                  := bosdataadd8
-htfadd8.settings.htf             := '8'
-htfadd8.settings.max_memory      := 10
-htfadd8.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd8)
-    LowestsbuSet(lowestsbu, htfadd8) 
-    MaxNormalSet(maxnormal, htfadd8)
-    MinNormalSet(minnormal, htfadd8)
-
-var CandleSet htfadd9                     = CandleSet.new()
-var CandleSettings SettingsHTFadd9        = CandleSettings.new()
-var Candle[] candlesadd9                  = array.new<Candle>(0)
-var BOSdata bosdataadd9                   = BOSdata.new()
-
-htfadd9.settings                 := SettingsHTFadd9
-htfadd9.candles                  := candlesadd9
-htfadd9.bosdata                  := bosdataadd9
-htfadd9.settings.htf             := '9'
-htfadd9.settings.max_memory      := 10
-htfadd9.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd9)
-    LowestsbuSet(lowestsbu, htfadd9) 
-    MaxNormalSet(maxnormal, htfadd9)
-    MinNormalSet(minnormal, htfadd9)
-
-var CandleSet htfadd10                     = CandleSet.new()
-var CandleSettings SettingsHTFadd10        = CandleSettings.new()
-var Candle[] candlesadd10                  = array.new<Candle>(0)
-var BOSdata bosdataadd10                   = BOSdata.new()
-
-htfadd10.settings                 := SettingsHTFadd10
-htfadd10.candles                  := candlesadd10
-htfadd10.bosdata                  := bosdataadd10
-htfadd10.settings.htf             := '10'
-htfadd10.settings.max_memory      := 10
-htfadd10.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd10)
-    LowestsbuSet(lowestsbu, htfadd10) 
-    MaxNormalSet(maxnormal, htfadd10)
-    MinNormalSet(minnormal, htfadd10)
-
-var CandleSet htfadd11                     = CandleSet.new()
-var CandleSettings SettingsHTFadd11        = CandleSettings.new()
-var Candle[] candlesadd11                  = array.new<Candle>(0)
-var BOSdata bosdataadd11                   = BOSdata.new()
-
-htfadd11.settings                 := SettingsHTFadd11
-htfadd11.candles                  := candlesadd11
-htfadd11.bosdata                  := bosdataadd11
-htfadd11.settings.htf             := '11'
-htfadd11.settings.max_memory      := 10
-htfadd11.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd11)
-    LowestsbuSet(lowestsbu, htfadd11) 
-    MaxNormalSet(maxnormal, htfadd11)
-    MinNormalSet(minnormal, htfadd11)
-
-var CandleSet htfadd12                     = CandleSet.new()
-var CandleSettings SettingsHTFadd12        = CandleSettings.new()
-var Candle[] candlesadd12                  = array.new<Candle>(0)
-var BOSdata bosdataadd12                   = BOSdata.new()
-
-htfadd12.settings                 := SettingsHTFadd12
-htfadd12.candles                  := candlesadd12
-htfadd12.bosdata                  := bosdataadd12
-htfadd12.settings.htf             := '12'
-htfadd12.settings.max_memory      := 10
-htfadd12.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd12)
-    LowestsbuSet(lowestsbu, htfadd12) 
-    MaxNormalSet(maxnormal, htfadd12)
-    MinNormalSet(minnormal, htfadd12)
-
-var CandleSet htfadd13                     = CandleSet.new()
-var CandleSettings SettingsHTFadd13        = CandleSettings.new()
-var Candle[] candlesadd13                  = array.new<Candle>(0)
-var BOSdata bosdataadd13                   = BOSdata.new()
-
-htfadd13.settings                 := SettingsHTFadd13
-htfadd13.candles                  := candlesadd13
-htfadd13.bosdata                  := bosdataadd13
-htfadd13.settings.htf             := '13'
-htfadd13.settings.max_memory      := 10
-htfadd13.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd13)
-    LowestsbuSet(lowestsbu, htfadd13) 
-    MaxNormalSet(maxnormal, htfadd13)
-    MinNormalSet(minnormal, htfadd13)
-
-var CandleSet htfadd14                     = CandleSet.new()
-var CandleSettings SettingsHTFadd14        = CandleSettings.new()
-var Candle[] candlesadd14                  = array.new<Candle>(0)
-var BOSdata bosdataadd14                   = BOSdata.new()
-
-htfadd14.settings                 := SettingsHTFadd14
-htfadd14.candles                  := candlesadd14
-htfadd14.bosdata                  := bosdataadd14
-htfadd14.settings.htf             := '14'
-htfadd14.settings.max_memory      := 10
-htfadd14.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd14)
-    LowestsbuSet(lowestsbu, htfadd14) 
-    MaxNormalSet(maxnormal, htfadd14)
-    MinNormalSet(minnormal, htfadd14)
-
-var CandleSet htfadd15                     = CandleSet.new()
-var CandleSettings SettingsHTFadd15        = CandleSettings.new()
-var Candle[] candlesadd15                  = array.new<Candle>(0)
-var BOSdata bosdataadd15                   = BOSdata.new()
-
-htfadd15.settings                 := SettingsHTFadd15
-htfadd15.candles                  := candlesadd15
-htfadd15.bosdata                  := bosdataadd15
-htfadd15.settings.htf             := '15'
-htfadd15.settings.max_memory      := 10
-htfadd15.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd15)
-    LowestsbuSet(lowestsbu, htfadd15) 
-    MaxNormalSet(maxnormal, htfadd15)
-    MinNormalSet(minnormal, htfadd15)
-
-var CandleSet htfadd16                     = CandleSet.new()
-var CandleSettings SettingsHTFadd16        = CandleSettings.new()
-var Candle[] candlesadd16                  = array.new<Candle>(0)
-var BOSdata bosdataadd16                   = BOSdata.new()
-
-htfadd16.settings                 := SettingsHTFadd16
-htfadd16.candles                  := candlesadd16
-htfadd16.bosdata                  := bosdataadd16
-htfadd16.settings.htf             := '16'
-htfadd16.settings.max_memory      := 10
-htfadd16.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd16)
-    LowestsbuSet(lowestsbu, htfadd16) 
-    MaxNormalSet(maxnormal, htfadd16)
-    MinNormalSet(minnormal, htfadd16)
-
-var CandleSet htfadd17                     = CandleSet.new()
-var CandleSettings SettingsHTFadd17        = CandleSettings.new()
-var Candle[] candlesadd17                  = array.new<Candle>(0)
-var BOSdata bosdataadd17                   = BOSdata.new()
-
-htfadd17.settings                 := SettingsHTFadd17
-htfadd17.candles                  := candlesadd17
-htfadd17.bosdata                  := bosdataadd17
-htfadd17.settings.htf             := '17'
-htfadd17.settings.max_memory      := 10
-htfadd17.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd17)
-    LowestsbuSet(lowestsbu, htfadd17) 
-    MaxNormalSet(maxnormal, htfadd17)
-    MinNormalSet(minnormal, htfadd17)
-
-var CandleSet htfadd18                     = CandleSet.new()
-var CandleSettings SettingsHTFadd18        = CandleSettings.new()
-var Candle[] candlesadd18                  = array.new<Candle>(0)
-var BOSdata bosdataadd18                   = BOSdata.new()
-
-htfadd18.settings                 := SettingsHTFadd18
-htfadd18.candles                  := candlesadd18
-htfadd18.bosdata                  := bosdataadd18
-htfadd18.settings.htf             := '18'
-htfadd18.settings.max_memory      := 10
-htfadd18.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd18)
-    LowestsbuSet(lowestsbu, htfadd18) 
-    MaxNormalSet(maxnormal, htfadd18)
-    MinNormalSet(minnormal, htfadd18)
-
-var CandleSet htfadd19                     = CandleSet.new()
-var CandleSettings SettingsHTFadd19        = CandleSettings.new()
-var Candle[] candlesadd19                  = array.new<Candle>(0)
-var BOSdata bosdataadd19                   = BOSdata.new()
-
-htfadd19.settings                 := SettingsHTFadd19
-htfadd19.candles                  := candlesadd19
-htfadd19.bosdata                  := bosdataadd19
-htfadd19.settings.htf             := '19'
-htfadd19.settings.max_memory      := 10
-htfadd19.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd19)
-    LowestsbuSet(lowestsbu, htfadd19) 
-    MaxNormalSet(maxnormal, htfadd19)
-    MinNormalSet(minnormal, htfadd19)
-
-var CandleSet htfadd20                     = CandleSet.new()
-var CandleSettings SettingsHTFadd20        = CandleSettings.new()
-var Candle[] candlesadd20                  = array.new<Candle>(0)
-var BOSdata bosdataadd20                   = BOSdata.new()
-
-htfadd20.settings                 := SettingsHTFadd20
-htfadd20.candles                  := candlesadd20
-htfadd20.bosdata                  := bosdataadd20
-htfadd20.settings.htf             := '20'
-htfadd20.settings.max_memory      := 10
-htfadd20.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd20)
-    LowestsbuSet(lowestsbu, htfadd20) 
-    MaxNormalSet(maxnormal, htfadd20)
-    MinNormalSet(minnormal, htfadd20)
-
-var CandleSet htfadd21                     = CandleSet.new()
-var CandleSettings SettingsHTFadd21        = CandleSettings.new()
-var Candle[] candlesadd21                  = array.new<Candle>(0)
-var BOSdata bosdataadd21                   = BOSdata.new()
-
-htfadd21.settings                 := SettingsHTFadd21
-htfadd21.candles                  := candlesadd21
-htfadd21.bosdata                  := bosdataadd21
-htfadd21.settings.htf             := '21'
-htfadd21.settings.max_memory      := 10
-htfadd21.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd21)
-    LowestsbuSet(lowestsbu, htfadd21) 
-    MaxNormalSet(maxnormal, htfadd21)
-    MinNormalSet(minnormal, htfadd21)
-
-var CandleSet htfadd22                     = CandleSet.new()
-var CandleSettings SettingsHTFadd22        = CandleSettings.new()
-var Candle[] candlesadd22                  = array.new<Candle>(0)
-var BOSdata bosdataadd22                   = BOSdata.new()
-
-htfadd22.settings                 := SettingsHTFadd22
-htfadd22.candles                  := candlesadd22
-htfadd22.bosdata                  := bosdataadd22
-htfadd22.settings.htf             := '22'
-htfadd22.settings.max_memory      := 10
-htfadd22.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd22)
-    LowestsbuSet(lowestsbu, htfadd22) 
-    MaxNormalSet(maxnormal, htfadd22)
-    MinNormalSet(minnormal, htfadd22)
-
-var CandleSet htfadd23                     = CandleSet.new()
-var CandleSettings SettingsHTFadd23        = CandleSettings.new()
-var Candle[] candlesadd23                  = array.new<Candle>(0)
-var BOSdata bosdataadd23                   = BOSdata.new()
-
-htfadd23.settings                 := SettingsHTFadd23
-htfadd23.candles                  := candlesadd23
-htfadd23.bosdata                  := bosdataadd23
-htfadd23.settings.htf             := '23'
-htfadd23.settings.max_memory      := 10
-htfadd23.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd23)
-    LowestsbuSet(lowestsbu, htfadd23) 
-    MaxNormalSet(maxnormal, htfadd23)
-    MinNormalSet(minnormal, htfadd23)
-
-var CandleSet htfadd24                     = CandleSet.new()
-var CandleSettings SettingsHTFadd24        = CandleSettings.new()
-var Candle[] candlesadd24                  = array.new<Candle>(0)
-var BOSdata bosdataadd24                   = BOSdata.new()
-
-htfadd24.settings                 := SettingsHTFadd24
-htfadd24.candles                  := candlesadd24
-htfadd24.bosdata                  := bosdataadd24
-htfadd24.settings.htf             := '24'
-htfadd24.settings.max_memory      := 10
-htfadd24.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd24)
-    LowestsbuSet(lowestsbu, htfadd24) 
-    MaxNormalSet(maxnormal, htfadd24)
-    MinNormalSet(minnormal, htfadd24)
-
-var CandleSet htfadd25                     = CandleSet.new()
-var CandleSettings SettingsHTFadd25        = CandleSettings.new()
-var Candle[] candlesadd25                  = array.new<Candle>(0)
-var BOSdata bosdataadd25                   = BOSdata.new()
-
-htfadd25.settings                 := SettingsHTFadd25
-htfadd25.candles                  := candlesadd25
-htfadd25.bosdata                  := bosdataadd25
-htfadd25.settings.htf             := '25'
-htfadd25.settings.max_memory      := 10
-htfadd25.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd25)
-    LowestsbuSet(lowestsbu, htfadd25) 
-    MaxNormalSet(maxnormal, htfadd25)
-    MinNormalSet(minnormal, htfadd25)
-
-var CandleSet htfadd26                     = CandleSet.new()
-var CandleSettings SettingsHTFadd26        = CandleSettings.new()
-var Candle[] candlesadd26                  = array.new<Candle>(0)
-var BOSdata bosdataadd26                   = BOSdata.new()
-
-htfadd26.settings                 := SettingsHTFadd26
-htfadd26.candles                  := candlesadd26
-htfadd26.bosdata                  := bosdataadd26
-htfadd26.settings.htf             := '26'
-htfadd26.settings.max_memory      := 10
-htfadd26.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd26)
-    LowestsbuSet(lowestsbu, htfadd26) 
-    MaxNormalSet(maxnormal, htfadd26)
-    MinNormalSet(minnormal, htfadd26)
-
-var CandleSet htfadd27                     = CandleSet.new()
-var CandleSettings SettingsHTFadd27        = CandleSettings.new()
-var Candle[] candlesadd27                  = array.new<Candle>(0)
-var BOSdata bosdataadd27                   = BOSdata.new()
-
-htfadd27.settings                 := SettingsHTFadd27
-htfadd27.candles                  := candlesadd27
-htfadd27.bosdata                  := bosdataadd27
-htfadd27.settings.htf             := '27'
-htfadd27.settings.max_memory      := 10
-htfadd27.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd27)
-    LowestsbuSet(lowestsbu, htfadd27) 
-    MaxNormalSet(maxnormal, htfadd27)
-    MinNormalSet(minnormal, htfadd27)
-
-var CandleSet htfadd28                     = CandleSet.new()
-var CandleSettings SettingsHTFadd28        = CandleSettings.new()
-var Candle[] candlesadd28                  = array.new<Candle>(0)
-var BOSdata bosdataadd28                   = BOSdata.new()
-
-htfadd28.settings                 := SettingsHTFadd28
-htfadd28.candles                  := candlesadd28
-htfadd28.bosdata                  := bosdataadd28
-htfadd28.settings.htf             := '28'
-htfadd28.settings.max_memory      := 10
-htfadd28.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd28)
-    LowestsbuSet(lowestsbu, htfadd28) 
-    MaxNormalSet(maxnormal, htfadd28)
-    MinNormalSet(minnormal, htfadd28)
-
-var CandleSet htfadd29                     = CandleSet.new()
-var CandleSettings SettingsHTFadd29        = CandleSettings.new()
-var Candle[] candlesadd29                  = array.new<Candle>(0)
-var BOSdata bosdataadd29                   = BOSdata.new()
-
-htfadd29.settings                 := SettingsHTFadd29
-htfadd29.candles                  := candlesadd29
-htfadd29.bosdata                  := bosdataadd29
-htfadd29.settings.htf             := '29'
-htfadd29.settings.max_memory      := 10
-htfadd29.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd29)
-    LowestsbuSet(lowestsbu, htfadd29) 
-    MaxNormalSet(maxnormal, htfadd29)
-    MinNormalSet(minnormal, htfadd29)
-
-var CandleSet htfadd30                     = CandleSet.new()
-var CandleSettings SettingsHTFadd30        = CandleSettings.new()
-var Candle[] candlesadd30                  = array.new<Candle>(0)
-var BOSdata bosdataadd30                   = BOSdata.new()
-
-htfadd30.settings                 := SettingsHTFadd30
-htfadd30.candles                  := candlesadd30
-htfadd30.bosdata                  := bosdataadd30
-htfadd30.settings.htf             := '30'
-htfadd30.settings.max_memory      := 10
-htfadd30.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd30)
-    LowestsbuSet(lowestsbu, htfadd30) 
-    MaxNormalSet(maxnormal, htfadd30)
-    MinNormalSet(minnormal, htfadd30)
-
-var CandleSet htfadd31                     = CandleSet.new()
-var CandleSettings SettingsHTFadd31        = CandleSettings.new()
-var Candle[] candlesadd31                  = array.new<Candle>(0)
-var BOSdata bosdataadd31                   = BOSdata.new()
-
-htfadd31.settings                 := SettingsHTFadd31
-htfadd31.candles                  := candlesadd31
-htfadd31.bosdata                  := bosdataadd31
-htfadd31.settings.htf             := '31'
-htfadd31.settings.max_memory      := 10
-htfadd31.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd31)
-    LowestsbuSet(lowestsbu, htfadd31) 
-    MaxNormalSet(maxnormal, htfadd31)
-    MinNormalSet(minnormal, htfadd31)
-
-var CandleSet htfadd32                     = CandleSet.new()
-var CandleSettings SettingsHTFadd32        = CandleSettings.new()
-var Candle[] candlesadd32                  = array.new<Candle>(0)
-var BOSdata bosdataadd32                   = BOSdata.new()
-
-htfadd32.settings                 := SettingsHTFadd32
-htfadd32.candles                  := candlesadd32
-htfadd32.bosdata                  := bosdataadd32
-htfadd32.settings.htf             := '32'
-htfadd32.settings.max_memory      := 10
-htfadd32.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd32)
-    LowestsbuSet(lowestsbu, htfadd32) 
-    MaxNormalSet(maxnormal, htfadd32)
-    MinNormalSet(minnormal, htfadd32)
-
-var CandleSet htfadd33                     = CandleSet.new()
-var CandleSettings SettingsHTFadd33        = CandleSettings.new()
-var Candle[] candlesadd33                  = array.new<Candle>(0)
-var BOSdata bosdataadd33                   = BOSdata.new()
-
-htfadd33.settings                 := SettingsHTFadd33
-htfadd33.candles                  := candlesadd33
-htfadd33.bosdata                  := bosdataadd33
-htfadd33.settings.htf             := '33'
-htfadd33.settings.max_memory      := 10
-htfadd33.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd33)
-    LowestsbuSet(lowestsbu, htfadd33) 
-    MaxNormalSet(maxnormal, htfadd33)
-    MinNormalSet(minnormal, htfadd33)
-
-var CandleSet htfadd34                     = CandleSet.new()
-var CandleSettings SettingsHTFadd34        = CandleSettings.new()
-var Candle[] candlesadd34                  = array.new<Candle>(0)
-var BOSdata bosdataadd34                   = BOSdata.new()
-
-htfadd34.settings                 := SettingsHTFadd34
-htfadd34.candles                  := candlesadd34
-htfadd34.bosdata                  := bosdataadd34
-htfadd34.settings.htf             := '34'
-htfadd34.settings.max_memory      := 10
-htfadd34.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd34)
-    LowestsbuSet(lowestsbu, htfadd34) 
-    MaxNormalSet(maxnormal, htfadd34)
-    MinNormalSet(minnormal, htfadd34)
-
-var CandleSet htfadd35                     = CandleSet.new()
-var CandleSettings SettingsHTFadd35        = CandleSettings.new()
-var Candle[] candlesadd35                  = array.new<Candle>(0)
-var BOSdata bosdataadd35                   = BOSdata.new()
-
-htfadd35.settings                 := SettingsHTFadd35
-htfadd35.candles                  := candlesadd35
-htfadd35.bosdata                  := bosdataadd35
-htfadd35.settings.htf             := '35'
-htfadd35.settings.max_memory      := 10
-htfadd35.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd35)
-    LowestsbuSet(lowestsbu, htfadd35) 
-    MaxNormalSet(maxnormal, htfadd35)
-    MinNormalSet(minnormal, htfadd35)
-
-var CandleSet htfadd36                     = CandleSet.new()
-var CandleSettings SettingsHTFadd36        = CandleSettings.new()
-var Candle[] candlesadd36                  = array.new<Candle>(0)
-var BOSdata bosdataadd36                   = BOSdata.new()
-
-htfadd36.settings                 := SettingsHTFadd36
-htfadd36.candles                  := candlesadd36
-htfadd36.bosdata                  := bosdataadd36
-htfadd36.settings.htf             := '36'
-htfadd36.settings.max_memory      := 10
-htfadd36.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd36)
-    LowestsbuSet(lowestsbu, htfadd36) 
-    MaxNormalSet(maxnormal, htfadd36)
-    MinNormalSet(minnormal, htfadd36)
-
-var CandleSet htfadd37                     = CandleSet.new()
-var CandleSettings SettingsHTFadd37        = CandleSettings.new()
-var Candle[] candlesadd37                  = array.new<Candle>(0)
-var BOSdata bosdataadd37                   = BOSdata.new()
-
-htfadd37.settings                 := SettingsHTFadd37
-htfadd37.candles                  := candlesadd37
-htfadd37.bosdata                  := bosdataadd37
-htfadd37.settings.htf             := '37'
-htfadd37.settings.max_memory      := 10
-htfadd37.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd37)
-    LowestsbuSet(lowestsbu, htfadd37) 
-    MaxNormalSet(maxnormal, htfadd37)
-    MinNormalSet(minnormal, htfadd37)
-
-var CandleSet htfadd38                     = CandleSet.new()
-var CandleSettings SettingsHTFadd38        = CandleSettings.new()
-var Candle[] candlesadd38                  = array.new<Candle>(0)
-var BOSdata bosdataadd38                   = BOSdata.new()
-
-htfadd38.settings                 := SettingsHTFadd38
-htfadd38.candles                  := candlesadd38
-htfadd38.bosdata                  := bosdataadd38
-htfadd38.settings.htf             := '38'
-htfadd38.settings.max_memory      := 10
-htfadd38.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd38)
-    LowestsbuSet(lowestsbu, htfadd38) 
-    MaxNormalSet(maxnormal, htfadd38)
-    MinNormalSet(minnormal, htfadd38)
-
-var CandleSet htfadd39                     = CandleSet.new()
-var CandleSettings SettingsHTFadd39        = CandleSettings.new()
-var Candle[] candlesadd39                  = array.new<Candle>(0)
-var BOSdata bosdataadd39                   = BOSdata.new()
-
-htfadd39.settings                 := SettingsHTFadd39
-htfadd39.candles                  := candlesadd39
-htfadd39.bosdata                  := bosdataadd39
-htfadd39.settings.htf             := '39'
-htfadd39.settings.max_memory      := 10
-htfadd39.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd39)
-    LowestsbuSet(lowestsbu, htfadd39) 
-    MaxNormalSet(maxnormal, htfadd39)
-    MinNormalSet(minnormal, htfadd39)
-
-var CandleSet htfadd40                     = CandleSet.new()
-var CandleSettings SettingsHTFadd40        = CandleSettings.new()
-var Candle[] candlesadd40                  = array.new<Candle>(0)
-var BOSdata bosdataadd40                   = BOSdata.new()
-
-htfadd40.settings                 := SettingsHTFadd40
-htfadd40.candles                  := candlesadd40
-htfadd40.bosdata                  := bosdataadd40
-htfadd40.settings.htf             := '40'
-htfadd40.settings.max_memory      := 10
-htfadd40.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd40)
-    LowestsbuSet(lowestsbu, htfadd40) 
-    MaxNormalSet(maxnormal, htfadd40)
-    MinNormalSet(minnormal, htfadd40)
-
-var CandleSet htfadd41                     = CandleSet.new()
-var CandleSettings SettingsHTFadd41        = CandleSettings.new()
-var Candle[] candlesadd41                  = array.new<Candle>(0)
-var BOSdata bosdataadd41                   = BOSdata.new()
-
-htfadd41.settings                 := SettingsHTFadd41
-htfadd41.candles                  := candlesadd41
-htfadd41.bosdata                  := bosdataadd41
-htfadd41.settings.htf             := '41'
-htfadd41.settings.max_memory      := 10
-htfadd41.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd41)
-    LowestsbuSet(lowestsbu, htfadd41) 
-    MaxNormalSet(maxnormal, htfadd41)
-    MinNormalSet(minnormal, htfadd41)
-
-var CandleSet htfadd42                     = CandleSet.new()
-var CandleSettings SettingsHTFadd42        = CandleSettings.new()
-var Candle[] candlesadd42                  = array.new<Candle>(0)
-var BOSdata bosdataadd42                   = BOSdata.new()
-
-htfadd42.settings                 := SettingsHTFadd42
-htfadd42.candles                  := candlesadd42
-htfadd42.bosdata                  := bosdataadd42
-htfadd42.settings.htf             := '42'
-htfadd42.settings.max_memory      := 10
-htfadd42.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd42)
-    LowestsbuSet(lowestsbu, htfadd42) 
-    MaxNormalSet(maxnormal, htfadd42)
-    MinNormalSet(minnormal, htfadd42)
-
-var CandleSet htfadd43                     = CandleSet.new()
-var CandleSettings SettingsHTFadd43        = CandleSettings.new()
-var Candle[] candlesadd43                  = array.new<Candle>(0)
-var BOSdata bosdataadd43                   = BOSdata.new()
-
-htfadd43.settings                 := SettingsHTFadd43
-htfadd43.candles                  := candlesadd43
-htfadd43.bosdata                  := bosdataadd43
-htfadd43.settings.htf             := '43'
-htfadd43.settings.max_memory      := 10
-htfadd43.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd43)
-    LowestsbuSet(lowestsbu, htfadd43) 
-    MaxNormalSet(maxnormal, htfadd43)
-    MinNormalSet(minnormal, htfadd43)
-
-var CandleSet htfadd44                     = CandleSet.new()
-var CandleSettings SettingsHTFadd44        = CandleSettings.new()
-var Candle[] candlesadd44                  = array.new<Candle>(0)
-var BOSdata bosdataadd44                   = BOSdata.new()
-
-htfadd44.settings                 := SettingsHTFadd44
-htfadd44.candles                  := candlesadd44
-htfadd44.bosdata                  := bosdataadd44
-htfadd44.settings.htf             := '44'
-htfadd44.settings.max_memory      := 10
-htfadd44.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd44)
-    LowestsbuSet(lowestsbu, htfadd44) 
-    MaxNormalSet(maxnormal, htfadd44)
-    MinNormalSet(minnormal, htfadd44)
-
-var CandleSet htfadd45                     = CandleSet.new()
-var CandleSettings SettingsHTFadd45        = CandleSettings.new()
-var Candle[] candlesadd45                  = array.new<Candle>(0)
-var BOSdata bosdataadd45                   = BOSdata.new()
-
-htfadd45.settings                 := SettingsHTFadd45
-htfadd45.candles                  := candlesadd45
-htfadd45.bosdata                  := bosdataadd45
-htfadd45.settings.htf             := '45'
-htfadd45.settings.max_memory      := 10
-htfadd45.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd45)
-    LowestsbuSet(lowestsbu, htfadd45) 
-    MaxNormalSet(maxnormal, htfadd45)
-    MinNormalSet(minnormal, htfadd45)
-
-var CandleSet htfadd46                     = CandleSet.new()
-var CandleSettings SettingsHTFadd46        = CandleSettings.new()
-var Candle[] candlesadd46                  = array.new<Candle>(0)
-var BOSdata bosdataadd46                   = BOSdata.new()
-
-htfadd46.settings                 := SettingsHTFadd46
-htfadd46.candles                  := candlesadd46
-htfadd46.bosdata                  := bosdataadd46
-htfadd46.settings.htf             := '46'
-htfadd46.settings.max_memory      := 10
-htfadd46.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd46)
-    LowestsbuSet(lowestsbu, htfadd46) 
-    MaxNormalSet(maxnormal, htfadd46)
-    MinNormalSet(minnormal, htfadd46)
-
-var CandleSet htfadd47                     = CandleSet.new()
-var CandleSettings SettingsHTFadd47        = CandleSettings.new()
-var Candle[] candlesadd47                  = array.new<Candle>(0)
-var BOSdata bosdataadd47                   = BOSdata.new()
-
-htfadd47.settings                 := SettingsHTFadd47
-htfadd47.candles                  := candlesadd47
-htfadd47.bosdata                  := bosdataadd47
-htfadd47.settings.htf             := '47'
-htfadd47.settings.max_memory      := 10
-htfadd47.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd47)
-    LowestsbuSet(lowestsbu, htfadd47) 
-    MaxNormalSet(maxnormal, htfadd47)
-    MinNormalSet(minnormal, htfadd47)
-
-var CandleSet htfadd48                     = CandleSet.new()
-var CandleSettings SettingsHTFadd48        = CandleSettings.new()
-var Candle[] candlesadd48                  = array.new<Candle>(0)
-var BOSdata bosdataadd48                   = BOSdata.new()
-
-htfadd48.settings                 := SettingsHTFadd48
-htfadd48.candles                  := candlesadd48
-htfadd48.bosdata                  := bosdataadd48
-htfadd48.settings.htf             := '48'
-htfadd48.settings.max_memory      := 10
-htfadd48.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd48)
-    LowestsbuSet(lowestsbu, htfadd48) 
-    MaxNormalSet(maxnormal, htfadd48)
-    MinNormalSet(minnormal, htfadd48)
-
-var CandleSet htfadd49                     = CandleSet.new()
-var CandleSettings SettingsHTFadd49        = CandleSettings.new()
-var Candle[] candlesadd49                  = array.new<Candle>(0)
-var BOSdata bosdataadd49                   = BOSdata.new()
-
-htfadd49.settings                 := SettingsHTFadd49
-htfadd49.candles                  := candlesadd49
-htfadd49.bosdata                  := bosdataadd49
-htfadd49.settings.htf             := '49'
-htfadd49.settings.max_memory      := 10
-htfadd49.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd49)
-    LowestsbuSet(lowestsbu, htfadd49) 
-    MaxNormalSet(maxnormal, htfadd49)
-    MinNormalSet(minnormal, htfadd49)
-
-var CandleSet htfadd50                     = CandleSet.new()
-var CandleSettings SettingsHTFadd50        = CandleSettings.new()
-var Candle[] candlesadd50                  = array.new<Candle>(0)
-var BOSdata bosdataadd50                   = BOSdata.new()
-
-htfadd50.settings                 := SettingsHTFadd50
-htfadd50.candles                  := candlesadd50
-htfadd50.bosdata                  := bosdataadd50
-htfadd50.settings.htf             := '50'
-htfadd50.settings.max_memory      := 10
-htfadd50.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd50)
-    LowestsbuSet(lowestsbu, htfadd50) 
-    MaxNormalSet(maxnormal, htfadd50)
-    MinNormalSet(minnormal, htfadd50)
-
-var CandleSet htfadd51                     = CandleSet.new()
-var CandleSettings SettingsHTFadd51        = CandleSettings.new()
-var Candle[] candlesadd51                  = array.new<Candle>(0)
-var BOSdata bosdataadd51                   = BOSdata.new()
-
-htfadd51.settings                 := SettingsHTFadd51
-htfadd51.candles                  := candlesadd51
-htfadd51.bosdata                  := bosdataadd51
-htfadd51.settings.htf             := '51'
-htfadd51.settings.max_memory      := 10
-htfadd51.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd51)
-    LowestsbuSet(lowestsbu, htfadd51) 
-    MaxNormalSet(maxnormal, htfadd51)
-    MinNormalSet(minnormal, htfadd51)
-
-var CandleSet htfadd52                     = CandleSet.new()
-var CandleSettings SettingsHTFadd52        = CandleSettings.new()
-var Candle[] candlesadd52                  = array.new<Candle>(0)
-var BOSdata bosdataadd52                   = BOSdata.new()
-
-htfadd52.settings                 := SettingsHTFadd52
-htfadd52.candles                  := candlesadd52
-htfadd52.bosdata                  := bosdataadd52
-htfadd52.settings.htf             := '52'
-htfadd52.settings.max_memory      := 10
-htfadd52.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd52)
-    LowestsbuSet(lowestsbu, htfadd52) 
-    MaxNormalSet(maxnormal, htfadd52)
-    MinNormalSet(minnormal, htfadd52)
-
-var CandleSet htfadd53                     = CandleSet.new()
-var CandleSettings SettingsHTFadd53        = CandleSettings.new()
-var Candle[] candlesadd53                  = array.new<Candle>(0)
-var BOSdata bosdataadd53                   = BOSdata.new()
-
-htfadd53.settings                 := SettingsHTFadd53
-htfadd53.candles                  := candlesadd53
-htfadd53.bosdata                  := bosdataadd53
-htfadd53.settings.htf             := '53'
-htfadd53.settings.max_memory      := 10
-htfadd53.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd53)
-    LowestsbuSet(lowestsbu, htfadd53) 
-    MaxNormalSet(maxnormal, htfadd53)
-    MinNormalSet(minnormal, htfadd53)
-
-var CandleSet htfadd54                     = CandleSet.new()
-var CandleSettings SettingsHTFadd54        = CandleSettings.new()
-var Candle[] candlesadd54                  = array.new<Candle>(0)
-var BOSdata bosdataadd54                   = BOSdata.new()
-
-htfadd54.settings                 := SettingsHTFadd54
-htfadd54.candles                  := candlesadd54
-htfadd54.bosdata                  := bosdataadd54
-htfadd54.settings.htf             := '54'
-htfadd54.settings.max_memory      := 10
-htfadd54.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd54)
-    LowestsbuSet(lowestsbu, htfadd54) 
-    MaxNormalSet(maxnormal, htfadd54)
-    MinNormalSet(minnormal, htfadd54)
-
-var CandleSet htfadd55                     = CandleSet.new()
-var CandleSettings SettingsHTFadd55        = CandleSettings.new()
-var Candle[] candlesadd55                  = array.new<Candle>(0)
-var BOSdata bosdataadd55                   = BOSdata.new()
-
-htfadd55.settings                 := SettingsHTFadd55
-htfadd55.candles                  := candlesadd55
-htfadd55.bosdata                  := bosdataadd55
-htfadd55.settings.htf             := '55'
-htfadd55.settings.max_memory      := 10
-htfadd55.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd55)
-    LowestsbuSet(lowestsbu, htfadd55) 
-    MaxNormalSet(maxnormal, htfadd55)
-    MinNormalSet(minnormal, htfadd55)
-
-var CandleSet htfadd56                     = CandleSet.new()
-var CandleSettings SettingsHTFadd56        = CandleSettings.new()
-var Candle[] candlesadd56                  = array.new<Candle>(0)
-var BOSdata bosdataadd56                   = BOSdata.new()
-
-htfadd56.settings                 := SettingsHTFadd56
-htfadd56.candles                  := candlesadd56
-htfadd56.bosdata                  := bosdataadd56
-htfadd56.settings.htf             := '56'
-htfadd56.settings.max_memory      := 10
-htfadd56.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd56)
-    LowestsbuSet(lowestsbu, htfadd56) 
-    MaxNormalSet(maxnormal, htfadd56)
-    MinNormalSet(minnormal, htfadd56)
-
-var CandleSet htfadd57                     = CandleSet.new()
-var CandleSettings SettingsHTFadd57        = CandleSettings.new()
-var Candle[] candlesadd57                  = array.new<Candle>(0)
-var BOSdata bosdataadd57                   = BOSdata.new()
-
-htfadd57.settings                 := SettingsHTFadd57
-htfadd57.candles                  := candlesadd57
-htfadd57.bosdata                  := bosdataadd57
-htfadd57.settings.htf             := '57'
-htfadd57.settings.max_memory      := 10
-htfadd57.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd57)
-    LowestsbuSet(lowestsbu, htfadd57) 
-    MaxNormalSet(maxnormal, htfadd57)
-    MinNormalSet(minnormal, htfadd57)
-
-var CandleSet htfadd58                     = CandleSet.new()
-var CandleSettings SettingsHTFadd58        = CandleSettings.new()
-var Candle[] candlesadd58                  = array.new<Candle>(0)
-var BOSdata bosdataadd58                   = BOSdata.new()
-
-htfadd58.settings                 := SettingsHTFadd58
-htfadd58.candles                  := candlesadd58
-htfadd58.bosdata                  := bosdataadd58
-htfadd58.settings.htf             := '58'
-htfadd58.settings.max_memory      := 10
-htfadd58.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd58)
-    LowestsbuSet(lowestsbu, htfadd58) 
-    MaxNormalSet(maxnormal, htfadd58)
-    MinNormalSet(minnormal, htfadd58)
-
-var CandleSet htfadd59                     = CandleSet.new()
-var CandleSettings SettingsHTFadd59        = CandleSettings.new()
-var Candle[] candlesadd59                  = array.new<Candle>(0)
-var BOSdata bosdataadd59                   = BOSdata.new()
-
-htfadd59.settings                 := SettingsHTFadd59
-htfadd59.candles                  := candlesadd59
-htfadd59.bosdata                  := bosdataadd59
-htfadd59.settings.htf             := '59'
-htfadd59.settings.max_memory      := 10
-htfadd59.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd59)
-    LowestsbuSet(lowestsbu, htfadd59) 
-    MaxNormalSet(maxnormal, htfadd59)
-    MinNormalSet(minnormal, htfadd59)
-
 var CandleSet htfadd60                     = CandleSet.new()
 var CandleSettings SettingsHTFadd60        = CandleSettings.new()
 var Candle[] candlesadd60                  = array.new<Candle>(0)
@@ -1623,13 +619,495 @@ htfadd60.bosdata                  := bosdataadd60
 htfadd60.settings.htf             := '60'
 htfadd60.settings.max_memory      := 10
 htfadd60.Monitor().BOSJudge()
-if barstate.islast
+if barstate.islast or barstate.isrealtime
     HighestsbdSet(highestsbd, htfadd60)
     LowestsbuSet(lowestsbu, htfadd60) 
     MaxNormalSet(maxnormal, htfadd60)
     MinNormalSet(minnormal, htfadd60)
+var CandleSet htfadd61                     = CandleSet.new()
+var CandleSettings SettingsHTFadd61        = CandleSettings.new()
+var Candle[] candlesadd61                  = array.new<Candle>(0)
+var BOSdata bosdataadd61                   = BOSdata.new()
+
+htfadd61.settings                 := SettingsHTFadd61
+htfadd61.candles                  := candlesadd61
+htfadd61.bosdata                  := bosdataadd61
+htfadd61.settings.htf             := '61'
+htfadd61.settings.max_memory      := 10
+htfadd61.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd61)
+    LowestsbuSet(lowestsbu, htfadd61) 
+    MaxNormalSet(maxnormal, htfadd61)
+    MinNormalSet(minnormal, htfadd61)
+var CandleSet htfadd62                     = CandleSet.new()
+var CandleSettings SettingsHTFadd62        = CandleSettings.new()
+var Candle[] candlesadd62                  = array.new<Candle>(0)
+var BOSdata bosdataadd62                   = BOSdata.new()
+
+htfadd62.settings                 := SettingsHTFadd62
+htfadd62.candles                  := candlesadd62
+htfadd62.bosdata                  := bosdataadd62
+htfadd62.settings.htf             := '62'
+htfadd62.settings.max_memory      := 10
+htfadd62.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd62)
+    LowestsbuSet(lowestsbu, htfadd62) 
+    MaxNormalSet(maxnormal, htfadd62)
+    MinNormalSet(minnormal, htfadd62)
+var CandleSet htfadd63                     = CandleSet.new()
+var CandleSettings SettingsHTFadd63        = CandleSettings.new()
+var Candle[] candlesadd63                  = array.new<Candle>(0)
+var BOSdata bosdataadd63                   = BOSdata.new()
+
+htfadd63.settings                 := SettingsHTFadd63
+htfadd63.candles                  := candlesadd63
+htfadd63.bosdata                  := bosdataadd63
+htfadd63.settings.htf             := '63'
+htfadd63.settings.max_memory      := 10
+htfadd63.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd63)
+    LowestsbuSet(lowestsbu, htfadd63) 
+    MaxNormalSet(maxnormal, htfadd63)
+    MinNormalSet(minnormal, htfadd63)
+var CandleSet htfadd64                     = CandleSet.new()
+var CandleSettings SettingsHTFadd64        = CandleSettings.new()
+var Candle[] candlesadd64                  = array.new<Candle>(0)
+var BOSdata bosdataadd64                   = BOSdata.new()
+
+htfadd64.settings                 := SettingsHTFadd64
+htfadd64.candles                  := candlesadd64
+htfadd64.bosdata                  := bosdataadd64
+htfadd64.settings.htf             := '64'
+htfadd64.settings.max_memory      := 10
+htfadd64.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd64)
+    LowestsbuSet(lowestsbu, htfadd64) 
+    MaxNormalSet(maxnormal, htfadd64)
+    MinNormalSet(minnormal, htfadd64)
+var CandleSet htfadd65                     = CandleSet.new()
+var CandleSettings SettingsHTFadd65        = CandleSettings.new()
+var Candle[] candlesadd65                  = array.new<Candle>(0)
+var BOSdata bosdataadd65                   = BOSdata.new()
+
+htfadd65.settings                 := SettingsHTFadd65
+htfadd65.candles                  := candlesadd65
+htfadd65.bosdata                  := bosdataadd65
+htfadd65.settings.htf             := '65'
+htfadd65.settings.max_memory      := 10
+htfadd65.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd65)
+    LowestsbuSet(lowestsbu, htfadd65) 
+    MaxNormalSet(maxnormal, htfadd65)
+    MinNormalSet(minnormal, htfadd65)
+var CandleSet htfadd66                     = CandleSet.new()
+var CandleSettings SettingsHTFadd66        = CandleSettings.new()
+var Candle[] candlesadd66                  = array.new<Candle>(0)
+var BOSdata bosdataadd66                   = BOSdata.new()
+
+htfadd66.settings                 := SettingsHTFadd66
+htfadd66.candles                  := candlesadd66
+htfadd66.bosdata                  := bosdataadd66
+htfadd66.settings.htf             := '66'
+htfadd66.settings.max_memory      := 10
+htfadd66.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd66)
+    LowestsbuSet(lowestsbu, htfadd66) 
+    MaxNormalSet(maxnormal, htfadd66)
+    MinNormalSet(minnormal, htfadd66)
+var CandleSet htfadd67                     = CandleSet.new()
+var CandleSettings SettingsHTFadd67        = CandleSettings.new()
+var Candle[] candlesadd67                  = array.new<Candle>(0)
+var BOSdata bosdataadd67                   = BOSdata.new()
+
+htfadd67.settings                 := SettingsHTFadd67
+htfadd67.candles                  := candlesadd67
+htfadd67.bosdata                  := bosdataadd67
+htfadd67.settings.htf             := '67'
+htfadd67.settings.max_memory      := 10
+htfadd67.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd67)
+    LowestsbuSet(lowestsbu, htfadd67) 
+    MaxNormalSet(maxnormal, htfadd67)
+    MinNormalSet(minnormal, htfadd67)
+var CandleSet htfadd68                     = CandleSet.new()
+var CandleSettings SettingsHTFadd68        = CandleSettings.new()
+var Candle[] candlesadd68                  = array.new<Candle>(0)
+var BOSdata bosdataadd68                   = BOSdata.new()
+
+htfadd68.settings                 := SettingsHTFadd68
+htfadd68.candles                  := candlesadd68
+htfadd68.bosdata                  := bosdataadd68
+htfadd68.settings.htf             := '68'
+htfadd68.settings.max_memory      := 10
+htfadd68.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd68)
+    LowestsbuSet(lowestsbu, htfadd68) 
+    MaxNormalSet(maxnormal, htfadd68)
+    MinNormalSet(minnormal, htfadd68)
+var CandleSet htfadd69                     = CandleSet.new()
+var CandleSettings SettingsHTFadd69        = CandleSettings.new()
+var Candle[] candlesadd69                  = array.new<Candle>(0)
+var BOSdata bosdataadd69                   = BOSdata.new()
+
+htfadd69.settings                 := SettingsHTFadd69
+htfadd69.candles                  := candlesadd69
+htfadd69.bosdata                  := bosdataadd69
+htfadd69.settings.htf             := '69'
+htfadd69.settings.max_memory      := 10
+htfadd69.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd69)
+    LowestsbuSet(lowestsbu, htfadd69) 
+    MaxNormalSet(maxnormal, htfadd69)
+    MinNormalSet(minnormal, htfadd69)
+var CandleSet htfadd70                     = CandleSet.new()
+var CandleSettings SettingsHTFadd70        = CandleSettings.new()
+var Candle[] candlesadd70                  = array.new<Candle>(0)
+var BOSdata bosdataadd70                   = BOSdata.new()
+
+htfadd70.settings                 := SettingsHTFadd70
+htfadd70.candles                  := candlesadd70
+htfadd70.bosdata                  := bosdataadd70
+htfadd70.settings.htf             := '70'
+htfadd70.settings.max_memory      := 10
+htfadd70.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd70)
+    LowestsbuSet(lowestsbu, htfadd70) 
+    MaxNormalSet(maxnormal, htfadd70)
+    MinNormalSet(minnormal, htfadd70)
+var CandleSet htfadd71                     = CandleSet.new()
+var CandleSettings SettingsHTFadd71        = CandleSettings.new()
+var Candle[] candlesadd71                  = array.new<Candle>(0)
+var BOSdata bosdataadd71                   = BOSdata.new()
+
+htfadd71.settings                 := SettingsHTFadd71
+htfadd71.candles                  := candlesadd71
+htfadd71.bosdata                  := bosdataadd71
+htfadd71.settings.htf             := '71'
+htfadd71.settings.max_memory      := 10
+htfadd71.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd71)
+    LowestsbuSet(lowestsbu, htfadd71) 
+    MaxNormalSet(maxnormal, htfadd71)
+    MinNormalSet(minnormal, htfadd71)
+var CandleSet htfadd72                     = CandleSet.new()
+var CandleSettings SettingsHTFadd72        = CandleSettings.new()
+var Candle[] candlesadd72                  = array.new<Candle>(0)
+var BOSdata bosdataadd72                   = BOSdata.new()
+
+htfadd72.settings                 := SettingsHTFadd72
+htfadd72.candles                  := candlesadd72
+htfadd72.bosdata                  := bosdataadd72
+htfadd72.settings.htf             := '72'
+htfadd72.settings.max_memory      := 10
+htfadd72.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd72)
+    LowestsbuSet(lowestsbu, htfadd72) 
+    MaxNormalSet(maxnormal, htfadd72)
+    MinNormalSet(minnormal, htfadd72)
+var CandleSet htfadd73                     = CandleSet.new()
+var CandleSettings SettingsHTFadd73        = CandleSettings.new()
+var Candle[] candlesadd73                  = array.new<Candle>(0)
+var BOSdata bosdataadd73                   = BOSdata.new()
+
+htfadd73.settings                 := SettingsHTFadd73
+htfadd73.candles                  := candlesadd73
+htfadd73.bosdata                  := bosdataadd73
+htfadd73.settings.htf             := '73'
+htfadd73.settings.max_memory      := 10
+htfadd73.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd73)
+    LowestsbuSet(lowestsbu, htfadd73) 
+    MaxNormalSet(maxnormal, htfadd73)
+    MinNormalSet(minnormal, htfadd73)
+var CandleSet htfadd74                     = CandleSet.new()
+var CandleSettings SettingsHTFadd74        = CandleSettings.new()
+var Candle[] candlesadd74                  = array.new<Candle>(0)
+var BOSdata bosdataadd74                   = BOSdata.new()
+
+htfadd74.settings                 := SettingsHTFadd74
+htfadd74.candles                  := candlesadd74
+htfadd74.bosdata                  := bosdataadd74
+htfadd74.settings.htf             := '74'
+htfadd74.settings.max_memory      := 10
+htfadd74.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd74)
+    LowestsbuSet(lowestsbu, htfadd74) 
+    MaxNormalSet(maxnormal, htfadd74)
+    MinNormalSet(minnormal, htfadd74)
+var CandleSet htfadd75                     = CandleSet.new()
+var CandleSettings SettingsHTFadd75        = CandleSettings.new()
+var Candle[] candlesadd75                  = array.new<Candle>(0)
+var BOSdata bosdataadd75                   = BOSdata.new()
+
+htfadd75.settings                 := SettingsHTFadd75
+htfadd75.candles                  := candlesadd75
+htfadd75.bosdata                  := bosdataadd75
+htfadd75.settings.htf             := '75'
+htfadd75.settings.max_memory      := 10
+htfadd75.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd75)
+    LowestsbuSet(lowestsbu, htfadd75) 
+    MaxNormalSet(maxnormal, htfadd75)
+    MinNormalSet(minnormal, htfadd75)
+var CandleSet htfadd76                     = CandleSet.new()
+var CandleSettings SettingsHTFadd76        = CandleSettings.new()
+var Candle[] candlesadd76                  = array.new<Candle>(0)
+var BOSdata bosdataadd76                   = BOSdata.new()
+
+htfadd76.settings                 := SettingsHTFadd76
+htfadd76.candles                  := candlesadd76
+htfadd76.bosdata                  := bosdataadd76
+htfadd76.settings.htf             := '76'
+htfadd76.settings.max_memory      := 10
+htfadd76.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd76)
+    LowestsbuSet(lowestsbu, htfadd76) 
+    MaxNormalSet(maxnormal, htfadd76)
+    MinNormalSet(minnormal, htfadd76)
+var CandleSet htfadd77                     = CandleSet.new()
+var CandleSettings SettingsHTFadd77        = CandleSettings.new()
+var Candle[] candlesadd77                  = array.new<Candle>(0)
+var BOSdata bosdataadd77                   = BOSdata.new()
+
+htfadd77.settings                 := SettingsHTFadd77
+htfadd77.candles                  := candlesadd77
+htfadd77.bosdata                  := bosdataadd77
+htfadd77.settings.htf             := '77'
+htfadd77.settings.max_memory      := 10
+htfadd77.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd77)
+    LowestsbuSet(lowestsbu, htfadd77) 
+    MaxNormalSet(maxnormal, htfadd77)
+    MinNormalSet(minnormal, htfadd77)
+var CandleSet htfadd78                     = CandleSet.new()
+var CandleSettings SettingsHTFadd78        = CandleSettings.new()
+var Candle[] candlesadd78                  = array.new<Candle>(0)
+var BOSdata bosdataadd78                   = BOSdata.new()
+
+htfadd78.settings                 := SettingsHTFadd78
+htfadd78.candles                  := candlesadd78
+htfadd78.bosdata                  := bosdataadd78
+htfadd78.settings.htf             := '78'
+htfadd78.settings.max_memory      := 10
+htfadd78.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd78)
+    LowestsbuSet(lowestsbu, htfadd78) 
+    MaxNormalSet(maxnormal, htfadd78)
+    MinNormalSet(minnormal, htfadd78)
+var CandleSet htfadd79                     = CandleSet.new()
+var CandleSettings SettingsHTFadd79        = CandleSettings.new()
+var Candle[] candlesadd79                  = array.new<Candle>(0)
+var BOSdata bosdataadd79                   = BOSdata.new()
+
+htfadd79.settings                 := SettingsHTFadd79
+htfadd79.candles                  := candlesadd79
+htfadd79.bosdata                  := bosdataadd79
+htfadd79.settings.htf             := '79'
+htfadd79.settings.max_memory      := 10
+htfadd79.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd79)
+    LowestsbuSet(lowestsbu, htfadd79) 
+    MaxNormalSet(maxnormal, htfadd79)
+    MinNormalSet(minnormal, htfadd79)
+var CandleSet htfadd80                     = CandleSet.new()
+var CandleSettings SettingsHTFadd80        = CandleSettings.new()
+var Candle[] candlesadd80                  = array.new<Candle>(0)
+var BOSdata bosdataadd80                   = BOSdata.new()
+
+htfadd80.settings                 := SettingsHTFadd80
+htfadd80.candles                  := candlesadd80
+htfadd80.bosdata                  := bosdataadd80
+htfadd80.settings.htf             := '80'
+htfadd80.settings.max_memory      := 10
+htfadd80.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd80)
+    LowestsbuSet(lowestsbu, htfadd80) 
+    MaxNormalSet(maxnormal, htfadd80)
+    MinNormalSet(minnormal, htfadd80)
+var CandleSet htfadd81                     = CandleSet.new()
+var CandleSettings SettingsHTFadd81        = CandleSettings.new()
+var Candle[] candlesadd81                  = array.new<Candle>(0)
+var BOSdata bosdataadd81                   = BOSdata.new()
+
+htfadd81.settings                 := SettingsHTFadd81
+htfadd81.candles                  := candlesadd81
+htfadd81.bosdata                  := bosdataadd81
+htfadd81.settings.htf             := '81'
+htfadd81.settings.max_memory      := 10
+htfadd81.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd81)
+    LowestsbuSet(lowestsbu, htfadd81) 
+    MaxNormalSet(maxnormal, htfadd81)
+    MinNormalSet(minnormal, htfadd81)
+var CandleSet htfadd82                     = CandleSet.new()
+var CandleSettings SettingsHTFadd82        = CandleSettings.new()
+var Candle[] candlesadd82                  = array.new<Candle>(0)
+var BOSdata bosdataadd82                   = BOSdata.new()
+
+htfadd82.settings                 := SettingsHTFadd82
+htfadd82.candles                  := candlesadd82
+htfadd82.bosdata                  := bosdataadd82
+htfadd82.settings.htf             := '82'
+htfadd82.settings.max_memory      := 10
+htfadd82.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd82)
+    LowestsbuSet(lowestsbu, htfadd82) 
+    MaxNormalSet(maxnormal, htfadd82)
+    MinNormalSet(minnormal, htfadd82)
+var CandleSet htfadd83                     = CandleSet.new()
+var CandleSettings SettingsHTFadd83        = CandleSettings.new()
+var Candle[] candlesadd83                  = array.new<Candle>(0)
+var BOSdata bosdataadd83                   = BOSdata.new()
+
+htfadd83.settings                 := SettingsHTFadd83
+htfadd83.candles                  := candlesadd83
+htfadd83.bosdata                  := bosdataadd83
+htfadd83.settings.htf             := '83'
+htfadd83.settings.max_memory      := 10
+htfadd83.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd83)
+    LowestsbuSet(lowestsbu, htfadd83) 
+    MaxNormalSet(maxnormal, htfadd83)
+    MinNormalSet(minnormal, htfadd83)
+var CandleSet htfadd84                     = CandleSet.new()
+var CandleSettings SettingsHTFadd84        = CandleSettings.new()
+var Candle[] candlesadd84                  = array.new<Candle>(0)
+var BOSdata bosdataadd84                   = BOSdata.new()
+
+htfadd84.settings                 := SettingsHTFadd84
+htfadd84.candles                  := candlesadd84
+htfadd84.bosdata                  := bosdataadd84
+htfadd84.settings.htf             := '84'
+htfadd84.settings.max_memory      := 10
+htfadd84.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd84)
+    LowestsbuSet(lowestsbu, htfadd84) 
+    MaxNormalSet(maxnormal, htfadd84)
+    MinNormalSet(minnormal, htfadd84)
+var CandleSet htfadd85                     = CandleSet.new()
+var CandleSettings SettingsHTFadd85        = CandleSettings.new()
+var Candle[] candlesadd85                  = array.new<Candle>(0)
+var BOSdata bosdataadd85                   = BOSdata.new()
+
+htfadd85.settings                 := SettingsHTFadd85
+htfadd85.candles                  := candlesadd85
+htfadd85.bosdata                  := bosdataadd85
+htfadd85.settings.htf             := '85'
+htfadd85.settings.max_memory      := 10
+htfadd85.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd85)
+    LowestsbuSet(lowestsbu, htfadd85) 
+    MaxNormalSet(maxnormal, htfadd85)
+    MinNormalSet(minnormal, htfadd85)
+var CandleSet htfadd86                     = CandleSet.new()
+var CandleSettings SettingsHTFadd86        = CandleSettings.new()
+var Candle[] candlesadd86                  = array.new<Candle>(0)
+var BOSdata bosdataadd86                   = BOSdata.new()
+
+htfadd86.settings                 := SettingsHTFadd86
+htfadd86.candles                  := candlesadd86
+htfadd86.bosdata                  := bosdataadd86
+htfadd86.settings.htf             := '86'
+htfadd86.settings.max_memory      := 10
+htfadd86.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd86)
+    LowestsbuSet(lowestsbu, htfadd86) 
+    MaxNormalSet(maxnormal, htfadd86)
+    MinNormalSet(minnormal, htfadd86)
+var CandleSet htfadd87                     = CandleSet.new()
+var CandleSettings SettingsHTFadd87        = CandleSettings.new()
+var Candle[] candlesadd87                  = array.new<Candle>(0)
+var BOSdata bosdataadd87                   = BOSdata.new()
+
+htfadd87.settings                 := SettingsHTFadd87
+htfadd87.candles                  := candlesadd87
+htfadd87.bosdata                  := bosdataadd87
+htfadd87.settings.htf             := '87'
+htfadd87.settings.max_memory      := 10
+htfadd87.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd87)
+    LowestsbuSet(lowestsbu, htfadd87) 
+    MaxNormalSet(maxnormal, htfadd87)
+    MinNormalSet(minnormal, htfadd87)
+var CandleSet htfadd88                     = CandleSet.new()
+var CandleSettings SettingsHTFadd88        = CandleSettings.new()
+var Candle[] candlesadd88                  = array.new<Candle>(0)
+var BOSdata bosdataadd88                   = BOSdata.new()
+
+htfadd88.settings                 := SettingsHTFadd88
+htfadd88.candles                  := candlesadd88
+htfadd88.bosdata                  := bosdataadd88
+htfadd88.settings.htf             := '88'
+htfadd88.settings.max_memory      := 10
+htfadd88.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd88)
+    LowestsbuSet(lowestsbu, htfadd88) 
+    MaxNormalSet(maxnormal, htfadd88)
+    MinNormalSet(minnormal, htfadd88)
+var CandleSet htfadd89                     = CandleSet.new()
+var CandleSettings SettingsHTFadd89        = CandleSettings.new()
+var Candle[] candlesadd89                  = array.new<Candle>(0)
+var BOSdata bosdataadd89                   = BOSdata.new()
+
+htfadd89.settings                 := SettingsHTFadd89
+htfadd89.candles                  := candlesadd89
+htfadd89.bosdata                  := bosdataadd89
+htfadd89.settings.htf             := '89'
+htfadd89.settings.max_memory      := 10
+htfadd89.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd89)
+    LowestsbuSet(lowestsbu, htfadd89) 
+    MaxNormalSet(maxnormal, htfadd89)
+    MinNormalSet(minnormal, htfadd89)
+var CandleSet htfadd90                     = CandleSet.new()
+var CandleSettings SettingsHTFadd90        = CandleSettings.new()
+var Candle[] candlesadd90                  = array.new<Candle>(0)
+var BOSdata bosdataadd90                   = BOSdata.new()
+
+htfadd90.settings                 := SettingsHTFadd90
+htfadd90.candles                  := candlesadd90
+htfadd90.bosdata                  := bosdataadd90
+htfadd90.settings.htf             := '90'
+htfadd90.settings.max_memory      := 10
+htfadd90.Monitor().BOSJudge()
+if barstate.islast or barstate.isrealtime
+    HighestsbdSet(highestsbd, htfadd90)
+    LowestsbuSet(lowestsbu, htfadd90) 
+    MaxNormalSet(maxnormal, htfadd90)
+    MinNormalSet(minnormal, htfadd90)
+
+
 //+---------------add var end------------------+//
-if settings.add_show and barstate.isrealtime
+if settings.add_show and barstate.islast
     maxnormal.addplot(offset)
     minnormal.addplot(offset)
     highestsbd.addplot(offset)
