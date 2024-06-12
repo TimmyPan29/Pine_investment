@@ -1,7 +1,7 @@
 //+-----filter the multiline after the timing and show that on figure -----+//
 // © T.PanShuai29
 //@version=5
-indicator("4line_", overlay=true, max_boxes_count = 500, max_lines_count = 500, max_bars_back = 5000)
+indicator("linex30_configurable", overlay=true, max_boxes_count = 500, max_lines_count = 500, max_bars_back = 5000)
 
 type Candle //for fourline candle
     float           c
@@ -37,7 +37,6 @@ type BOSdata
     string          strtemp2
     int             dateinnumber = 0
 
-
 type CandleSettings
     bool            show
     string          htf
@@ -62,7 +61,6 @@ type Settings
     color           date_label_color
     string          price_label_size
     color           price_label_color
-    bool            add_show
 
 type Trace
     int             trace_c_size 
@@ -76,18 +74,6 @@ type CandleSet
     Trace           trace
     label           tfName
     label           tfTimer        
-type ValueDecisionReg
-    float           value
-    int             vidx 
-    string          vdate
-    string          vname
-    string          vtext
-    string          vremntime
-    string          vdecisionname
-    label           vlb
-    line            vln
-    float           vtemp
-
 
 type Helper
     string name             = "Helper"
@@ -369,129 +355,128 @@ htf30 .trace                  := trace_30
 //+-settings    
 
 //+----------------------------------------+//
-
 htf1.settings.show         := input.bool(true, "HTF 1", inline="htf1")
 htf_1                      = input.timeframe("1", "", inline="htf1")
 htf1.settings.htf          := htf_1
 htf1.settings.max_memory   := input.int(3, "", inline="htf1")
-htf2.settings.show         := input.bool(true, "HTF 1", inline="htf2")
+htf2.settings.show         := input.bool(true, "HTF 2", inline="htf2")
 htf_2                      = input.timeframe("2", "", inline="htf2")
 htf2.settings.htf          := htf_2
 htf2.settings.max_memory   := input.int(3, "", inline="htf2")
-htf3.settings.show         := input.bool(true, "HTF 1", inline="htf3")
+htf3.settings.show         := input.bool(true, "HTF 3", inline="htf3")
 htf_3                      = input.timeframe("3", "", inline="htf3")
 htf3.settings.htf          := htf_3
 htf3.settings.max_memory   := input.int(3, "", inline="htf3")
-htf4.settings.show         := input.bool(true, "HTF 1", inline="htf4")
+htf4.settings.show         := input.bool(true, "HTF 4", inline="htf4")
 htf_4                      = input.timeframe("4", "", inline="htf4")
 htf4.settings.htf          := htf_4
 htf4.settings.max_memory   := input.int(3, "", inline="htf4")
-htf5.settings.show         := input.bool(false, "HTF 1", inline="htf5")
+htf5.settings.show         := input.bool(false, "HTF 5", inline="htf5")
 htf_5                      = input.timeframe("5", "", inline="htf5")
 htf5.settings.htf          := htf_5
 htf5.settings.max_memory   := input.int(3, "", inline="htf5")
-htf6.settings.show         := input.bool(false, "HTF 1", inline="htf6")
+htf6.settings.show         := input.bool(false, "HTF 6", inline="htf6")
 htf_6                      = input.timeframe("6", "", inline="htf6")
 htf6.settings.htf          := htf_6
 htf6.settings.max_memory   := input.int(3, "", inline="htf6")
-htf7.settings.show         := input.bool(false, "HTF 1", inline="htf7")
+htf7.settings.show         := input.bool(false, "HTF 7", inline="htf7")
 htf_7                      = input.timeframe("7", "", inline="htf7")
 htf7.settings.htf          := htf_7
 htf7.settings.max_memory   := input.int(3, "", inline="htf7")
-htf8.settings.show         := input.bool(false, "HTF 1", inline="htf8")
+htf8.settings.show         := input.bool(false, "HTF 8", inline="htf8")
 htf_8                      = input.timeframe("8", "", inline="htf8")
 htf8.settings.htf          := htf_8
 htf8.settings.max_memory   := input.int(3, "", inline="htf8")
-htf9.settings.show         := input.bool(false, "HTF 1", inline="htf9")
+htf9.settings.show         := input.bool(false, "HTF 9", inline="htf9")
 htf_9                      = input.timeframe("9", "", inline="htf9")
 htf9.settings.htf          := htf_9
 htf9.settings.max_memory   := input.int(3, "", inline="htf9")
-htf10.settings.show         := input.bool(false, "HTF 1", inline="htf10")
+htf10.settings.show         := input.bool(false, "HTF 10", inline="htf10")
 htf_10                      = input.timeframe("10", "", inline="htf10")
 htf10.settings.htf          := htf_10
 htf10.settings.max_memory   := input.int(3, "", inline="htf10")
-htf11.settings.show         := input.bool(false, "HTF 1", inline="htf11")
+htf11.settings.show         := input.bool(false, "HTF 11", inline="htf11")
 htf_11                      = input.timeframe("11", "", inline="htf11")
 htf11.settings.htf          := htf_11
 htf11.settings.max_memory   := input.int(3, "", inline="htf11")
-htf12.settings.show         := input.bool(false, "HTF 1", inline="htf12")
+htf12.settings.show         := input.bool(false, "HTF 12", inline="htf12")
 htf_12                      = input.timeframe("12", "", inline="htf12")
 htf12.settings.htf          := htf_12
 htf12.settings.max_memory   := input.int(3, "", inline="htf12")
-htf13.settings.show         := input.bool(false, "HTF 1", inline="htf13")
+htf13.settings.show         := input.bool(false, "HTF 13", inline="htf13")
 htf_13                      = input.timeframe("13", "", inline="htf13")
 htf13.settings.htf          := htf_13
 htf13.settings.max_memory   := input.int(3, "", inline="htf13")
-htf14.settings.show         := input.bool(false, "HTF 1", inline="htf14")
+htf14.settings.show         := input.bool(false, "HTF 14", inline="htf14")
 htf_14                      = input.timeframe("14", "", inline="htf14")
 htf14.settings.htf          := htf_14
 htf14.settings.max_memory   := input.int(3, "", inline="htf14")
-htf15.settings.show         := input.bool(false, "HTF 1", inline="htf15")
+htf15.settings.show         := input.bool(false, "HTF 15", inline="htf15")
 htf_15                      = input.timeframe("15", "", inline="htf15")
 htf15.settings.htf          := htf_15
 htf15.settings.max_memory   := input.int(3, "", inline="htf15")
-htf16.settings.show         := input.bool(false, "HTF 1", inline="htf16")
+htf16.settings.show         := input.bool(false, "HTF 16", inline="htf16")
 htf_16                      = input.timeframe("16", "", inline="htf16")
 htf16.settings.htf          := htf_16
 htf16.settings.max_memory   := input.int(3, "", inline="htf16")
-htf17.settings.show         := input.bool(false, "HTF 1", inline="htf17")
+htf17.settings.show         := input.bool(false, "HTF 17", inline="htf17")
 htf_17                      = input.timeframe("17", "", inline="htf17")
 htf17.settings.htf          := htf_17
 htf17.settings.max_memory   := input.int(3, "", inline="htf17")
-htf18.settings.show         := input.bool(false, "HTF 1", inline="htf18")
+htf18.settings.show         := input.bool(false, "HTF 18", inline="htf18")
 htf_18                      = input.timeframe("18", "", inline="htf18")
 htf18.settings.htf          := htf_18
 htf18.settings.max_memory   := input.int(3, "", inline="htf18")
-htf19.settings.show         := input.bool(false, "HTF 1", inline="htf19")
+htf19.settings.show         := input.bool(false, "HTF 19", inline="htf19")
 htf_19                      = input.timeframe("19", "", inline="htf19")
 htf19.settings.htf          := htf_19
 htf19.settings.max_memory   := input.int(3, "", inline="htf19")
-htf20.settings.show         := input.bool(false, "HTF 1", inline="htf20")
+htf20.settings.show         := input.bool(false, "HTF 20", inline="htf20")
 htf_20                      = input.timeframe("20", "", inline="htf20")
 htf20.settings.htf          := htf_20
 htf20.settings.max_memory   := input.int(3, "", inline="htf20")
-htf21.settings.show         := input.bool(false, "HTF 1", inline="htf21")
+htf21.settings.show         := input.bool(false, "HTF 21", inline="htf21")
 htf_21                      = input.timeframe("21", "", inline="htf21")
 htf21.settings.htf          := htf_21
 htf21.settings.max_memory   := input.int(3, "", inline="htf21")
-htf22.settings.show         := input.bool(false, "HTF 1", inline="htf22")
+htf22.settings.show         := input.bool(false, "HTF 22", inline="htf22")
 htf_22                      = input.timeframe("22", "", inline="htf22")
 htf22.settings.htf          := htf_22
 htf22.settings.max_memory   := input.int(3, "", inline="htf22")
-htf23.settings.show         := input.bool(false, "HTF 1", inline="htf23")
+htf23.settings.show         := input.bool(false, "HTF 23", inline="htf23")
 htf_23                      = input.timeframe("23", "", inline="htf23")
 htf23.settings.htf          := htf_23
 htf23.settings.max_memory   := input.int(3, "", inline="htf23")
-htf24.settings.show         := input.bool(false, "HTF 1", inline="htf24")
+htf24.settings.show         := input.bool(false, "HTF 24", inline="htf24")
 htf_24                      = input.timeframe("24", "", inline="htf24")
 htf24.settings.htf          := htf_24
 htf24.settings.max_memory   := input.int(3, "", inline="htf24")
-htf25.settings.show         := input.bool(false, "HTF 1", inline="htf25")
+htf25.settings.show         := input.bool(false, "HTF 25", inline="htf25")
 htf_25                      = input.timeframe("25", "", inline="htf25")
 htf25.settings.htf          := htf_25
 htf25.settings.max_memory   := input.int(3, "", inline="htf25")
-htf26.settings.show         := input.bool(false, "HTF 1", inline="htf26")
+htf26.settings.show         := input.bool(false, "HTF 26", inline="htf26")
 htf_26                      = input.timeframe("26", "", inline="htf26")
 htf26.settings.htf          := htf_26
 htf26.settings.max_memory   := input.int(3, "", inline="htf26")
-htf27.settings.show         := input.bool(false, "HTF 1", inline="htf27")
+htf27.settings.show         := input.bool(false, "HTF 27", inline="htf27")
 htf_27                      = input.timeframe("27", "", inline="htf27")
 htf27.settings.htf          := htf_27
 htf27.settings.max_memory   := input.int(3, "", inline="htf27")
-htf28.settings.show         := input.bool(false, "HTF 1", inline="htf28")
+htf28.settings.show         := input.bool(false, "HTF 28", inline="htf28")
 htf_28                      = input.timeframe("28", "", inline="htf28")
 htf28.settings.htf          := htf_28
 htf28.settings.max_memory   := input.int(3, "", inline="htf28")
-htf29.settings.show         := input.bool(false, "HTF 1", inline="htf29")
+htf29.settings.show         := input.bool(false, "HTF 29", inline="htf29")
 htf_29                      = input.timeframe("29", "", inline="htf29")
 htf29.settings.htf          := htf_29
 htf29.settings.max_memory   := input.int(3, "", inline="htf29")
-htf30.settings.show         := input.bool(false, "HTF 1", inline="htf30")
+htf30.settings.show         := input.bool(false, "HTF 30", inline="htf30")
 htf_30                      = input.timeframe("30", "", inline="htf30")
 htf30.settings.htf          := htf_30
 htf30.settings.max_memory   := input.int(3, "", inline="htf30")
 
-settings.max_sets          := input.int(30, "Limit to next HTFs only", minval=1, maxval=4)
+settings.max_sets          := input.int(30, "Limit to next HTFs only", minval=1, maxval=30)
 
 settings.offset            := input.int(10, "padding from current candles", minval = 1)
 settings.text_buffer       := input.int(10, "space between text features", minval = 1, maxval = 10)
@@ -515,9 +500,96 @@ settings.htf_timer_size    := input.string(size.normal, "", [size.tiny, size.sma
 settings.price_label_color := input.color(color.new(color.black, 10), "price_label", inline='31')
 settings.price_label_size  := input.string(size.normal, "", [size.tiny, size.small, size.normal, size.large, size.huge], inline="31")
 
-htf1.trace.trace_c_color   := input.color(color.new(color.red, 50), "level1    ", inline='level 1', group="trace")
-htf1.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='level 1', group="trace")
-htf1.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='level 1', group="trace")
+htf1.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF1    ", inline='htflevel1', group="trace")
+htf1.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel1', group="trace")
+htf1.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel1', group="trace")
+htf2.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF2    ", inline='htflevel2', group="trace")
+htf2.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel2', group="trace")
+htf2.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel2', group="trace")
+htf3.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF3    ", inline='htflevel3', group="trace")
+htf3.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel3', group="trace")
+htf3.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel3', group="trace")
+htf4.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF4    ", inline='htflevel4', group="trace")
+htf4.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel4', group="trace")
+htf4.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel4', group="trace")
+htf5.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF5    ", inline='htflevel5', group="trace")
+htf5.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel5', group="trace")
+htf5.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel5', group="trace")
+htf6.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF6    ", inline='htflevel6', group="trace")
+htf6.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel6', group="trace")
+htf6.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel6', group="trace")
+htf7.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF7    ", inline='htflevel7', group="trace")
+htf7.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel7', group="trace")
+htf7.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel7', group="trace")
+htf8.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF8    ", inline='htflevel8', group="trace")
+htf8.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel8', group="trace")
+htf8.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel8', group="trace")
+htf9.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF9    ", inline='htflevel9', group="trace")
+htf9.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel9', group="trace")
+htf9.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel9', group="trace")
+htf10.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF10    ", inline='htflevel10', group="trace")
+htf10.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel10', group="trace")
+htf10.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel10', group="trace")
+htf11.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF11    ", inline='htflevel11', group="trace")
+htf11.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel11', group="trace")
+htf11.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel11', group="trace")
+htf12.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF12    ", inline='htflevel12', group="trace")
+htf12.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel12', group="trace")
+htf12.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel12', group="trace")
+htf13.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF13    ", inline='htflevel13', group="trace")
+htf13.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel13', group="trace")
+htf13.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel13', group="trace")
+htf14.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF14    ", inline='htflevel14', group="trace")
+htf14.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel14', group="trace")
+htf14.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel14', group="trace")
+htf15.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF15    ", inline='htflevel15', group="trace")
+htf15.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel15', group="trace")
+htf15.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel15', group="trace")
+htf16.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF16    ", inline='htflevel16', group="trace")
+htf16.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel16', group="trace")
+htf16.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel16', group="trace")
+htf17.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF17    ", inline='htflevel17', group="trace")
+htf17.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel17', group="trace")
+htf17.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel17', group="trace")
+htf18.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF18    ", inline='htflevel18', group="trace")
+htf18.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel18', group="trace")
+htf18.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel18', group="trace")
+htf19.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF19    ", inline='htflevel19', group="trace")
+htf19.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel19', group="trace")
+htf19.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel19', group="trace")
+htf20.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF20    ", inline='htflevel20', group="trace")
+htf20.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel20', group="trace")
+htf20.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel20', group="trace")
+htf21.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF21    ", inline='htflevel21', group="trace")
+htf21.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel21', group="trace")
+htf21.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel21', group="trace")
+htf22.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF22    ", inline='htflevel22', group="trace")
+htf22.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel22', group="trace")
+htf22.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel22', group="trace")
+htf23.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF23    ", inline='htflevel23', group="trace")
+htf23.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel23', group="trace")
+htf23.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel23', group="trace")
+htf24.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF24    ", inline='htflevel24', group="trace")
+htf24.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel24', group="trace")
+htf24.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel24', group="trace")
+htf25.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF25    ", inline='htflevel25', group="trace")
+htf25.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel25', group="trace")
+htf25.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel25', group="trace")
+htf26.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF26    ", inline='htflevel26', group="trace")
+htf26.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel26', group="trace")
+htf26.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel26', group="trace")
+htf27.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF27    ", inline='htflevel27', group="trace")
+htf27.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel27', group="trace")
+htf27.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel27', group="trace")
+htf28.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF28    ", inline='htflevel28', group="trace")
+htf28.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel28', group="trace")
+htf28.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel28', group="trace")
+htf29.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF29    ", inline='htflevel29', group="trace")
+htf29.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel29', group="trace")
+htf29.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel29', group="trace")
+htf30.trace.trace_c_color   := input.color(color.new(color.black, 50), "SkinHTF30    ", inline='htflevel30', group="trace")
+htf30.trace.trace_c_style   := input.string('⎯⎯⎯', '', options = ['⎯⎯⎯', '----', '····'], inline='htflevel30', group="trace")
+htf30.trace.trace_c_size    := input.int(2, '', options = [1,2,3,4], inline='htflevel30', group="trace")
 
 //+----------------------------------------+//
 //+- Variables   
@@ -631,7 +703,7 @@ method Monitor(CandleSet candleSet) =>
     BOSdata bosdata = candleSet.bosdata
     HTFBarTime = time(candleSet.settings.htf)
     isNewHTFCandle = ta.change(HTFBarTime)
-    if isNewHTFCandle != 0 or barstate.islast
+    if isNewHTFCandle != 0 
         Candle candle    = Candle.new()
         candle.c        := bar_index==0 ? close : bosdata.temp
         candle.c_idx    := bar_index
@@ -653,7 +725,7 @@ method BOSJudge(CandleSet candleSet) =>
     if not barstate.isrealtime
         bosdata.dateinnumber := tf-tp*2000*k+tp*(k-1)*1000
     string strresult = helper.formattedtime(bosdata.dateinnumber)
-    if candleSet.candles.size() > 0 and (isNewHTFCandle != 0 or barstate.islast)
+    if candleSet.candles.size() > 0 and isNewHTFCandle != 0
         Candle candle = candleSet.candles.first()
         if(bosdata.state == 1)
             bosdata.regclose1 := bosdata.regclose2
@@ -721,10 +793,6 @@ method BOSJudge(CandleSet candleSet) =>
                 bosdata.sbu := na
                 bosdata.sbu_idx:= na
             bosdata.state := 1
-    if(not na(bosdata.sbd) and na(bosdata.sbu))  //no sky
-        bosdata.temp2   := bosdata.regclose3
-    else if(na(bosdata.sbd) and (not na(bosdata.sbu)))
-        bosdata.temp3   := bosdata.regclose3
     candleSet
 
 method plotdata(CandleSet candleSet, int offset, int delta) =>
@@ -809,1140 +877,11 @@ method plotdata(CandleSet candleSet, int offset, int delta) =>
             li_sbd := line.new(bar_index, bosdata.sbd, offset, bosdata.sbd, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
     candleSet
 
-method MaxNormalSet(ValueDecisionReg maxnormal, CandleSet candleSet) =>
-    ValueDecisionReg m1 = maxnormal
-    CandleSet        cs = candleSet
-    var bool         fg = true 
-    if fg
-        m1.value            := 0
-        m1.vtext            := "maxprice \n(possible sbd): "
-        m1.vdecisionname    := "MaxNormalSet"
-        fg                  := false
-    m1.vtemp  := cs.bosdata.temp3
-    if m1.vtemp > m1.value
-        m1.value        := m1.vtemp
-        m1.vname        := cs.settings.htf
-    m1.vremntime    := helper.RemainingTime(m1.vname)
-    maxnormal
-
-method MinNormalSet(ValueDecisionReg minnormal, CandleSet candleSet) =>
-    ValueDecisionReg m1 = minnormal
-    CandleSet        cs = candleSet
-    var bool         fg = true 
-    if fg
-        m1.value            := 99999999
-        m1.vtext            := "minprice \n(possible sbu): "
-        m1.vdecisionname    := "MinNormalSet"
-        fg                  := false
-    m1.vtemp  := cs.bosdata.temp2
-    if m1.vtemp < m1.value
-        m1.value  := m1.vtemp
-        m1.vname  := cs.settings.htf
-    m1.vremntime    := helper.RemainingTime(m1.vname)
-    minnormal
-
-method HighestsbdSet(ValueDecisionReg highestsbd, CandleSet candleSet) =>
-    ValueDecisionReg m1 = highestsbd
-    CandleSet        cs = candleSet
-    var bool         fg = true 
-    if fg
-        m1.value            := 0
-        m1.vtext            := "highestsbd: "
-        m1.vdecisionname    := "HighestsbdSet"
-        fg                  := false
-    if cs.bosdata.sbd > m1.value
-        m1.value := cs.bosdata.sbd
-        m1.vidx  := cs.bosdata.sbd_idx
-        m1.vname := cs.settings.htf
-        m1.vdate := cs.bosdata.s_dated
-    m1.vremntime    := helper.RemainingTime(m1.vname)
-    highestsbd
-
-method LowestsbuSet (ValueDecisionReg lowestsbu, CandleSet candleSet) =>
-    ValueDecisionReg m1 = lowestsbu
-    CandleSet        cs = candleSet
-    var bool         fg = true 
-    if fg
-        m1.value            := 99999999
-        m1.vtext            := "lowestsbu: "
-        m1.vdecisionname    := "LowestsbuSet"
-        fg                  := false
-    if cs.bosdata.sbu < m1.value
-        m1.value := cs.bosdata.sbu
-        m1.vidx  := cs.bosdata.sbu_idx
-        m1.vname := cs.settings.htf
-        m1.vdate := cs.bosdata.s_dateu
-    m1.vremntime    := helper.RemainingTime(m1.vname)
-    lowestsbu
-
-method addplot (ValueDecisionReg decision, int offset) =>
-    ValueDecisionReg m1 = decision
-    if m1.vdecisionname == "LowestsbuSet"
-        if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset-5, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
-        else
-            m1.vlb := label.new( offset-5,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
-        if not na(m1.vln)
-            line.set_xy1(m1.vln, bar_index, m1.value)
-            line.set_xy2(m1.vln, offset, m1.value)
-        else
-            m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
-        m1.value            := 99999999
-    if m1.vdecisionname == "HighestsbdSet"
-        if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset-2, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
-        else
-            m1.vlb := label.new(offset-2,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
-        if not na(m1.vln)
-            line.set_xy1(m1.vln, bar_index, m1.value)
-            line.set_xy2(m1.vln, offset, m1.value)
-        else
-            m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
-        m1.value            := 0
-    decision
-
 //+---------------Main------------------+//
 int cnt    = 0
 int last   = helper.HTFEnabled()
 int delta  = settings.text_buffer
 int offset = settings.offset + bar_index
-//+---------------ADD------------------+//
-
-//+---------------add var------------------+//
-
-var CandleSet htfadd1                     = CandleSet.new()
-var CandleSettings SettingsHTFadd1        = CandleSettings.new()
-var Candle[] candlesadd1                  = array.new<Candle>(0)
-var BOSdata bosdataadd1                   = BOSdata.new()
-
-htfadd1.settings                 := SettingsHTFadd1
-htfadd1.candles                  := candlesadd1
-htfadd1.bosdata                  := bosdataadd1
-htfadd1.settings.htf             := '1'
-htfadd1.settings.max_memory      := 10
-htfadd1.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd1)
-    LowestsbuSet(lowestsbu, htfadd1) 
-    MaxNormalSet(maxnormal, htfadd1)
-    MinNormalSet(minnormal, htfadd1)
-
-var CandleSet htfadd2                     = CandleSet.new()
-var CandleSettings SettingsHTFadd2        = CandleSettings.new()
-var Candle[] candlesadd2                  = array.new<Candle>(0)
-var BOSdata bosdataadd2                   = BOSdata.new()
-
-htfadd2.settings                 := SettingsHTFadd2
-htfadd2.candles                  := candlesadd2
-htfadd2.bosdata                  := bosdataadd2
-htfadd2.settings.htf             := '2'
-htfadd2.settings.max_memory      := 10
-htfadd2.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd2)
-    LowestsbuSet(lowestsbu, htfadd2) 
-    MaxNormalSet(maxnormal, htfadd2)
-    MinNormalSet(minnormal, htfadd2)
-
-var CandleSet htfadd3                     = CandleSet.new()
-var CandleSettings SettingsHTFadd3        = CandleSettings.new()
-var Candle[] candlesadd3                  = array.new<Candle>(0)
-var BOSdata bosdataadd3                   = BOSdata.new()
-
-htfadd3.settings                 := SettingsHTFadd3
-htfadd3.candles                  := candlesadd3
-htfadd3.bosdata                  := bosdataadd3
-htfadd3.settings.htf             := '3'
-htfadd3.settings.max_memory      := 10
-htfadd3.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd3)
-    LowestsbuSet(lowestsbu, htfadd3) 
-    MaxNormalSet(maxnormal, htfadd3)
-    MinNormalSet(minnormal, htfadd3)
-
-var CandleSet htfadd4                     = CandleSet.new()
-var CandleSettings SettingsHTFadd4        = CandleSettings.new()
-var Candle[] candlesadd4                  = array.new<Candle>(0)
-var BOSdata bosdataadd4                   = BOSdata.new()
-
-htfadd4.settings                 := SettingsHTFadd4
-htfadd4.candles                  := candlesadd4
-htfadd4.bosdata                  := bosdataadd4
-htfadd4.settings.htf             := '4'
-htfadd4.settings.max_memory      := 10
-htfadd4.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd4)
-    LowestsbuSet(lowestsbu, htfadd4) 
-    MaxNormalSet(maxnormal, htfadd4)
-    MinNormalSet(minnormal, htfadd4)
-
-var CandleSet htfadd5                     = CandleSet.new()
-var CandleSettings SettingsHTFadd5        = CandleSettings.new()
-var Candle[] candlesadd5                  = array.new<Candle>(0)
-var BOSdata bosdataadd5                   = BOSdata.new()
-
-htfadd5.settings                 := SettingsHTFadd5
-htfadd5.candles                  := candlesadd5
-htfadd5.bosdata                  := bosdataadd5
-htfadd5.settings.htf             := '5'
-htfadd5.settings.max_memory      := 10
-htfadd5.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd5)
-    LowestsbuSet(lowestsbu, htfadd5) 
-    MaxNormalSet(maxnormal, htfadd5)
-    MinNormalSet(minnormal, htfadd5)
-
-var CandleSet htfadd6                     = CandleSet.new()
-var CandleSettings SettingsHTFadd6        = CandleSettings.new()
-var Candle[] candlesadd6                  = array.new<Candle>(0)
-var BOSdata bosdataadd6                   = BOSdata.new()
-
-htfadd6.settings                 := SettingsHTFadd6
-htfadd6.candles                  := candlesadd6
-htfadd6.bosdata                  := bosdataadd6
-htfadd6.settings.htf             := '6'
-htfadd6.settings.max_memory      := 10
-htfadd6.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd6)
-    LowestsbuSet(lowestsbu, htfadd6) 
-    MaxNormalSet(maxnormal, htfadd6)
-    MinNormalSet(minnormal, htfadd6)
-
-var CandleSet htfadd7                     = CandleSet.new()
-var CandleSettings SettingsHTFadd7        = CandleSettings.new()
-var Candle[] candlesadd7                  = array.new<Candle>(0)
-var BOSdata bosdataadd7                   = BOSdata.new()
-
-htfadd7.settings                 := SettingsHTFadd7
-htfadd7.candles                  := candlesadd7
-htfadd7.bosdata                  := bosdataadd7
-htfadd7.settings.htf             := '7'
-htfadd7.settings.max_memory      := 10
-htfadd7.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd7)
-    LowestsbuSet(lowestsbu, htfadd7) 
-    MaxNormalSet(maxnormal, htfadd7)
-    MinNormalSet(minnormal, htfadd7)
-
-var CandleSet htfadd8                     = CandleSet.new()
-var CandleSettings SettingsHTFadd8        = CandleSettings.new()
-var Candle[] candlesadd8                  = array.new<Candle>(0)
-var BOSdata bosdataadd8                   = BOSdata.new()
-
-htfadd8.settings                 := SettingsHTFadd8
-htfadd8.candles                  := candlesadd8
-htfadd8.bosdata                  := bosdataadd8
-htfadd8.settings.htf             := '8'
-htfadd8.settings.max_memory      := 10
-htfadd8.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd8)
-    LowestsbuSet(lowestsbu, htfadd8) 
-    MaxNormalSet(maxnormal, htfadd8)
-    MinNormalSet(minnormal, htfadd8)
-
-var CandleSet htfadd9                     = CandleSet.new()
-var CandleSettings SettingsHTFadd9        = CandleSettings.new()
-var Candle[] candlesadd9                  = array.new<Candle>(0)
-var BOSdata bosdataadd9                   = BOSdata.new()
-
-htfadd9.settings                 := SettingsHTFadd9
-htfadd9.candles                  := candlesadd9
-htfadd9.bosdata                  := bosdataadd9
-htfadd9.settings.htf             := '9'
-htfadd9.settings.max_memory      := 10
-htfadd9.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd9)
-    LowestsbuSet(lowestsbu, htfadd9) 
-    MaxNormalSet(maxnormal, htfadd9)
-    MinNormalSet(minnormal, htfadd9)
-
-var CandleSet htfadd10                     = CandleSet.new()
-var CandleSettings SettingsHTFadd10        = CandleSettings.new()
-var Candle[] candlesadd10                  = array.new<Candle>(0)
-var BOSdata bosdataadd10                   = BOSdata.new()
-
-htfadd10.settings                 := SettingsHTFadd10
-htfadd10.candles                  := candlesadd10
-htfadd10.bosdata                  := bosdataadd10
-htfadd10.settings.htf             := '10'
-htfadd10.settings.max_memory      := 10
-htfadd10.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd10)
-    LowestsbuSet(lowestsbu, htfadd10) 
-    MaxNormalSet(maxnormal, htfadd10)
-    MinNormalSet(minnormal, htfadd10)
-
-var CandleSet htfadd11                     = CandleSet.new()
-var CandleSettings SettingsHTFadd11        = CandleSettings.new()
-var Candle[] candlesadd11                  = array.new<Candle>(0)
-var BOSdata bosdataadd11                   = BOSdata.new()
-
-htfadd11.settings                 := SettingsHTFadd11
-htfadd11.candles                  := candlesadd11
-htfadd11.bosdata                  := bosdataadd11
-htfadd11.settings.htf             := '11'
-htfadd11.settings.max_memory      := 10
-htfadd11.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd11)
-    LowestsbuSet(lowestsbu, htfadd11) 
-    MaxNormalSet(maxnormal, htfadd11)
-    MinNormalSet(minnormal, htfadd11)
-
-var CandleSet htfadd12                     = CandleSet.new()
-var CandleSettings SettingsHTFadd12        = CandleSettings.new()
-var Candle[] candlesadd12                  = array.new<Candle>(0)
-var BOSdata bosdataadd12                   = BOSdata.new()
-
-htfadd12.settings                 := SettingsHTFadd12
-htfadd12.candles                  := candlesadd12
-htfadd12.bosdata                  := bosdataadd12
-htfadd12.settings.htf             := '12'
-htfadd12.settings.max_memory      := 10
-htfadd12.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd12)
-    LowestsbuSet(lowestsbu, htfadd12) 
-    MaxNormalSet(maxnormal, htfadd12)
-    MinNormalSet(minnormal, htfadd12)
-
-var CandleSet htfadd13                     = CandleSet.new()
-var CandleSettings SettingsHTFadd13        = CandleSettings.new()
-var Candle[] candlesadd13                  = array.new<Candle>(0)
-var BOSdata bosdataadd13                   = BOSdata.new()
-
-htfadd13.settings                 := SettingsHTFadd13
-htfadd13.candles                  := candlesadd13
-htfadd13.bosdata                  := bosdataadd13
-htfadd13.settings.htf             := '13'
-htfadd13.settings.max_memory      := 10
-htfadd13.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd13)
-    LowestsbuSet(lowestsbu, htfadd13) 
-    MaxNormalSet(maxnormal, htfadd13)
-    MinNormalSet(minnormal, htfadd13)
-
-var CandleSet htfadd14                     = CandleSet.new()
-var CandleSettings SettingsHTFadd14        = CandleSettings.new()
-var Candle[] candlesadd14                  = array.new<Candle>(0)
-var BOSdata bosdataadd14                   = BOSdata.new()
-
-htfadd14.settings                 := SettingsHTFadd14
-htfadd14.candles                  := candlesadd14
-htfadd14.bosdata                  := bosdataadd14
-htfadd14.settings.htf             := '14'
-htfadd14.settings.max_memory      := 10
-htfadd14.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd14)
-    LowestsbuSet(lowestsbu, htfadd14) 
-    MaxNormalSet(maxnormal, htfadd14)
-    MinNormalSet(minnormal, htfadd14)
-
-var CandleSet htfadd15                     = CandleSet.new()
-var CandleSettings SettingsHTFadd15        = CandleSettings.new()
-var Candle[] candlesadd15                  = array.new<Candle>(0)
-var BOSdata bosdataadd15                   = BOSdata.new()
-
-htfadd15.settings                 := SettingsHTFadd15
-htfadd15.candles                  := candlesadd15
-htfadd15.bosdata                  := bosdataadd15
-htfadd15.settings.htf             := '15'
-htfadd15.settings.max_memory      := 10
-htfadd15.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd15)
-    LowestsbuSet(lowestsbu, htfadd15) 
-    MaxNormalSet(maxnormal, htfadd15)
-    MinNormalSet(minnormal, htfadd15)
-
-var CandleSet htfadd16                     = CandleSet.new()
-var CandleSettings SettingsHTFadd16        = CandleSettings.new()
-var Candle[] candlesadd16                  = array.new<Candle>(0)
-var BOSdata bosdataadd16                   = BOSdata.new()
-
-htfadd16.settings                 := SettingsHTFadd16
-htfadd16.candles                  := candlesadd16
-htfadd16.bosdata                  := bosdataadd16
-htfadd16.settings.htf             := '16'
-htfadd16.settings.max_memory      := 10
-htfadd16.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd16)
-    LowestsbuSet(lowestsbu, htfadd16) 
-    MaxNormalSet(maxnormal, htfadd16)
-    MinNormalSet(minnormal, htfadd16)
-
-var CandleSet htfadd17                     = CandleSet.new()
-var CandleSettings SettingsHTFadd17        = CandleSettings.new()
-var Candle[] candlesadd17                  = array.new<Candle>(0)
-var BOSdata bosdataadd17                   = BOSdata.new()
-
-htfadd17.settings                 := SettingsHTFadd17
-htfadd17.candles                  := candlesadd17
-htfadd17.bosdata                  := bosdataadd17
-htfadd17.settings.htf             := '17'
-htfadd17.settings.max_memory      := 10
-htfadd17.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd17)
-    LowestsbuSet(lowestsbu, htfadd17) 
-    MaxNormalSet(maxnormal, htfadd17)
-    MinNormalSet(minnormal, htfadd17)
-
-var CandleSet htfadd18                     = CandleSet.new()
-var CandleSettings SettingsHTFadd18        = CandleSettings.new()
-var Candle[] candlesadd18                  = array.new<Candle>(0)
-var BOSdata bosdataadd18                   = BOSdata.new()
-
-htfadd18.settings                 := SettingsHTFadd18
-htfadd18.candles                  := candlesadd18
-htfadd18.bosdata                  := bosdataadd18
-htfadd18.settings.htf             := '18'
-htfadd18.settings.max_memory      := 10
-htfadd18.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd18)
-    LowestsbuSet(lowestsbu, htfadd18) 
-    MaxNormalSet(maxnormal, htfadd18)
-    MinNormalSet(minnormal, htfadd18)
-
-var CandleSet htfadd19                     = CandleSet.new()
-var CandleSettings SettingsHTFadd19        = CandleSettings.new()
-var Candle[] candlesadd19                  = array.new<Candle>(0)
-var BOSdata bosdataadd19                   = BOSdata.new()
-
-htfadd19.settings                 := SettingsHTFadd19
-htfadd19.candles                  := candlesadd19
-htfadd19.bosdata                  := bosdataadd19
-htfadd19.settings.htf             := '19'
-htfadd19.settings.max_memory      := 10
-htfadd19.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd19)
-    LowestsbuSet(lowestsbu, htfadd19) 
-    MaxNormalSet(maxnormal, htfadd19)
-    MinNormalSet(minnormal, htfadd19)
-
-var CandleSet htfadd20                     = CandleSet.new()
-var CandleSettings SettingsHTFadd20        = CandleSettings.new()
-var Candle[] candlesadd20                  = array.new<Candle>(0)
-var BOSdata bosdataadd20                   = BOSdata.new()
-
-htfadd20.settings                 := SettingsHTFadd20
-htfadd20.candles                  := candlesadd20
-htfadd20.bosdata                  := bosdataadd20
-htfadd20.settings.htf             := '20'
-htfadd20.settings.max_memory      := 10
-htfadd20.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd20)
-    LowestsbuSet(lowestsbu, htfadd20) 
-    MaxNormalSet(maxnormal, htfadd20)
-    MinNormalSet(minnormal, htfadd20)
-
-var CandleSet htfadd21                     = CandleSet.new()
-var CandleSettings SettingsHTFadd21        = CandleSettings.new()
-var Candle[] candlesadd21                  = array.new<Candle>(0)
-var BOSdata bosdataadd21                   = BOSdata.new()
-
-htfadd21.settings                 := SettingsHTFadd21
-htfadd21.candles                  := candlesadd21
-htfadd21.bosdata                  := bosdataadd21
-htfadd21.settings.htf             := '21'
-htfadd21.settings.max_memory      := 10
-htfadd21.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd21)
-    LowestsbuSet(lowestsbu, htfadd21) 
-    MaxNormalSet(maxnormal, htfadd21)
-    MinNormalSet(minnormal, htfadd21)
-
-var CandleSet htfadd22                     = CandleSet.new()
-var CandleSettings SettingsHTFadd22        = CandleSettings.new()
-var Candle[] candlesadd22                  = array.new<Candle>(0)
-var BOSdata bosdataadd22                   = BOSdata.new()
-
-htfadd22.settings                 := SettingsHTFadd22
-htfadd22.candles                  := candlesadd22
-htfadd22.bosdata                  := bosdataadd22
-htfadd22.settings.htf             := '22'
-htfadd22.settings.max_memory      := 10
-htfadd22.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd22)
-    LowestsbuSet(lowestsbu, htfadd22) 
-    MaxNormalSet(maxnormal, htfadd22)
-    MinNormalSet(minnormal, htfadd22)
-
-var CandleSet htfadd23                     = CandleSet.new()
-var CandleSettings SettingsHTFadd23        = CandleSettings.new()
-var Candle[] candlesadd23                  = array.new<Candle>(0)
-var BOSdata bosdataadd23                   = BOSdata.new()
-
-htfadd23.settings                 := SettingsHTFadd23
-htfadd23.candles                  := candlesadd23
-htfadd23.bosdata                  := bosdataadd23
-htfadd23.settings.htf             := '23'
-htfadd23.settings.max_memory      := 10
-htfadd23.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd23)
-    LowestsbuSet(lowestsbu, htfadd23) 
-    MaxNormalSet(maxnormal, htfadd23)
-    MinNormalSet(minnormal, htfadd23)
-
-var CandleSet htfadd24                     = CandleSet.new()
-var CandleSettings SettingsHTFadd24        = CandleSettings.new()
-var Candle[] candlesadd24                  = array.new<Candle>(0)
-var BOSdata bosdataadd24                   = BOSdata.new()
-
-htfadd24.settings                 := SettingsHTFadd24
-htfadd24.candles                  := candlesadd24
-htfadd24.bosdata                  := bosdataadd24
-htfadd24.settings.htf             := '24'
-htfadd24.settings.max_memory      := 10
-htfadd24.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd24)
-    LowestsbuSet(lowestsbu, htfadd24) 
-    MaxNormalSet(maxnormal, htfadd24)
-    MinNormalSet(minnormal, htfadd24)
-
-var CandleSet htfadd25                     = CandleSet.new()
-var CandleSettings SettingsHTFadd25        = CandleSettings.new()
-var Candle[] candlesadd25                  = array.new<Candle>(0)
-var BOSdata bosdataadd25                   = BOSdata.new()
-
-htfadd25.settings                 := SettingsHTFadd25
-htfadd25.candles                  := candlesadd25
-htfadd25.bosdata                  := bosdataadd25
-htfadd25.settings.htf             := '25'
-htfadd25.settings.max_memory      := 10
-htfadd25.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd25)
-    LowestsbuSet(lowestsbu, htfadd25) 
-    MaxNormalSet(maxnormal, htfadd25)
-    MinNormalSet(minnormal, htfadd25)
-
-var CandleSet htfadd26                     = CandleSet.new()
-var CandleSettings SettingsHTFadd26        = CandleSettings.new()
-var Candle[] candlesadd26                  = array.new<Candle>(0)
-var BOSdata bosdataadd26                   = BOSdata.new()
-
-htfadd26.settings                 := SettingsHTFadd26
-htfadd26.candles                  := candlesadd26
-htfadd26.bosdata                  := bosdataadd26
-htfadd26.settings.htf             := '26'
-htfadd26.settings.max_memory      := 10
-htfadd26.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd26)
-    LowestsbuSet(lowestsbu, htfadd26) 
-    MaxNormalSet(maxnormal, htfadd26)
-    MinNormalSet(minnormal, htfadd26)
-
-var CandleSet htfadd27                     = CandleSet.new()
-var CandleSettings SettingsHTFadd27        = CandleSettings.new()
-var Candle[] candlesadd27                  = array.new<Candle>(0)
-var BOSdata bosdataadd27                   = BOSdata.new()
-
-htfadd27.settings                 := SettingsHTFadd27
-htfadd27.candles                  := candlesadd27
-htfadd27.bosdata                  := bosdataadd27
-htfadd27.settings.htf             := '27'
-htfadd27.settings.max_memory      := 10
-htfadd27.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd27)
-    LowestsbuSet(lowestsbu, htfadd27) 
-    MaxNormalSet(maxnormal, htfadd27)
-    MinNormalSet(minnormal, htfadd27)
-
-var CandleSet htfadd28                     = CandleSet.new()
-var CandleSettings SettingsHTFadd28        = CandleSettings.new()
-var Candle[] candlesadd28                  = array.new<Candle>(0)
-var BOSdata bosdataadd28                   = BOSdata.new()
-
-htfadd28.settings                 := SettingsHTFadd28
-htfadd28.candles                  := candlesadd28
-htfadd28.bosdata                  := bosdataadd28
-htfadd28.settings.htf             := '28'
-htfadd28.settings.max_memory      := 10
-htfadd28.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd28)
-    LowestsbuSet(lowestsbu, htfadd28) 
-    MaxNormalSet(maxnormal, htfadd28)
-    MinNormalSet(minnormal, htfadd28)
-
-var CandleSet htfadd29                     = CandleSet.new()
-var CandleSettings SettingsHTFadd29        = CandleSettings.new()
-var Candle[] candlesadd29                  = array.new<Candle>(0)
-var BOSdata bosdataadd29                   = BOSdata.new()
-
-htfadd29.settings                 := SettingsHTFadd29
-htfadd29.candles                  := candlesadd29
-htfadd29.bosdata                  := bosdataadd29
-htfadd29.settings.htf             := '29'
-htfadd29.settings.max_memory      := 10
-htfadd29.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd29)
-    LowestsbuSet(lowestsbu, htfadd29) 
-    MaxNormalSet(maxnormal, htfadd29)
-    MinNormalSet(minnormal, htfadd29)
-
-var CandleSet htfadd30                     = CandleSet.new()
-var CandleSettings SettingsHTFadd30        = CandleSettings.new()
-var Candle[] candlesadd30                  = array.new<Candle>(0)
-var BOSdata bosdataadd30                   = BOSdata.new()
-
-htfadd30.settings                 := SettingsHTFadd30
-htfadd30.candles                  := candlesadd30
-htfadd30.bosdata                  := bosdataadd30
-htfadd30.settings.htf             := '30'
-htfadd30.settings.max_memory      := 10
-htfadd30.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd30)
-    LowestsbuSet(lowestsbu, htfadd30) 
-    MaxNormalSet(maxnormal, htfadd30)
-    MinNormalSet(minnormal, htfadd30)
-
-var CandleSet htfadd31                     = CandleSet.new()
-var CandleSettings SettingsHTFadd31        = CandleSettings.new()
-var Candle[] candlesadd31                  = array.new<Candle>(0)
-var BOSdata bosdataadd31                   = BOSdata.new()
-
-htfadd31.settings                 := SettingsHTFadd31
-htfadd31.candles                  := candlesadd31
-htfadd31.bosdata                  := bosdataadd31
-htfadd31.settings.htf             := '31'
-htfadd31.settings.max_memory      := 10
-htfadd31.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd31)
-    LowestsbuSet(lowestsbu, htfadd31) 
-    MaxNormalSet(maxnormal, htfadd31)
-    MinNormalSet(minnormal, htfadd31)
-
-var CandleSet htfadd32                     = CandleSet.new()
-var CandleSettings SettingsHTFadd32        = CandleSettings.new()
-var Candle[] candlesadd32                  = array.new<Candle>(0)
-var BOSdata bosdataadd32                   = BOSdata.new()
-
-htfadd32.settings                 := SettingsHTFadd32
-htfadd32.candles                  := candlesadd32
-htfadd32.bosdata                  := bosdataadd32
-htfadd32.settings.htf             := '32'
-htfadd32.settings.max_memory      := 10
-htfadd32.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd32)
-    LowestsbuSet(lowestsbu, htfadd32) 
-    MaxNormalSet(maxnormal, htfadd32)
-    MinNormalSet(minnormal, htfadd32)
-
-var CandleSet htfadd33                     = CandleSet.new()
-var CandleSettings SettingsHTFadd33        = CandleSettings.new()
-var Candle[] candlesadd33                  = array.new<Candle>(0)
-var BOSdata bosdataadd33                   = BOSdata.new()
-
-htfadd33.settings                 := SettingsHTFadd33
-htfadd33.candles                  := candlesadd33
-htfadd33.bosdata                  := bosdataadd33
-htfadd33.settings.htf             := '33'
-htfadd33.settings.max_memory      := 10
-htfadd33.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd33)
-    LowestsbuSet(lowestsbu, htfadd33) 
-    MaxNormalSet(maxnormal, htfadd33)
-    MinNormalSet(minnormal, htfadd33)
-
-var CandleSet htfadd34                     = CandleSet.new()
-var CandleSettings SettingsHTFadd34        = CandleSettings.new()
-var Candle[] candlesadd34                  = array.new<Candle>(0)
-var BOSdata bosdataadd34                   = BOSdata.new()
-
-htfadd34.settings                 := SettingsHTFadd34
-htfadd34.candles                  := candlesadd34
-htfadd34.bosdata                  := bosdataadd34
-htfadd34.settings.htf             := '34'
-htfadd34.settings.max_memory      := 10
-htfadd34.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd34)
-    LowestsbuSet(lowestsbu, htfadd34) 
-    MaxNormalSet(maxnormal, htfadd34)
-    MinNormalSet(minnormal, htfadd34)
-
-var CandleSet htfadd35                     = CandleSet.new()
-var CandleSettings SettingsHTFadd35        = CandleSettings.new()
-var Candle[] candlesadd35                  = array.new<Candle>(0)
-var BOSdata bosdataadd35                   = BOSdata.new()
-
-htfadd35.settings                 := SettingsHTFadd35
-htfadd35.candles                  := candlesadd35
-htfadd35.bosdata                  := bosdataadd35
-htfadd35.settings.htf             := '35'
-htfadd35.settings.max_memory      := 10
-htfadd35.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd35)
-    LowestsbuSet(lowestsbu, htfadd35) 
-    MaxNormalSet(maxnormal, htfadd35)
-    MinNormalSet(minnormal, htfadd35)
-
-var CandleSet htfadd36                     = CandleSet.new()
-var CandleSettings SettingsHTFadd36        = CandleSettings.new()
-var Candle[] candlesadd36                  = array.new<Candle>(0)
-var BOSdata bosdataadd36                   = BOSdata.new()
-
-htfadd36.settings                 := SettingsHTFadd36
-htfadd36.candles                  := candlesadd36
-htfadd36.bosdata                  := bosdataadd36
-htfadd36.settings.htf             := '36'
-htfadd36.settings.max_memory      := 10
-htfadd36.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd36)
-    LowestsbuSet(lowestsbu, htfadd36) 
-    MaxNormalSet(maxnormal, htfadd36)
-    MinNormalSet(minnormal, htfadd36)
-
-var CandleSet htfadd37                     = CandleSet.new()
-var CandleSettings SettingsHTFadd37        = CandleSettings.new()
-var Candle[] candlesadd37                  = array.new<Candle>(0)
-var BOSdata bosdataadd37                   = BOSdata.new()
-
-htfadd37.settings                 := SettingsHTFadd37
-htfadd37.candles                  := candlesadd37
-htfadd37.bosdata                  := bosdataadd37
-htfadd37.settings.htf             := '37'
-htfadd37.settings.max_memory      := 10
-htfadd37.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd37)
-    LowestsbuSet(lowestsbu, htfadd37) 
-    MaxNormalSet(maxnormal, htfadd37)
-    MinNormalSet(minnormal, htfadd37)
-
-var CandleSet htfadd38                     = CandleSet.new()
-var CandleSettings SettingsHTFadd38        = CandleSettings.new()
-var Candle[] candlesadd38                  = array.new<Candle>(0)
-var BOSdata bosdataadd38                   = BOSdata.new()
-
-htfadd38.settings                 := SettingsHTFadd38
-htfadd38.candles                  := candlesadd38
-htfadd38.bosdata                  := bosdataadd38
-htfadd38.settings.htf             := '38'
-htfadd38.settings.max_memory      := 10
-htfadd38.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd38)
-    LowestsbuSet(lowestsbu, htfadd38) 
-    MaxNormalSet(maxnormal, htfadd38)
-    MinNormalSet(minnormal, htfadd38)
-
-var CandleSet htfadd39                     = CandleSet.new()
-var CandleSettings SettingsHTFadd39        = CandleSettings.new()
-var Candle[] candlesadd39                  = array.new<Candle>(0)
-var BOSdata bosdataadd39                   = BOSdata.new()
-
-htfadd39.settings                 := SettingsHTFadd39
-htfadd39.candles                  := candlesadd39
-htfadd39.bosdata                  := bosdataadd39
-htfadd39.settings.htf             := '39'
-htfadd39.settings.max_memory      := 10
-htfadd39.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd39)
-    LowestsbuSet(lowestsbu, htfadd39) 
-    MaxNormalSet(maxnormal, htfadd39)
-    MinNormalSet(minnormal, htfadd39)
-
-var CandleSet htfadd40                     = CandleSet.new()
-var CandleSettings SettingsHTFadd40        = CandleSettings.new()
-var Candle[] candlesadd40                  = array.new<Candle>(0)
-var BOSdata bosdataadd40                   = BOSdata.new()
-
-htfadd40.settings                 := SettingsHTFadd40
-htfadd40.candles                  := candlesadd40
-htfadd40.bosdata                  := bosdataadd40
-htfadd40.settings.htf             := '40'
-htfadd40.settings.max_memory      := 10
-htfadd40.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd40)
-    LowestsbuSet(lowestsbu, htfadd40) 
-    MaxNormalSet(maxnormal, htfadd40)
-    MinNormalSet(minnormal, htfadd40)
-
-var CandleSet htfadd41                     = CandleSet.new()
-var CandleSettings SettingsHTFadd41        = CandleSettings.new()
-var Candle[] candlesadd41                  = array.new<Candle>(0)
-var BOSdata bosdataadd41                   = BOSdata.new()
-
-htfadd41.settings                 := SettingsHTFadd41
-htfadd41.candles                  := candlesadd41
-htfadd41.bosdata                  := bosdataadd41
-htfadd41.settings.htf             := '41'
-htfadd41.settings.max_memory      := 10
-htfadd41.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd41)
-    LowestsbuSet(lowestsbu, htfadd41) 
-    MaxNormalSet(maxnormal, htfadd41)
-    MinNormalSet(minnormal, htfadd41)
-
-var CandleSet htfadd42                     = CandleSet.new()
-var CandleSettings SettingsHTFadd42        = CandleSettings.new()
-var Candle[] candlesadd42                  = array.new<Candle>(0)
-var BOSdata bosdataadd42                   = BOSdata.new()
-
-htfadd42.settings                 := SettingsHTFadd42
-htfadd42.candles                  := candlesadd42
-htfadd42.bosdata                  := bosdataadd42
-htfadd42.settings.htf             := '42'
-htfadd42.settings.max_memory      := 10
-htfadd42.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd42)
-    LowestsbuSet(lowestsbu, htfadd42) 
-    MaxNormalSet(maxnormal, htfadd42)
-    MinNormalSet(minnormal, htfadd42)
-
-var CandleSet htfadd43                     = CandleSet.new()
-var CandleSettings SettingsHTFadd43        = CandleSettings.new()
-var Candle[] candlesadd43                  = array.new<Candle>(0)
-var BOSdata bosdataadd43                   = BOSdata.new()
-
-htfadd43.settings                 := SettingsHTFadd43
-htfadd43.candles                  := candlesadd43
-htfadd43.bosdata                  := bosdataadd43
-htfadd43.settings.htf             := '43'
-htfadd43.settings.max_memory      := 10
-htfadd43.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd43)
-    LowestsbuSet(lowestsbu, htfadd43) 
-    MaxNormalSet(maxnormal, htfadd43)
-    MinNormalSet(minnormal, htfadd43)
-
-var CandleSet htfadd44                     = CandleSet.new()
-var CandleSettings SettingsHTFadd44        = CandleSettings.new()
-var Candle[] candlesadd44                  = array.new<Candle>(0)
-var BOSdata bosdataadd44                   = BOSdata.new()
-
-htfadd44.settings                 := SettingsHTFadd44
-htfadd44.candles                  := candlesadd44
-htfadd44.bosdata                  := bosdataadd44
-htfadd44.settings.htf             := '44'
-htfadd44.settings.max_memory      := 10
-htfadd44.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd44)
-    LowestsbuSet(lowestsbu, htfadd44) 
-    MaxNormalSet(maxnormal, htfadd44)
-    MinNormalSet(minnormal, htfadd44)
-
-var CandleSet htfadd45                     = CandleSet.new()
-var CandleSettings SettingsHTFadd45        = CandleSettings.new()
-var Candle[] candlesadd45                  = array.new<Candle>(0)
-var BOSdata bosdataadd45                   = BOSdata.new()
-
-htfadd45.settings                 := SettingsHTFadd45
-htfadd45.candles                  := candlesadd45
-htfadd45.bosdata                  := bosdataadd45
-htfadd45.settings.htf             := '45'
-htfadd45.settings.max_memory      := 10
-htfadd45.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd45)
-    LowestsbuSet(lowestsbu, htfadd45) 
-    MaxNormalSet(maxnormal, htfadd45)
-    MinNormalSet(minnormal, htfadd45)
-
-var CandleSet htfadd46                     = CandleSet.new()
-var CandleSettings SettingsHTFadd46        = CandleSettings.new()
-var Candle[] candlesadd46                  = array.new<Candle>(0)
-var BOSdata bosdataadd46                   = BOSdata.new()
-
-htfadd46.settings                 := SettingsHTFadd46
-htfadd46.candles                  := candlesadd46
-htfadd46.bosdata                  := bosdataadd46
-htfadd46.settings.htf             := '46'
-htfadd46.settings.max_memory      := 10
-htfadd46.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd46)
-    LowestsbuSet(lowestsbu, htfadd46) 
-    MaxNormalSet(maxnormal, htfadd46)
-    MinNormalSet(minnormal, htfadd46)
-
-var CandleSet htfadd47                     = CandleSet.new()
-var CandleSettings SettingsHTFadd47        = CandleSettings.new()
-var Candle[] candlesadd47                  = array.new<Candle>(0)
-var BOSdata bosdataadd47                   = BOSdata.new()
-
-htfadd47.settings                 := SettingsHTFadd47
-htfadd47.candles                  := candlesadd47
-htfadd47.bosdata                  := bosdataadd47
-htfadd47.settings.htf             := '47'
-htfadd47.settings.max_memory      := 10
-htfadd47.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd47)
-    LowestsbuSet(lowestsbu, htfadd47) 
-    MaxNormalSet(maxnormal, htfadd47)
-    MinNormalSet(minnormal, htfadd47)
-
-var CandleSet htfadd48                     = CandleSet.new()
-var CandleSettings SettingsHTFadd48        = CandleSettings.new()
-var Candle[] candlesadd48                  = array.new<Candle>(0)
-var BOSdata bosdataadd48                   = BOSdata.new()
-
-htfadd48.settings                 := SettingsHTFadd48
-htfadd48.candles                  := candlesadd48
-htfadd48.bosdata                  := bosdataadd48
-htfadd48.settings.htf             := '48'
-htfadd48.settings.max_memory      := 10
-htfadd48.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd48)
-    LowestsbuSet(lowestsbu, htfadd48) 
-    MaxNormalSet(maxnormal, htfadd48)
-    MinNormalSet(minnormal, htfadd48)
-
-var CandleSet htfadd49                     = CandleSet.new()
-var CandleSettings SettingsHTFadd49        = CandleSettings.new()
-var Candle[] candlesadd49                  = array.new<Candle>(0)
-var BOSdata bosdataadd49                   = BOSdata.new()
-
-htfadd49.settings                 := SettingsHTFadd49
-htfadd49.candles                  := candlesadd49
-htfadd49.bosdata                  := bosdataadd49
-htfadd49.settings.htf             := '49'
-htfadd49.settings.max_memory      := 10
-htfadd49.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd49)
-    LowestsbuSet(lowestsbu, htfadd49) 
-    MaxNormalSet(maxnormal, htfadd49)
-    MinNormalSet(minnormal, htfadd49)
-
-var CandleSet htfadd50                     = CandleSet.new()
-var CandleSettings SettingsHTFadd50        = CandleSettings.new()
-var Candle[] candlesadd50                  = array.new<Candle>(0)
-var BOSdata bosdataadd50                   = BOSdata.new()
-
-htfadd50.settings                 := SettingsHTFadd50
-htfadd50.candles                  := candlesadd50
-htfadd50.bosdata                  := bosdataadd50
-htfadd50.settings.htf             := '50'
-htfadd50.settings.max_memory      := 10
-htfadd50.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd50)
-    LowestsbuSet(lowestsbu, htfadd50) 
-    MaxNormalSet(maxnormal, htfadd50)
-    MinNormalSet(minnormal, htfadd50)
-
-var CandleSet htfadd51                     = CandleSet.new()
-var CandleSettings SettingsHTFadd51        = CandleSettings.new()
-var Candle[] candlesadd51                  = array.new<Candle>(0)
-var BOSdata bosdataadd51                   = BOSdata.new()
-
-htfadd51.settings                 := SettingsHTFadd51
-htfadd51.candles                  := candlesadd51
-htfadd51.bosdata                  := bosdataadd51
-htfadd51.settings.htf             := '51'
-htfadd51.settings.max_memory      := 10
-htfadd51.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd51)
-    LowestsbuSet(lowestsbu, htfadd51) 
-    MaxNormalSet(maxnormal, htfadd51)
-    MinNormalSet(minnormal, htfadd51)
-
-var CandleSet htfadd52                     = CandleSet.new()
-var CandleSettings SettingsHTFadd52        = CandleSettings.new()
-var Candle[] candlesadd52                  = array.new<Candle>(0)
-var BOSdata bosdataadd52                   = BOSdata.new()
-
-htfadd52.settings                 := SettingsHTFadd52
-htfadd52.candles                  := candlesadd52
-htfadd52.bosdata                  := bosdataadd52
-htfadd52.settings.htf             := '52'
-htfadd52.settings.max_memory      := 10
-htfadd52.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd52)
-    LowestsbuSet(lowestsbu, htfadd52) 
-    MaxNormalSet(maxnormal, htfadd52)
-    MinNormalSet(minnormal, htfadd52)
-
-var CandleSet htfadd53                     = CandleSet.new()
-var CandleSettings SettingsHTFadd53        = CandleSettings.new()
-var Candle[] candlesadd53                  = array.new<Candle>(0)
-var BOSdata bosdataadd53                   = BOSdata.new()
-
-htfadd53.settings                 := SettingsHTFadd53
-htfadd53.candles                  := candlesadd53
-htfadd53.bosdata                  := bosdataadd53
-htfadd53.settings.htf             := '53'
-htfadd53.settings.max_memory      := 10
-htfadd53.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd53)
-    LowestsbuSet(lowestsbu, htfadd53) 
-    MaxNormalSet(maxnormal, htfadd53)
-    MinNormalSet(minnormal, htfadd53)
-
-var CandleSet htfadd54                     = CandleSet.new()
-var CandleSettings SettingsHTFadd54        = CandleSettings.new()
-var Candle[] candlesadd54                  = array.new<Candle>(0)
-var BOSdata bosdataadd54                   = BOSdata.new()
-
-htfadd54.settings                 := SettingsHTFadd54
-htfadd54.candles                  := candlesadd54
-htfadd54.bosdata                  := bosdataadd54
-htfadd54.settings.htf             := '54'
-htfadd54.settings.max_memory      := 10
-htfadd54.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd54)
-    LowestsbuSet(lowestsbu, htfadd54) 
-    MaxNormalSet(maxnormal, htfadd54)
-    MinNormalSet(minnormal, htfadd54)
-
-var CandleSet htfadd55                     = CandleSet.new()
-var CandleSettings SettingsHTFadd55        = CandleSettings.new()
-var Candle[] candlesadd55                  = array.new<Candle>(0)
-var BOSdata bosdataadd55                   = BOSdata.new()
-
-htfadd55.settings                 := SettingsHTFadd55
-htfadd55.candles                  := candlesadd55
-htfadd55.bosdata                  := bosdataadd55
-htfadd55.settings.htf             := '55'
-htfadd55.settings.max_memory      := 10
-htfadd55.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd55)
-    LowestsbuSet(lowestsbu, htfadd55) 
-    MaxNormalSet(maxnormal, htfadd55)
-    MinNormalSet(minnormal, htfadd55)
-
-var CandleSet htfadd56                     = CandleSet.new()
-var CandleSettings SettingsHTFadd56        = CandleSettings.new()
-var Candle[] candlesadd56                  = array.new<Candle>(0)
-var BOSdata bosdataadd56                   = BOSdata.new()
-
-htfadd56.settings                 := SettingsHTFadd56
-htfadd56.candles                  := candlesadd56
-htfadd56.bosdata                  := bosdataadd56
-htfadd56.settings.htf             := '56'
-htfadd56.settings.max_memory      := 10
-htfadd56.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd56)
-    LowestsbuSet(lowestsbu, htfadd56) 
-    MaxNormalSet(maxnormal, htfadd56)
-    MinNormalSet(minnormal, htfadd56)
-
-var CandleSet htfadd57                     = CandleSet.new()
-var CandleSettings SettingsHTFadd57        = CandleSettings.new()
-var Candle[] candlesadd57                  = array.new<Candle>(0)
-var BOSdata bosdataadd57                   = BOSdata.new()
-
-htfadd57.settings                 := SettingsHTFadd57
-htfadd57.candles                  := candlesadd57
-htfadd57.bosdata                  := bosdataadd57
-htfadd57.settings.htf             := '57'
-htfadd57.settings.max_memory      := 10
-htfadd57.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd57)
-    LowestsbuSet(lowestsbu, htfadd57) 
-    MaxNormalSet(maxnormal, htfadd57)
-    MinNormalSet(minnormal, htfadd57)
-
-var CandleSet htfadd58                     = CandleSet.new()
-var CandleSettings SettingsHTFadd58        = CandleSettings.new()
-var Candle[] candlesadd58                  = array.new<Candle>(0)
-var BOSdata bosdataadd58                   = BOSdata.new()
-
-htfadd58.settings                 := SettingsHTFadd58
-htfadd58.candles                  := candlesadd58
-htfadd58.bosdata                  := bosdataadd58
-htfadd58.settings.htf             := '58'
-htfadd58.settings.max_memory      := 10
-htfadd58.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd58)
-    LowestsbuSet(lowestsbu, htfadd58) 
-    MaxNormalSet(maxnormal, htfadd58)
-    MinNormalSet(minnormal, htfadd58)
-
-var CandleSet htfadd59                     = CandleSet.new()
-var CandleSettings SettingsHTFadd59        = CandleSettings.new()
-var Candle[] candlesadd59                  = array.new<Candle>(0)
-var BOSdata bosdataadd59                   = BOSdata.new()
-
-htfadd59.settings                 := SettingsHTFadd59
-htfadd59.candles                  := candlesadd59
-htfadd59.bosdata                  := bosdataadd59
-htfadd59.settings.htf             := '59'
-htfadd59.settings.max_memory      := 10
-htfadd59.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd59)
-    LowestsbuSet(lowestsbu, htfadd59) 
-    MaxNormalSet(maxnormal, htfadd59)
-    MinNormalSet(minnormal, htfadd59)
-
-var CandleSet htfadd60                     = CandleSet.new()
-var CandleSettings SettingsHTFadd60        = CandleSettings.new()
-var Candle[] candlesadd60                  = array.new<Candle>(0)
-var BOSdata bosdataadd60                   = BOSdata.new()
-
-htfadd60.settings                 := SettingsHTFadd60
-htfadd60.candles                  := candlesadd60
-htfadd60.bosdata                  := bosdataadd60
-htfadd60.settings.htf             := '60'
-htfadd60.settings.max_memory      := 10
-htfadd60.Monitor().BOSJudge()
-if barstate.islast
-    HighestsbdSet(highestsbd, htfadd60)
-    LowestsbuSet(lowestsbu, htfadd60) 
-    
-//+---------------add var end------------------+//
-if settings.add_show and barstate.islast
-    highestsbd.addplot(offset)
-    lowestsbu.addplot(offset)
-    var line nowcloseline = na
-    if not na(nowcloseline)
-        line.set_xy1(nowcloseline, bar_index, close)
-        line.set_xy2(nowcloseline, bar_index+2, close)
-    else
-        nowcloseline := line.new(bar_index, close, bar_index, close, xloc= xloc.bar_index, color = color.new(color.gray, 10), style = line.style_dotted , width = 4)       
-//if barstate.islast
-//    label.new(bar_index,close, str.tostring(htfadd15.bosdata.sbu) + "\n" + str.tostring(htfadd15.bosdata.sbd) + "\n" + "hello")
-//+---------------ADD END------------------+//
 
 if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)
     htf1.Monitor().BOSJudge()

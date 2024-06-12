@@ -36,6 +36,7 @@ type BOSdata
     string          strtemp1
     string          strtemp2
     int             dateinnumber = 0
+    bool            nowclosebool = false
 
 type CandleSettings
     bool            show
@@ -138,11 +139,12 @@ htf4.bosdata                := bosdata_4
 htf4.trace                  := trace_4
 
 //+---------------ValueDeicsion------------------+//
-var ValueDecisionReg maxnormal  = ValueDecisionReg.new()
-var ValueDecisionReg minnormal  = ValueDecisionReg.new()
-var ValueDecisionReg highestsbd = ValueDecisionReg.new()
-var ValueDecisionReg lowestsbu  = ValueDecisionReg.new()
-var ValueDecisionReg predictor  = ValueDecisionReg.new()
+var ValueDecisionReg highestsbd  = ValueDecisionReg.new(vtext="highestsbd: ", value=0, vdecisionname="HighestsbdSet")
+var ValueDecisionReg lowestsbu  = ValueDecisionReg.new(vtext= "lowestsbu: ", vdecisionname="LowestsbuSet" , value=99999999)
+var ValueDecisionReg estmaxsbd  = ValueDecisionReg.new(vdecisionname="estmaxsbd", value=0, vtext="estmaxsbd: ")
+var ValueDecisionReg estminsbu  = ValueDecisionReg.new(vdecisionname="estminsbu", value=99999999, vtext="estminsbu: ")
+
+
 //+---------------ValueDeicsionEND------------------+//
 
 //+----------------------------------------+//
@@ -311,7 +313,18 @@ method Monitor(CandleSet candleSet) =>
             Candle delCandle = array.pop(candleSet.candles)
     bosdata.temp := close //in fact "temp" is the lastest close price
     candleSet
- 
+
+method Monitor_Est(CandleSet candleSet) =>
+    if barstate.isrealtime
+        Candle candle    = Candle.new()
+        candle.c        := close
+        candle.c_idx    := bar_index
+        candleSet.candles.unshift(candle)
+        if candleSet.candles.size() > candleSet.settings.max_memory //清除舊candle
+            Candle delCandle = array.pop(candleSet.candles)
+        candleSet.bosdata.nowclosebool := true
+    candleSet
+
 method BOSJudge(CandleSet candleSet) =>
     HTFBarTime = time(candleSet.settings.htf)
     isNewHTFCandle = ta.change(HTFBarTime)
@@ -325,12 +338,12 @@ method BOSJudge(CandleSet candleSet) =>
         bosdata.dateinnumber := tf-tp*2000*k+tp*(k-1)*1000
         fg                   := false
     string strresult = helper.formattedtime(bosdata.dateinnumber)
-    if candleSet.candles.size() > 0 and isNewHTFCandle != 0 or barstate.isrealtime
+    if (candleSet.candles.size() > 0 and isNewHTFCandle != 0) // 就算最新的出現 也必須遵守這個規定 為了讓結構穩定不亂序
         Candle candle = candleSet.candles.first()
         if(bosdata.state == 1)
             bosdata.regclose1 := bosdata.regclose2
             bosdata.regclose2 := bosdata.regclose3
-            bosdata.regclose3 := barstate.isrealtime? bosdata.temp : candle.c
+            bosdata.regclose3 := candle.c
             bosdata.slope1 := bosdata.regclose2 - bosdata.regclose1>0? 1 : -1
             bosdata.slope2 := bosdata.regclose3 - bosdata.regclose2>0? 1 : -1
             if((not na(bosdata.sbd)) and (not na(bosdata.sbu)))
@@ -393,6 +406,7 @@ method BOSJudge(CandleSet candleSet) =>
                 bosdata.sbu := na
                 bosdata.sbu_idx:= na
             bosdata.state := 1
+    bosdata.nowclosebool  := false
     candleSet
 
 method plotdata(CandleSet candleSet, int offset, int delta) =>
@@ -477,43 +491,9 @@ method plotdata(CandleSet candleSet, int offset, int delta) =>
             li_sbd := line.new(bar_index, bosdata.sbd, offset, bosdata.sbd, xloc= xloc.bar_index, color = trace.trace_c_color, style = helper.LineStyle(trace.trace_c_style) , width = trace.trace_c_size)
     candleSet
 
-method MaxNormalSet(ValueDecisionReg maxnormal, CandleSet candleSet) =>
-    ValueDecisionReg m1 = maxnormal
-    CandleSet        cs = candleSet
-    var bool         fg = true 
-    if fg
-        m1.value            := 0
-        m1.vtext            := "maxprice \n(possible sbd): "
-        m1.vdecisionname    := "MaxNormalSet"
-        fg                  := false
-    if cs.bosdata.sbd > m1.value
-        m1.value        := cs.bosdata.sbd
-        m1.vname        := cs.settings.htf
-    maxnormal
-
-method MinNormalSet(ValueDecisionReg minnormal, CandleSet candleSet) =>
-    ValueDecisionReg m1 = minnormal
-    CandleSet        cs = candleSet
-    var bool         fg = true 
-    if fg
-        m1.value            := 99999999
-        m1.vtext            := "minprice \n(possible sbu): "
-        m1.vdecisionname    := "MinNormalSet"
-        fg                  := false
-    if cs.bosdata.sbu < m1.value
-        m1.value  := cs.bosdata.sbu
-        m1.vname  := cs.settings.htf
-    minnormal
-
 method HighestsbdSet(ValueDecisionReg highestsbd, CandleSet candleSet) =>
     ValueDecisionReg m1 = highestsbd
     CandleSet        cs = candleSet
-    var bool         fg = true 
-    if fg
-        m1.value            := 0
-        m1.vtext            := "highestsbd: "
-        m1.vdecisionname    := "HighestsbdSet"
-        fg                  := false
     if cs.bosdata.sbd > m1.value
         m1.value := cs.bosdata.sbd
         m1.vidx  := cs.bosdata.sbd_idx
@@ -525,11 +505,6 @@ method LowestsbuSet (ValueDecisionReg lowestsbu, CandleSet candleSet) =>
     ValueDecisionReg m1 = lowestsbu
     CandleSet        cs = candleSet
     var bool         fg = true 
-    if fg
-        m1.value            := 99999999
-        m1.vtext            := "lowestsbu: "
-        m1.vdecisionname    := "LowestsbuSet"
-        fg                  := false
     if cs.bosdata.sbu < m1.value
         m1.value := cs.bosdata.sbu
         m1.vidx  := cs.bosdata.sbu_idx
@@ -540,8 +515,19 @@ method LowestsbuSet (ValueDecisionReg lowestsbu, CandleSet candleSet) =>
 method Predictor (CandleSet candleSet, ValueDecisionReg predictor) =>
     CandleSet        cs = candleSet
     ValueDecisionReg pt = predictor
-    
-
+    if pt.vdecisionname == "estmaxsbd"
+        if pt.value < cs.bosdata.sbd  
+            pt.value := cs.bosdata.sbd
+            pt.vidx  := cs.bosdata.sbd_idx
+            pt.vname := cs.settings.htf
+            pt.vdate := cs.bosdata.s_dated
+    if pt.vdecisionname == "estminsbu"
+        if pt.value > cs.bosdata.sbu  
+            pt.value := cs.bosdata.sbu
+            pt.vidx  := cs.bosdata.sbu_idx
+            pt.vname := cs.settings.htf
+            pt.vdate := cs.bosdata.s_dateu
+    predictor
 
 method addplot (ValueDecisionReg decision, int offset) =>
     ValueDecisionReg m1 = decision
@@ -568,10 +554,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
             line.set_xy2(m1.vln, offset, m1.value)
         else
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
-    if m1.vdecisionname == "MaxNormalSet"
+    if m1.vdecisionname == "estmaxsbd"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset+3, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
             m1.vlb := label.new(offset+3,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
@@ -579,10 +565,11 @@ method addplot (ValueDecisionReg decision, int offset) =>
             line.set_xy2(m1.vln, offset, m1.value)
         else
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
-    if m1.vdecisionname == "MinNormalSet"
+        m1.value   := 0
+    if m1.vdecisionname == "estminsbu"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset+3, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value)  + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value)  + "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
             m1.vlb := label.new(offset+3,m1.value,text= decision.vtext + str.tostring(m1.value),style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
@@ -881,7 +868,7 @@ htfadd90.bosdata                  := bosdataadd90
 htfadd90.settings.htf             := '90'
 htfadd90.settings.max_memory      := 10
 
-if bar_index <= last_bar_index
+if true
     htfadd60.Monitor().BOSJudge()
     htfadd61.Monitor().BOSJudge()
     htfadd62.Monitor().BOSJudge()
@@ -914,138 +901,170 @@ if bar_index <= last_bar_index
     htfadd89.Monitor().BOSJudge()
     htfadd90.Monitor().BOSJudge()
 
-if bar_index == last_bar_index-1
+if bar_index == last_bar_index - 1
     HighestsbdSet(highestsbd, htfadd60)
     LowestsbuSet(lowestsbu, htfadd60) 
-    MaxNormalSet(maxnormal, htfadd60)
-    MinNormalSet(minnormal, htfadd60)
     HighestsbdSet(highestsbd, htfadd61)
     LowestsbuSet(lowestsbu, htfadd61) 
-    MaxNormalSet(maxnormal, htfadd61)
-    MinNormalSet(minnormal, htfadd61)
     HighestsbdSet(highestsbd, htfadd62)
     LowestsbuSet(lowestsbu, htfadd62) 
-    MaxNormalSet(maxnormal, htfadd62)
-    MinNormalSet(minnormal, htfadd62)
     HighestsbdSet(highestsbd, htfadd63)
     LowestsbuSet(lowestsbu, htfadd63) 
-    MaxNormalSet(maxnormal, htfadd63)
-    MinNormalSet(minnormal, htfadd63)
     HighestsbdSet(highestsbd, htfadd64)
     LowestsbuSet(lowestsbu, htfadd64) 
-    MaxNormalSet(maxnormal, htfadd64)
-    MinNormalSet(minnormal, htfadd64)
     HighestsbdSet(highestsbd, htfadd65)
     LowestsbuSet(lowestsbu, htfadd65) 
-    MaxNormalSet(maxnormal, htfadd65)
-    MinNormalSet(minnormal, htfadd65)
     HighestsbdSet(highestsbd, htfadd66)
     LowestsbuSet(lowestsbu, htfadd66) 
-    MaxNormalSet(maxnormal, htfadd66)
-    MinNormalSet(minnormal, htfadd66)
     HighestsbdSet(highestsbd, htfadd67)
     LowestsbuSet(lowestsbu, htfadd67) 
-    MaxNormalSet(maxnormal, htfadd67)
-    MinNormalSet(minnormal, htfadd67)
     HighestsbdSet(highestsbd, htfadd68)
     LowestsbuSet(lowestsbu, htfadd68) 
-    MaxNormalSet(maxnormal, htfadd68)
-    MinNormalSet(minnormal, htfadd68)
     HighestsbdSet(highestsbd, htfadd69)
     LowestsbuSet(lowestsbu, htfadd69) 
-    MaxNormalSet(maxnormal, htfadd69)
-    MinNormalSet(minnormal, htfadd69)
     HighestsbdSet(highestsbd, htfadd70)
     LowestsbuSet(lowestsbu, htfadd70) 
-    MaxNormalSet(maxnormal, htfadd70)
-    MinNormalSet(minnormal, htfadd70)
     HighestsbdSet(highestsbd, htfadd71)
     LowestsbuSet(lowestsbu, htfadd71) 
-    MaxNormalSet(maxnormal, htfadd71)
-    MinNormalSet(minnormal, htfadd71)
     HighestsbdSet(highestsbd, htfadd72)
     LowestsbuSet(lowestsbu, htfadd72) 
-    MaxNormalSet(maxnormal, htfadd72)
-    MinNormalSet(minnormal, htfadd72)
     HighestsbdSet(highestsbd, htfadd73)
     LowestsbuSet(lowestsbu, htfadd73) 
-    MaxNormalSet(maxnormal, htfadd73)
-    MinNormalSet(minnormal, htfadd73)
     HighestsbdSet(highestsbd, htfadd74)
     LowestsbuSet(lowestsbu, htfadd74) 
-    MaxNormalSet(maxnormal, htfadd74)
-    MinNormalSet(minnormal, htfadd74)
     HighestsbdSet(highestsbd, htfadd75)
     LowestsbuSet(lowestsbu, htfadd75) 
-    MaxNormalSet(maxnormal, htfadd75)
-    MinNormalSet(minnormal, htfadd75)
     HighestsbdSet(highestsbd, htfadd76)
     LowestsbuSet(lowestsbu, htfadd76) 
-    MaxNormalSet(maxnormal, htfadd76)
-    MinNormalSet(minnormal, htfadd76)
     HighestsbdSet(highestsbd, htfadd77)
     LowestsbuSet(lowestsbu, htfadd77) 
-    MaxNormalSet(maxnormal, htfadd77)
-    MinNormalSet(minnormal, htfadd77)
     HighestsbdSet(highestsbd, htfadd78)
     LowestsbuSet(lowestsbu, htfadd78) 
-    MaxNormalSet(maxnormal, htfadd78)
-    MinNormalSet(minnormal, htfadd78)
     HighestsbdSet(highestsbd, htfadd79)
     LowestsbuSet(lowestsbu, htfadd79) 
-    MaxNormalSet(maxnormal, htfadd79)
-    MinNormalSet(minnormal, htfadd79)
     HighestsbdSet(highestsbd, htfadd80)
     LowestsbuSet(lowestsbu, htfadd80) 
-    MaxNormalSet(maxnormal, htfadd80)
-    MinNormalSet(minnormal, htfadd80)
     HighestsbdSet(highestsbd, htfadd81)
     LowestsbuSet(lowestsbu, htfadd81) 
-    MaxNormalSet(maxnormal, htfadd81)
-    MinNormalSet(minnormal, htfadd81)
     HighestsbdSet(highestsbd, htfadd82)
     LowestsbuSet(lowestsbu, htfadd82) 
-    MaxNormalSet(maxnormal, htfadd82)
-    MinNormalSet(minnormal, htfadd82)
     HighestsbdSet(highestsbd, htfadd83)
     LowestsbuSet(lowestsbu, htfadd83) 
-    MaxNormalSet(maxnormal, htfadd83)
-    MinNormalSet(minnormal, htfadd83)
     HighestsbdSet(highestsbd, htfadd84)
     LowestsbuSet(lowestsbu, htfadd84) 
-    MaxNormalSet(maxnormal, htfadd84)
-    MinNormalSet(minnormal, htfadd84)
     HighestsbdSet(highestsbd, htfadd85)
     LowestsbuSet(lowestsbu, htfadd85) 
-    MaxNormalSet(maxnormal, htfadd85)
-    MinNormalSet(minnormal, htfadd85)
     HighestsbdSet(highestsbd, htfadd86)
     LowestsbuSet(lowestsbu, htfadd86) 
-    MaxNormalSet(maxnormal, htfadd86)
-    MinNormalSet(minnormal, htfadd86)
     HighestsbdSet(highestsbd, htfadd87)
     LowestsbuSet(lowestsbu, htfadd87) 
-    MaxNormalSet(maxnormal, htfadd87)
-    MinNormalSet(minnormal, htfadd87)
     HighestsbdSet(highestsbd, htfadd88)
     LowestsbuSet(lowestsbu, htfadd88) 
-    MaxNormalSet(maxnormal, htfadd88)
-    MinNormalSet(minnormal, htfadd88)
     HighestsbdSet(highestsbd, htfadd89)
     LowestsbuSet(lowestsbu, htfadd89) 
-    MaxNormalSet(maxnormal, htfadd89)
-    MinNormalSet(minnormal, htfadd89)
     HighestsbdSet(highestsbd, htfadd90)
     LowestsbuSet(lowestsbu, htfadd90) 
-    MaxNormalSet(maxnormal, htfadd90)
-    MinNormalSet(minnormal, htfadd90)
+if barstate.islast or barstate.isrealtime
+    htfadd60.Monitor_Est().BOSJudge()
+    htfadd61.Monitor_Est().BOSJudge()
+    htfadd62.Monitor_Est().BOSJudge()
+    htfadd63.Monitor_Est().BOSJudge()
+    htfadd64.Monitor_Est().BOSJudge()
+    htfadd65.Monitor_Est().BOSJudge()
+    htfadd66.Monitor_Est().BOSJudge()
+    htfadd67.Monitor_Est().BOSJudge()
+    htfadd68.Monitor_Est().BOSJudge()
+    htfadd69.Monitor_Est().BOSJudge()
+    htfadd70.Monitor_Est().BOSJudge()
+    htfadd71.Monitor_Est().BOSJudge()
+    htfadd72.Monitor_Est().BOSJudge()
+    htfadd73.Monitor_Est().BOSJudge()
+    htfadd74.Monitor_Est().BOSJudge()
+    htfadd75.Monitor_Est().BOSJudge()
+    htfadd76.Monitor_Est().BOSJudge()
+    htfadd77.Monitor_Est().BOSJudge()
+    htfadd78.Monitor_Est().BOSJudge()
+    htfadd79.Monitor_Est().BOSJudge()
+    htfadd80.Monitor_Est().BOSJudge()
+    htfadd81.Monitor_Est().BOSJudge()
+    htfadd82.Monitor_Est().BOSJudge()
+    htfadd83.Monitor_Est().BOSJudge()
+    htfadd84.Monitor_Est().BOSJudge()
+    htfadd85.Monitor_Est().BOSJudge()
+    htfadd86.Monitor_Est().BOSJudge()
+    htfadd87.Monitor_Est().BOSJudge()
+    htfadd88.Monitor_Est().BOSJudge()
+    htfadd89.Monitor_Est().BOSJudge()
+    htfadd90.Monitor_Est().BOSJudge()
+    Predictor(htfadd60, estminsbu)
+    Predictor(htfadd60, estmaxsbd) 
+    Predictor(htfadd61, estminsbu)
+    Predictor(htfadd61, estmaxsbd) 
+    Predictor(htfadd62, estminsbu)
+    Predictor(htfadd62, estmaxsbd) 
+    Predictor(htfadd63, estminsbu)
+    Predictor(htfadd63, estmaxsbd) 
+    Predictor(htfadd64, estminsbu)
+    Predictor(htfadd64, estmaxsbd) 
+    Predictor(htfadd65, estminsbu)
+    Predictor(htfadd65, estmaxsbd) 
+    Predictor(htfadd66, estminsbu)
+    Predictor(htfadd66, estmaxsbd) 
+    Predictor(htfadd67, estminsbu)
+    Predictor(htfadd67, estmaxsbd) 
+    Predictor(htfadd68, estminsbu)
+    Predictor(htfadd68, estmaxsbd) 
+    Predictor(htfadd69, estminsbu)
+    Predictor(htfadd69, estmaxsbd) 
+    Predictor(htfadd70, estminsbu)
+    Predictor(htfadd70, estmaxsbd) 
+    Predictor(htfadd71, estminsbu)
+    Predictor(htfadd71, estmaxsbd) 
+    Predictor(htfadd72, estminsbu)
+    Predictor(htfadd72, estmaxsbd) 
+    Predictor(htfadd73, estminsbu)
+    Predictor(htfadd73, estmaxsbd) 
+    Predictor(htfadd74, estminsbu)
+    Predictor(htfadd74, estmaxsbd) 
+    Predictor(htfadd75, estminsbu)
+    Predictor(htfadd75, estmaxsbd) 
+    Predictor(htfadd76, estminsbu)
+    Predictor(htfadd76, estmaxsbd) 
+    Predictor(htfadd77, estminsbu)
+    Predictor(htfadd77, estmaxsbd) 
+    Predictor(htfadd78, estminsbu)
+    Predictor(htfadd78, estmaxsbd) 
+    Predictor(htfadd79, estminsbu)
+    Predictor(htfadd79, estmaxsbd) 
+    Predictor(htfadd80, estminsbu)
+    Predictor(htfadd80, estmaxsbd) 
+    Predictor(htfadd81, estminsbu)
+    Predictor(htfadd81, estmaxsbd) 
+    Predictor(htfadd82, estminsbu)
+    Predictor(htfadd82, estmaxsbd) 
+    Predictor(htfadd83, estminsbu)
+    Predictor(htfadd83, estmaxsbd) 
+    Predictor(htfadd84, estminsbu)
+    Predictor(htfadd84, estmaxsbd) 
+    Predictor(htfadd85, estminsbu)
+    Predictor(htfadd85, estmaxsbd) 
+    Predictor(htfadd86, estminsbu)
+    Predictor(htfadd86, estmaxsbd) 
+    Predictor(htfadd87, estminsbu)
+    Predictor(htfadd87, estmaxsbd) 
+    Predictor(htfadd88, estminsbu)
+    Predictor(htfadd88, estmaxsbd) 
+    Predictor(htfadd89, estminsbu)
+    Predictor(htfadd89, estmaxsbd) 
+    Predictor(htfadd90, estminsbu)
+    Predictor(htfadd90, estmaxsbd) 
 
 //+---------------add var end------------------+//
 if settings.add_show and barstate.isrealtime
     highestsbd.addplot(offset)
     lowestsbu.addplot(offset)
-    maxnormal.addplot(offset)
-    minnormal.addplot(offset)
+    estminsbu.addplot(offset)
+    estmaxsbd.addplot(offset)
 
     var line nowcloseline = na
     if not na(nowcloseline)
