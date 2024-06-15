@@ -1,6 +1,7 @@
 # Python script to generate the Pine Script code
 output = ""
 
+<<<<<<< HEAD
 for i in range(1350, 1441):
     output += f"""var CandleSet htfadd{i}                     = CandleSet.new()
 var CandleSettings SettingsHTFadd{i}        = CandleSettings.new(htf='{i}',htfint={i},max_memory=3)
@@ -9,6 +10,15 @@ var BOSdata bosdataadd{i}                   = BOSdata.new()
 htfadd{i}.settings                 := SettingsHTFadd{i}
 htfadd{i}.candles                  := candlesadd{i}
 htfadd{i}.bosdata                  := bosdataadd{i}
+=======
+for i in range(1, 31):
+    output += f"""if  htf{i}.settings.show and helper.ValidTimeframe(htf{i}.settings.htf) 
+    htf{i}.Monitor().BOSJudge()
+    if barstate.isrealtime or barstate.islast
+        htf{i}.Monitor_Est().BOSJudge()
+        plotdata(htf{i}, offset, delta)
+    cnt +=1
+>>>>>>> 0e2bc89750cdad4885d991680553a87c5f18bf2b
 """
 print(output)
 

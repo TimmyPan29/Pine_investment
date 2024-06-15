@@ -722,7 +722,6 @@ method Monitor_Est(CandleSet candleSet) =>
         candleSet.candles.unshift(candle)
         if candleSet.candles.size() > candleSet.settings.max_memory //清除舊candle
             Candle delCandle = array.pop(candleSet.candles)
-        candleSet.bosdata.nowclosebool := true
     candleSet 
     
 method BOSJudge(CandleSet candleSet) =>
@@ -894,151 +893,187 @@ int last   = helper.HTFEnabled()
 int delta  = settings.text_buffer
 int offset = settings.offset + bar_index
 
-if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf)
+if  htf1.settings.show and helper.ValidTimeframe(htf1.settings.htf) 
     htf1.Monitor().BOSJudge()
-    plotdata(htf1, offset, delta)
+    if barstate.isrealtime or barstate.islast
+        htf1.Monitor_Est().BOSJudge()
+        plotdata(htf1, offset, delta)
     cnt +=1
-if  htf2.settings.show and helper.ValidTimeframe(htf2.settings.htf)
+if  htf2.settings.show and helper.ValidTimeframe(htf2.settings.htf) 
     htf2.Monitor().BOSJudge()
-    plotdata(htf2, offset, delta)
+    if barstate.isrealtime or barstate.islast
+        htf2.Monitor_Est().BOSJudge()
+        plotdata(htf2, offset, delta)
     cnt +=1
-if  htf3.settings.show and helper.ValidTimeframe(htf3.settings.htf)
+if  htf3.settings.show and helper.ValidTimeframe(htf3.settings.htf) 
     htf3.Monitor().BOSJudge()
-    plotdata(htf3, offset, delta)
+    if barstate.isrealtime or barstate.islast
+        htf3.Monitor_Est().BOSJudge()
+        plotdata(htf3, offset, delta)
     cnt +=1
-if  htf4.settings.show and helper.ValidTimeframe(htf4.settings.htf)
+if  htf4.settings.show and helper.ValidTimeframe(htf4.settings.htf) 
     htf4.Monitor().BOSJudge()
-    plotdata(htf4, offset, delta)
-
-if  htf5.settings.show and helper.ValidTimeframe(htf5.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf4.Monitor_Est().BOSJudge()
+        plotdata(htf4, offset, delta)
+    cnt +=1
+if  htf5.settings.show and helper.ValidTimeframe(htf5.settings.htf) 
     htf5.Monitor().BOSJudge()
-    plotdata(htf5, offset, delta)
-    cnt += 1
-
-if  htf6.settings.show and helper.ValidTimeframe(htf6.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf5.Monitor_Est().BOSJudge()
+        plotdata(htf5, offset, delta)
+    cnt +=1
+if  htf6.settings.show and helper.ValidTimeframe(htf6.settings.htf) 
     htf6.Monitor().BOSJudge()
-    plotdata(htf6, offset, delta)
-    cnt += 1
-
-if  htf7.settings.show and helper.ValidTimeframe(htf7.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf6.Monitor_Est().BOSJudge()
+        plotdata(htf6, offset, delta)
+    cnt +=1
+if  htf7.settings.show and helper.ValidTimeframe(htf7.settings.htf) 
     htf7.Monitor().BOSJudge()
-    plotdata(htf7, offset, delta)
-    cnt += 1
-
-if  htf8.settings.show and helper.ValidTimeframe(htf8.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf7.Monitor_Est().BOSJudge()
+        plotdata(htf7, offset, delta)
+    cnt +=1
+if  htf8.settings.show and helper.ValidTimeframe(htf8.settings.htf) 
     htf8.Monitor().BOSJudge()
-    plotdata(htf8, offset, delta)
-    cnt += 1
-
-if  htf9.settings.show and helper.ValidTimeframe(htf9.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf8.Monitor_Est().BOSJudge()
+        plotdata(htf8, offset, delta)
+    cnt +=1
+if  htf9.settings.show and helper.ValidTimeframe(htf9.settings.htf) 
     htf9.Monitor().BOSJudge()
-    plotdata(htf9, offset, delta)
-    cnt += 1
-
-if  htf10.settings.show and helper.ValidTimeframe(htf10.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf9.Monitor_Est().BOSJudge()
+        plotdata(htf9, offset, delta)
+    cnt +=1
+if  htf10.settings.show and helper.ValidTimeframe(htf10.settings.htf) 
     htf10.Monitor().BOSJudge()
-    plotdata(htf10, offset, delta)
-    cnt += 1
-
-if  htf11.settings.show and helper.ValidTimeframe(htf11.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf10.Monitor_Est().BOSJudge()
+        plotdata(htf10, offset, delta)
+    cnt +=1
+if  htf11.settings.show and helper.ValidTimeframe(htf11.settings.htf) 
     htf11.Monitor().BOSJudge()
-    plotdata(htf11, offset, delta)
-    cnt += 1
-
-if  htf12.settings.show and helper.ValidTimeframe(htf12.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf11.Monitor_Est().BOSJudge()
+        plotdata(htf11, offset, delta)
+    cnt +=1
+if  htf12.settings.show and helper.ValidTimeframe(htf12.settings.htf) 
     htf12.Monitor().BOSJudge()
-    plotdata(htf12, offset, delta)
-    cnt += 1
-
-if  htf13.settings.show and helper.ValidTimeframe(htf13.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf12.Monitor_Est().BOSJudge()
+        plotdata(htf12, offset, delta)
+    cnt +=1
+if  htf13.settings.show and helper.ValidTimeframe(htf13.settings.htf) 
     htf13.Monitor().BOSJudge()
-    plotdata(htf13, offset, delta)
-    cnt += 1
-
-if  htf14.settings.show and helper.ValidTimeframe(htf14.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf13.Monitor_Est().BOSJudge()
+        plotdata(htf13, offset, delta)
+    cnt +=1
+if  htf14.settings.show and helper.ValidTimeframe(htf14.settings.htf) 
     htf14.Monitor().BOSJudge()
-    plotdata(htf14, offset, delta)
-    cnt += 1
-
-if  htf15.settings.show and helper.ValidTimeframe(htf15.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf14.Monitor_Est().BOSJudge()
+        plotdata(htf14, offset, delta)
+    cnt +=1
+if  htf15.settings.show and helper.ValidTimeframe(htf15.settings.htf) 
     htf15.Monitor().BOSJudge()
-    plotdata(htf15, offset, delta)
-    cnt += 1
-
-if  htf16.settings.show and helper.ValidTimeframe(htf16.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf15.Monitor_Est().BOSJudge()
+        plotdata(htf15, offset, delta)
+    cnt +=1
+if  htf16.settings.show and helper.ValidTimeframe(htf16.settings.htf) 
     htf16.Monitor().BOSJudge()
-    plotdata(htf16, offset, delta)
-    cnt += 1
-
-if  htf17.settings.show and helper.ValidTimeframe(htf17.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf16.Monitor_Est().BOSJudge()
+        plotdata(htf16, offset, delta)
+    cnt +=1
+if  htf17.settings.show and helper.ValidTimeframe(htf17.settings.htf) 
     htf17.Monitor().BOSJudge()
-    plotdata(htf17, offset, delta)
-    cnt += 1
-
-if  htf18.settings.show and helper.ValidTimeframe(htf18.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf17.Monitor_Est().BOSJudge()
+        plotdata(htf17, offset, delta)
+    cnt +=1
+if  htf18.settings.show and helper.ValidTimeframe(htf18.settings.htf) 
     htf18.Monitor().BOSJudge()
-    plotdata(htf18, offset, delta)
-    cnt += 1
-
-if  htf19.settings.show and helper.ValidTimeframe(htf19.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf18.Monitor_Est().BOSJudge()
+        plotdata(htf18, offset, delta)
+    cnt +=1
+if  htf19.settings.show and helper.ValidTimeframe(htf19.settings.htf) 
     htf19.Monitor().BOSJudge()
-    plotdata(htf19, offset, delta)
-    cnt += 1
-
-if  htf20.settings.show and helper.ValidTimeframe(htf20.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf19.Monitor_Est().BOSJudge()
+        plotdata(htf19, offset, delta)
+    cnt +=1
+if  htf20.settings.show and helper.ValidTimeframe(htf20.settings.htf) 
     htf20.Monitor().BOSJudge()
-    plotdata(htf20, offset, delta)
-    cnt += 1
-
-if  htf21.settings.show and helper.ValidTimeframe(htf21.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf20.Monitor_Est().BOSJudge()
+        plotdata(htf20, offset, delta)
+    cnt +=1
+if  htf21.settings.show and helper.ValidTimeframe(htf21.settings.htf) 
     htf21.Monitor().BOSJudge()
-    plotdata(htf21, offset, delta)
-    cnt += 1
-
-if  htf22.settings.show and helper.ValidTimeframe(htf22.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf21.Monitor_Est().BOSJudge()
+        plotdata(htf21, offset, delta)
+    cnt +=1
+if  htf22.settings.show and helper.ValidTimeframe(htf22.settings.htf) 
     htf22.Monitor().BOSJudge()
-    plotdata(htf22, offset, delta)
-    cnt += 1
-
-if  htf23.settings.show and helper.ValidTimeframe(htf23.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf22.Monitor_Est().BOSJudge()
+        plotdata(htf22, offset, delta)
+    cnt +=1
+if  htf23.settings.show and helper.ValidTimeframe(htf23.settings.htf) 
     htf23.Monitor().BOSJudge()
-    plotdata(htf23, offset, delta)
-    cnt += 1
-
-if  htf24.settings.show and helper.ValidTimeframe(htf24.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf23.Monitor_Est().BOSJudge()
+        plotdata(htf23, offset, delta)
+    cnt +=1
+if  htf24.settings.show and helper.ValidTimeframe(htf24.settings.htf) 
     htf24.Monitor().BOSJudge()
-    plotdata(htf24, offset, delta)
-    cnt += 1
-
-if  htf25.settings.show and helper.ValidTimeframe(htf25.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf24.Monitor_Est().BOSJudge()
+        plotdata(htf24, offset, delta)
+    cnt +=1
+if  htf25.settings.show and helper.ValidTimeframe(htf25.settings.htf) 
     htf25.Monitor().BOSJudge()
-    plotdata(htf25, offset, delta)
-    cnt += 1
-
-if  htf26.settings.show and helper.ValidTimeframe(htf26.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf25.Monitor_Est().BOSJudge()
+        plotdata(htf25, offset, delta)
+    cnt +=1
+if  htf26.settings.show and helper.ValidTimeframe(htf26.settings.htf) 
     htf26.Monitor().BOSJudge()
-    plotdata(htf26, offset, delta)
-    cnt += 1
-
-if  htf27.settings.show and helper.ValidTimeframe(htf27.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf26.Monitor_Est().BOSJudge()
+        plotdata(htf26, offset, delta)
+    cnt +=1
+if  htf27.settings.show and helper.ValidTimeframe(htf27.settings.htf) 
     htf27.Monitor().BOSJudge()
-    plotdata(htf27, offset, delta)
-    cnt += 1
-
-if  htf28.settings.show and helper.ValidTimeframe(htf28.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf27.Monitor_Est().BOSJudge()
+        plotdata(htf27, offset, delta)
+    cnt +=1
+if  htf28.settings.show and helper.ValidTimeframe(htf28.settings.htf) 
     htf28.Monitor().BOSJudge()
-    plotdata(htf28, offset, delta)
-    cnt += 1
-
-if  htf29.settings.show and helper.ValidTimeframe(htf29.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf28.Monitor_Est().BOSJudge()
+        plotdata(htf28, offset, delta)
+    cnt +=1
+if  htf29.settings.show and helper.ValidTimeframe(htf29.settings.htf) 
     htf29.Monitor().BOSJudge()
-    plotdata(htf29, offset, delta)
-    cnt += 1
-
-if  htf30.settings.show and helper.ValidTimeframe(htf30.settings.htf)
+    if barstate.isrealtime or barstate.islast
+        htf29.Monitor_Est().BOSJudge()
+        plotdata(htf29, offset, delta)
+    cnt +=1
+if  htf30.settings.show and helper.ValidTimeframe(htf30.settings.htf) 
     htf30.Monitor().BOSJudge()
-    plotdata(htf30, offset, delta)
-    cnt += 1
+    if barstate.isrealtime or barstate.islast
+        htf30.Monitor_Est().BOSJudge()
+        plotdata(htf30, offset, delta)
+    cnt +=1
+
 if cnt>last
     label.new(bar_index,high,"over the line count limit 30")
 
