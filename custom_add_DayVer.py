@@ -1,137 +1,137 @@
 //+-----filter the multiline after the timing and show that on figure -----+//
 // © T.PanShuai29
 //@version=5
-indicator("add_60setBaseAndItv", overlay=true, max_boxes_count = 500, max_lines_count = 500, max_bars_back = 5000)
+indicator("add_60Day_setBaseAndItv", overlay=true, max_boxes_count = 500, max_lines_count = 500, max_bars_back = 5000)
 //+----------------------------------------+//
 //+- Custom Variable
-int Base     = input.int(1,"Base",inline='custom_setting',minval=1,maxval=1439)
-int Interval = input.int(1,"Interval",inline='custom_setting',minval=1,maxval=1439)
-int CmprSet  = input.int(60,"Nunber of Compared Set",inline='custom_setting',minval=1,maxval=60,tooltip="總共要和幾組比 最少和1組比 最多60組比")
-int Bound    = Base + Interval*CmprSet
+int Baseint  = input.int(1,"Base",inline='custom_setting',options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60])
+int Interval = input.int(1,"Interval",inline='custom_setting',options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60])
+int CmprSet  = input.int(10,"Nunber of Compared Set",inline='custom_setting',minval=1,maxval=60,tooltip="總共要和幾組比 最少和1組比 最多60組比")
+int Bound    = (Baseint + Interval*CmprSet)*1440
 // there is four line a set, totally. 
-string str_base =  str.tostring(Base)
-int    int_itv1 =  Base+1*Interval
-int    int_itv2 =  Base+2*Interval
-int    int_itv3 =  Base+3*Interval
-int    int_itv4 =  Base+4*Interval
-int    int_itv5 =  Base+5*Interval
-int    int_itv6 =  Base+6*Interval
-int    int_itv7 =  Base+7*Interval
-int    int_itv8 =  Base+8*Interval
-int    int_itv9 =  Base+9*Interval
-int    int_itv10 = Base+10*Interval
-int    int_itv11 = Base+11*Interval
-int    int_itv12 = Base+12*Interval
-int    int_itv13 = Base+13*Interval
-int    int_itv14 = Base+14*Interval
-int    int_itv15 = Base+15*Interval
-int    int_itv16 = Base+16*Interval
-int    int_itv17 = Base+17*Interval
-int    int_itv18 = Base+18*Interval
-int    int_itv19 = Base+19*Interval
-int    int_itv20 = Base+20*Interval
-int    int_itv21 = Base+21*Interval
-int    int_itv22 = Base+22*Interval
-int    int_itv23 = Base+23*Interval
-int    int_itv24 = Base+24*Interval
-int    int_itv25 = Base+25*Interval
-int    int_itv26 = Base+26*Interval
-int    int_itv27 = Base+27*Interval
-int    int_itv28 = Base+28*Interval
-int    int_itv29 = Base+29*Interval
-int    int_itv30 = Base+30*Interval
-int    int_itv31 = Base+31*Interval
-int    int_itv32 = Base+32*Interval
-int    int_itv33 = Base+33*Interval
-int    int_itv34 = Base+34*Interval
-int    int_itv35 = Base+35*Interval
-int    int_itv36 = Base+36*Interval
-int    int_itv37 = Base+37*Interval
-int    int_itv38 = Base+38*Interval
-int    int_itv39 = Base+39*Interval
-int    int_itv40 = Base+40*Interval
-int    int_itv41 = Base+41*Interval
-int    int_itv42 = Base+42*Interval
-int    int_itv43 = Base+43*Interval
-int    int_itv44 = Base+44*Interval
-int    int_itv45 = Base+45*Interval
-int    int_itv46 = Base+46*Interval
-int    int_itv47 = Base+47*Interval
-int    int_itv48 = Base+48*Interval
-int    int_itv49 = Base+49*Interval
-int    int_itv50 = Base+50*Interval
-int    int_itv51 = Base+51*Interval
-int    int_itv52 = Base+52*Interval
-int    int_itv53 = Base+53*Interval
-int    int_itv54 = Base+54*Interval
-int    int_itv55 = Base+55*Interval
-int    int_itv56 = Base+56*Interval
-int    int_itv57 = Base+57*Interval
-int    int_itv58 = Base+58*Interval
-int    int_itv59 = Base+59*Interval
-int    int_itv60 = Base+60*Interval
+string str_base  =  str.tostring(Baseint)+"D"
+int    Base      =  (Baseint)*1440
+int    int_itv1  =  (Baseint+1*Interval)*1440
+int    int_itv2  =  (Baseint+2*Interval)*1440
+int    int_itv3  =  (Baseint+3*Interval)*1440
+int    int_itv4  =  (Baseint+4*Interval)*1440
+int    int_itv5  =  (Baseint+5*Interval)*1440
+int    int_itv6  =  (Baseint+6*Interval)*1440
+int    int_itv7  =  (Baseint+7*Interval)*1440
+int    int_itv8  =  (Baseint+8*Interval)*1440
+int    int_itv9  =  (Baseint+9*Interval)*1440
+int    int_itv10 =  (Baseint+10*Interval)*1440
+int    int_itv11 =  (Baseint+11*Interval)*1440
+int    int_itv12 =  (Baseint+12*Interval)*1440
+int    int_itv13 =  (Baseint+13*Interval)*1440
+int    int_itv14 =  (Baseint+14*Interval)*1440
+int    int_itv15 =  (Baseint+15*Interval)*1440
+int    int_itv16 =  (Baseint+16*Interval)*1440
+int    int_itv17 =  (Baseint+17*Interval)*1440
+int    int_itv18 =  (Baseint+18*Interval)*1440
+int    int_itv19 =  (Baseint+19*Interval)*1440
+int    int_itv20 =  (Baseint+20*Interval)*1440
+int    int_itv21 =  (Baseint+21*Interval)*1440
+int    int_itv22 =  (Baseint+22*Interval)*1440
+int    int_itv23 =  (Baseint+23*Interval)*1440
+int    int_itv24 =  (Baseint+24*Interval)*1440
+int    int_itv25 =  (Baseint+25*Interval)*1440
+int    int_itv26 =  (Baseint+26*Interval)*1440
+int    int_itv27 =  (Baseint+27*Interval)*1440
+int    int_itv28 =  (Baseint+28*Interval)*1440
+int    int_itv29 =  (Baseint+29*Interval)*1440
+int    int_itv30 =  (Baseint+30*Interval)*1440
+int    int_itv31 =  (Baseint+31*Interval)*1440
+int    int_itv32 =  (Baseint+32*Interval)*1440
+int    int_itv33 =  (Baseint+33*Interval)*1440
+int    int_itv34 =  (Baseint+34*Interval)*1440
+int    int_itv35 =  (Baseint+35*Interval)*1440
+int    int_itv36 =  (Baseint+36*Interval)*1440
+int    int_itv37 =  (Baseint+37*Interval)*1440
+int    int_itv38 =  (Baseint+38*Interval)*1440
+int    int_itv39 =  (Baseint+39*Interval)*1440
+int    int_itv40 =  (Baseint+40*Interval)*1440
+int    int_itv41 =  (Baseint+41*Interval)*1440
+int    int_itv42 =  (Baseint+42*Interval)*1440
+int    int_itv43 =  (Baseint+43*Interval)*1440
+int    int_itv44 =  (Baseint+44*Interval)*1440
+int    int_itv45 =  (Baseint+45*Interval)*1440
+int    int_itv46 =  (Baseint+46*Interval)*1440
+int    int_itv47 =  (Baseint+47*Interval)*1440
+int    int_itv48 =  (Baseint+48*Interval)*1440
+int    int_itv49 =  (Baseint+49*Interval)*1440
+int    int_itv50 =  (Baseint+50*Interval)*1440
+int    int_itv51 =  (Baseint+51*Interval)*1440
+int    int_itv52 =  (Baseint+52*Interval)*1440
+int    int_itv53 =  (Baseint+53*Interval)*1440
+int    int_itv54 =  (Baseint+54*Interval)*1440
+int    int_itv55 =  (Baseint+55*Interval)*1440
+int    int_itv56 =  (Baseint+56*Interval)*1440
+int    int_itv57 =  (Baseint+57*Interval)*1440
+int    int_itv58 =  (Baseint+58*Interval)*1440
+int    int_itv59 =  (Baseint+59*Interval)*1440
+int    int_itv60 =  (Baseint+60*Interval)*1440
 
-string str_itv1  = str.tostring(int_itv1)
-string str_itv2  = str.tostring(int_itv2)
-string str_itv3  = str.tostring(int_itv3)
-string str_itv4  = str.tostring(int_itv4)
-string str_itv5  = str.tostring(int_itv5)
-string str_itv6  = str.tostring(int_itv6)
-string str_itv7  = str.tostring(int_itv7)
-string str_itv8  = str.tostring(int_itv8)
-string str_itv9  = str.tostring(int_itv9)
-string str_itv10 = str.tostring(int_itv10)
-string str_itv11 = str.tostring(int_itv11)
-string str_itv12 = str.tostring(int_itv12)
-string str_itv13 = str.tostring(int_itv13)
-string str_itv14 = str.tostring(int_itv14)
-string str_itv15 = str.tostring(int_itv15)
-string str_itv16 = str.tostring(int_itv16)
-string str_itv17 = str.tostring(int_itv17)
-string str_itv18 = str.tostring(int_itv18)
-string str_itv19 = str.tostring(int_itv19)
-string str_itv20 = str.tostring(int_itv20)
-string str_itv21 = str.tostring(int_itv21)
-string str_itv22 = str.tostring(int_itv22)
-string str_itv23 = str.tostring(int_itv23)
-string str_itv24 = str.tostring(int_itv24)
-string str_itv25 = str.tostring(int_itv25)
-string str_itv26 = str.tostring(int_itv26)
-string str_itv27 = str.tostring(int_itv27)
-string str_itv28 = str.tostring(int_itv28)
-string str_itv29 = str.tostring(int_itv29)
-string str_itv30 = str.tostring(int_itv30)
-string str_itv31 = str.tostring(int_itv31)
-string str_itv32 = str.tostring(int_itv32)
-string str_itv33 = str.tostring(int_itv33)
-string str_itv34 = str.tostring(int_itv34)
-string str_itv35 = str.tostring(int_itv35)
-string str_itv36 = str.tostring(int_itv36)
-string str_itv37 = str.tostring(int_itv37)
-string str_itv38 = str.tostring(int_itv38)
-string str_itv39 = str.tostring(int_itv39)
-string str_itv40 = str.tostring(int_itv40)
-string str_itv41 = str.tostring(int_itv41)
-string str_itv42 = str.tostring(int_itv42)
-string str_itv43 = str.tostring(int_itv43)
-string str_itv44 = str.tostring(int_itv44)
-string str_itv45 = str.tostring(int_itv45)
-string str_itv46 = str.tostring(int_itv46)
-string str_itv47 = str.tostring(int_itv47)
-string str_itv48 = str.tostring(int_itv48)
-string str_itv49 = str.tostring(int_itv49)
-string str_itv50 = str.tostring(int_itv50)
-string str_itv51 = str.tostring(int_itv51)
-string str_itv52 = str.tostring(int_itv52)
-string str_itv53 = str.tostring(int_itv53)
-string str_itv54 = str.tostring(int_itv54)
-string str_itv55 = str.tostring(int_itv55)
-string str_itv56 = str.tostring(int_itv56)
-string str_itv57 = str.tostring(int_itv57)
-string str_itv58 = str.tostring(int_itv58)
-string str_itv59 = str.tostring(int_itv59)
-string str_itv60 = str.tostring(int_itv60)
-
+string str_itv1   = str.tostring(int_itv1/1440)+"D"
+string str_itv2   = str.tostring(int_itv2/1440)+"D"
+string str_itv3   = str.tostring(int_itv3/1440)+"D"
+string str_itv4   = str.tostring(int_itv4/1440)+"D"
+string str_itv5   = str.tostring(int_itv5/1440)+"D"
+string str_itv6   = str.tostring(int_itv6/1440)+"D"
+string str_itv7   = str.tostring(int_itv7/1440)+"D"
+string str_itv8   = str.tostring(int_itv8/1440)+"D"
+string str_itv9   = str.tostring(int_itv9/1440)+"D"
+string str_itv10  = str.tostring(int_itv10/1440)+"D"
+string str_itv11  = str.tostring(int_itv11/1440)+"D"
+string str_itv12  = str.tostring(int_itv12/1440)+"D"
+string str_itv13  = str.tostring(int_itv13/1440)+"D"
+string str_itv14  = str.tostring(int_itv14/1440)+"D"
+string str_itv15  = str.tostring(int_itv15/1440)+"D"
+string str_itv16  = str.tostring(int_itv16/1440)+"D"
+string str_itv17  = str.tostring(int_itv17/1440)+"D"
+string str_itv18  = str.tostring(int_itv18/1440)+"D"
+string str_itv19  = str.tostring(int_itv19/1440)+"D"
+string str_itv20  = str.tostring(int_itv20/1440)+"D"
+string str_itv21  = str.tostring(int_itv21/1440)+"D"
+string str_itv22  = str.tostring(int_itv22/1440)+"D"
+string str_itv23  = str.tostring(int_itv23/1440)+"D"
+string str_itv24  = str.tostring(int_itv24/1440)+"D"
+string str_itv25  = str.tostring(int_itv25/1440)+"D"
+string str_itv26  = str.tostring(int_itv26/1440)+"D"
+string str_itv27  = str.tostring(int_itv27/1440)+"D"
+string str_itv28  = str.tostring(int_itv28/1440)+"D"
+string str_itv29  = str.tostring(int_itv29/1440)+"D"
+string str_itv30  = str.tostring(int_itv30/1440)+"D"
+string str_itv31  = str.tostring(int_itv31/1440)+"D"
+string str_itv32  = str.tostring(int_itv32/1440)+"D"
+string str_itv33  = str.tostring(int_itv33/1440)+"D"
+string str_itv34  = str.tostring(int_itv34/1440)+"D"
+string str_itv35  = str.tostring(int_itv35/1440)+"D"
+string str_itv36  = str.tostring(int_itv36/1440)+"D"
+string str_itv37  = str.tostring(int_itv37/1440)+"D"
+string str_itv38  = str.tostring(int_itv38/1440)+"D"
+string str_itv39  = str.tostring(int_itv39/1440)+"D"
+string str_itv40  = str.tostring(int_itv40/1440)+"D"
+string str_itv41  = str.tostring(int_itv41/1440)+"D"
+string str_itv42  = str.tostring(int_itv42/1440)+"D"
+string str_itv43  = str.tostring(int_itv43/1440)+"D"
+string str_itv44  = str.tostring(int_itv44/1440)+"D"
+string str_itv45  = str.tostring(int_itv45/1440)+"D"
+string str_itv46  = str.tostring(int_itv46/1440)+"D"
+string str_itv47  = str.tostring(int_itv47/1440)+"D"
+string str_itv48  = str.tostring(int_itv48/1440)+"D"
+string str_itv49  = str.tostring(int_itv49/1440)+"D"
+string str_itv50  = str.tostring(int_itv50/1440)+"D"
+string str_itv51  = str.tostring(int_itv51/1440)+"D"
+string str_itv52  = str.tostring(int_itv52/1440)+"D"
+string str_itv53  = str.tostring(int_itv53/1440)+"D"
+string str_itv54  = str.tostring(int_itv54/1440)+"D"
+string str_itv55  = str.tostring(int_itv55/1440)+"D"
+string str_itv56  = str.tostring(int_itv56/1440)+"D"
+string str_itv57  = str.tostring(int_itv57/1440)+"D"
+string str_itv58  = str.tostring(int_itv58/1440)+"D"
+string str_itv59  = str.tostring(int_itv59/1440)+"D"
+string str_itv60  = str.tostring(int_itv60/1440)+"D"
 
 //+----------------------------------------+//
 
@@ -174,6 +174,7 @@ type CandleSettings
     string          htf
     int             max_memory
     int             htfint
+    int             htfintdivD
 
 type Settings
     int             offset
@@ -228,10 +229,10 @@ Settings settings = Settings.new()
 
 
 //+---------------ValueDeicsion------------------+//
-var ValueDecisionReg highestsbd = ValueDecisionReg.new(value=0)
-var ValueDecisionReg lowestsbu  = ValueDecisionReg.new(value=99999999)
-var ValueDecisionReg estmaxsbd  = ValueDecisionReg.new(vdecisionname="estmaxsbd", value=0, vtext="estmaxsbd: ")
-var ValueDecisionReg estminsbu  = ValueDecisionReg.new(vdecisionname="estminsbu", value=99999999, vtext="estminsbu: ")
+var ValueDecisionReg highestsbd = ValueDecisionReg.new(value=0       ,vdecisionname = "HighestsbdSet", vtext = "highestsbd: ")
+var ValueDecisionReg lowestsbu  = ValueDecisionReg.new(value=99999999,vdecisionname = "LowestsbuSet",  vtext = "lowestsbu: ")
+var ValueDecisionReg estmaxsbd  = ValueDecisionReg.new(value=0       ,vdecisionname = "estmaxsbd",     vtext = "estmaxsbd: ")
+var ValueDecisionReg estminsbu  = ValueDecisionReg.new(value=99999999,vdecisionname = "estminsbu",     vtext = "estminsbu: ")
 
 
 //+---------------ValueDeicsionEND------------------+//
@@ -249,9 +250,8 @@ settings.text_buffer       := input.int(10, "space between text features", minva
 
 
 Helper    helper        = Helper.new()
-
+var int index           = 0
 color color_transparent = #ffffff00
-var index               = 0  //不要動
 var bool fggetnowclose  = false
 //+----------------------------------------+//
 //+- Internal functions   
@@ -299,7 +299,7 @@ method RemainingTime(Helper helper, string HTF) =>
 
 method formattedtime(Helper helper, int i_HTF) =>
     helper.name := "THE DATE OF BAR"
-    r = str.format("{0,date,yyyy-MM-dd HH:mm}", i_HTF)
+    r = str.format("{0,date,yyyy-MM-dd}", i_HTF)
     r
 
     
@@ -329,9 +329,9 @@ method Monitor(CandleSet candleSet) =>
 
             if candleSet.candles.size() > candleSet.settings.max_memory //清除舊candle
                 Candle delCandle = array.pop(candleSet.candles)
-        bosdata.temp := close //in fact "temp" is the lastest close price
-
+    candleSet.bosdata.temp := close //in fact "temp" is the lastest close price
     candleSet
+
 
 method Monitor_Est(CandleSet candleSet) =>
     if candleSet.settings.htfint <= Bound
@@ -343,19 +343,20 @@ method Monitor_Est(CandleSet candleSet) =>
             if candleSet.candles.size() > candleSet.settings.max_memory //清除舊candle
                 Candle delCandle = array.pop(candleSet.candles)
     candleSet
+    
 
 method BOSJudge(CandleSet candleSet) =>
-    HTFBarTime = time(candleSet.settings.htf)
-    isNewHTFCandle = ta.change(HTFBarTime)
+    HTFBarTime      = time(candleSet.settings.htf)
+    isNewHTFCandle  = ta.change(HTFBarTime)
     BOSdata bosdata = candleSet.bosdata
-    var bool fg          = true
+    bool fg     = true
     
     int tf = time(timeframe.period)
     int tp = timeframe.in_seconds(timeframe.period)
     int tn = timeframe.in_seconds(candleSet.settings.htf)
     int k  = tn/tp
     if fg
-        bosdata.dateinnumber := tf-tp*2000*k+tp*(k-1)*1000
+        bosdata.dateinnumber := tf-1000*tp*(k-1)
         fg                   := false
     string strresult = helper.formattedtime(bosdata.dateinnumber)
     if candleSet.settings.htfint <= Bound
@@ -379,7 +380,7 @@ method BOSJudge(CandleSet candleSet) =>
             if(bosdata.state == 2)
                 if(bosdata.slope1 != bosdata.slope2)
                     bosdata.reg1key := bosdata.regclose2
-                    bosdata.reg1key_idx := index==0? 0 : index - 1 - k
+                    bosdata.reg1key_idx := index==0? 0 : index - 1 - k 
                     bosdata.strtemp1    := strresult
                 //else //Buff_key1維持原樣
                 if(bosdata.regclose3>bosdata.sbu)
@@ -400,7 +401,7 @@ method BOSJudge(CandleSet candleSet) =>
                 if(bosdata.slope1 != bosdata.slope2) // build sky
                     bosdata.strtemp2    := strresult
                     bosdata.reg2key := bosdata.regclose2
-                    bosdata.reg2key_idx := index - 1 - k
+                    bosdata.reg2key_idx := index - 1 - k 
                     bosdata.sbu := bosdata.reg2key
                     bosdata.sbu_idx:= bosdata.reg2key_idx
                     bosdata.reg1key := bosdata.reg2key
@@ -428,47 +429,34 @@ method BOSJudge(CandleSet candleSet) =>
                     bosdata.sbu_idx:= na
                 bosdata.state := 1
     candleSet
-
-
+    
 
 method HighestsbdSet(ValueDecisionReg highestsbd, CandleSet candleSet) =>
-    ValueDecisionReg m1 = highestsbd
-    CandleSet        cs = candleSet
-    var bool         fg = true
-    if cs.settings.htfint <= Bound
-        if fg
-            m1.value            := 0
-            m1.vtext            := "highestsbd: "
-            m1.vdecisionname    := "HighestsbdSet"
-            fg                  := false
+    if candleSet.settings.htfint <= Bound
+        ValueDecisionReg m1 = highestsbd
+        CandleSet        cs = candleSet
         if cs.bosdata.sbd > m1.value
             m1.value := cs.bosdata.sbd
             m1.vidx  := cs.bosdata.sbd_idx
             m1.vname := cs.settings.htf
             m1.vdate := cs.bosdata.s_dated
-    m1
+    highestsbd
 
 method LowestsbuSet (ValueDecisionReg lowestsbu, CandleSet candleSet) =>
-    ValueDecisionReg m1 = lowestsbu
-    CandleSet        cs = candleSet
-    var bool         fg = true
-    if cs.settings.htfint <= Bound
-        if fg
-            m1.value            := 99999999
-            m1.vtext            := "lowestsbu: "
-            m1.vdecisionname    := "LowestsbuSet"
-            fg                  := false
+    if candleSet.settings.htfint <= Bound
+        ValueDecisionReg     m1 = lowestsbu
+        CandleSet            cs = candleSet
         if cs.bosdata.sbu < m1.value
             m1.value := cs.bosdata.sbu
             m1.vidx  := cs.bosdata.sbu_idx
             m1.vname := cs.settings.htf
             m1.vdate := cs.bosdata.s_dateu
-    m1
+    lowestsbu
 
 method Predictor (CandleSet candleSet, ValueDecisionReg predictor) =>
     if candleSet.settings.htfint <= Bound
-        CandleSet        cs = candleSet
-        ValueDecisionReg pt = predictor
+        CandleSet              cs = candleSet
+        var ValueDecisionReg   pt = predictor
         if pt.vdecisionname == "estmaxsbd"
             if pt.value < cs.bosdata.sbd  
                 pt.value := cs.bosdata.sbd
@@ -489,51 +477,51 @@ method addplot (ValueDecisionReg decision, int offset) =>
     if m1.vdecisionname == "LowestsbuSet"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset-5, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname  + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new( offset-5,m1.value,text= decision.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new( offset-5,m1.value,text= decision.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname  + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
         else
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
-        m1.value   := 99999999
+        m1.value   := 99999999    
     if m1.vdecisionname == "HighestsbdSet"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset-2, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min"+ "\n" + m1.vremntime)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset-2,m1.value,text= decision.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min"+ "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset-2,m1.value,text= decision.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
         else
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
-        m1.value   := 0
+        m1.value   := 0    
     if m1.vdecisionname == "estmaxsbd"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset+3, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname  + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset+3,m1.value,text= decision.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset+3,m1.value,text= decision.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname  + "\n" + m1.vremntime, style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
         else
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
-        m1.value   := 0
+        m1.value   := 0    
     if m1.vdecisionname == "estminsbu"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset+3, m1.value)
-            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value)  + "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
+            label.set_text(m1.vlb,decision.vtext + str.tostring(m1.value)  + "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname  + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset+3,m1.value,text= decision.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset+3,m1.value,text= decision.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname  + "\n" + m1.vremntime, style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
         else
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
-        m1.value   := 99999999
+        m1.value   := 99999999 
     decision
 
 method Shadowing(CandleSet sh, CandleSet cd) =>
@@ -576,432 +564,432 @@ htfadd1.candles                  := candlesadd1
 htfadd1.bosdata                  := bosdataadd1
 //+---------------addbase var------------------+//
 var CandleSet htfbase                     = CandleSet.new()
-var CandleSettings Settingshtfbase        = CandleSettings.new(htf=str_base,htfint=Base,max_memory=3)
+var CandleSettings Settingshtfbase        = CandleSettings.new(htf=str_base,htfint=Base,max_memory=3,htfintdivD=Baseint)
 var Candle[] candlesbase                  = array.new<Candle>(0)
 var BOSdata bosdatabase                   = BOSdata.new()
 htfbase.settings                 := Settingshtfbase
 htfbase.candles                  := candlesbase
 htfbase.bosdata                  := bosdatabase
 var CandleSet htfitv1                     = CandleSet.new()
-var CandleSettings Settingshtfitv1        = CandleSettings.new(htf=str_itv1,htfint=int_itv1,max_memory=3)
+var CandleSettings Settingshtfitv1        = CandleSettings.new(htf=str_itv1,htfint=int_itv1,max_memory=3,htfintdivD=int_itv1/1440)
 var Candle[] candlesitv1                  = array.new<Candle>(0)
 var BOSdata bosdataitv1                   = BOSdata.new()
-htfitv1.settings                 := Settingshtfitv1
-htfitv1.candles                  := candlesitv1
-htfitv1.bosdata                  := bosdataitv1
+htfitv1.settings                         := Settingshtfitv1
+htfitv1.candles                          := candlesitv1
+htfitv1.bosdata                          := bosdataitv1
 var CandleSet htfitv2                     = CandleSet.new()
-var CandleSettings Settingshtfitv2        = CandleSettings.new(htf=str_itv2,htfint=int_itv2,max_memory=3)
+var CandleSettings Settingshtfitv2        = CandleSettings.new(htf=str_itv2,htfint=int_itv2,max_memory=3,htfintdivD=int_itv2/1440)
 var Candle[] candlesitv2                  = array.new<Candle>(0)
 var BOSdata bosdataitv2                   = BOSdata.new()
-htfitv2.settings                 := Settingshtfitv2
-htfitv2.candles                  := candlesitv2
-htfitv2.bosdata                  := bosdataitv2
+htfitv2.settings                         := Settingshtfitv2
+htfitv2.candles                          := candlesitv2
+htfitv2.bosdata                          := bosdataitv2
 var CandleSet htfitv3                     = CandleSet.new()
-var CandleSettings Settingshtfitv3        = CandleSettings.new(htf=str_itv3,htfint=int_itv3,max_memory=3)
+var CandleSettings Settingshtfitv3        = CandleSettings.new(htf=str_itv3,htfint=int_itv3,max_memory=3,htfintdivD=int_itv3/1440)
 var Candle[] candlesitv3                  = array.new<Candle>(0)
 var BOSdata bosdataitv3                   = BOSdata.new()
-htfitv3.settings                 := Settingshtfitv3
-htfitv3.candles                  := candlesitv3
-htfitv3.bosdata                  := bosdataitv3
+htfitv3.settings                         := Settingshtfitv3
+htfitv3.candles                          := candlesitv3
+htfitv3.bosdata                          := bosdataitv3
 var CandleSet htfitv4                     = CandleSet.new()
-var CandleSettings Settingshtfitv4        = CandleSettings.new(htf=str_itv4,htfint=int_itv4,max_memory=3)
+var CandleSettings Settingshtfitv4        = CandleSettings.new(htf=str_itv4,htfint=int_itv4,max_memory=3,htfintdivD=int_itv4/1440)
 var Candle[] candlesitv4                  = array.new<Candle>(0)
 var BOSdata bosdataitv4                   = BOSdata.new()
-htfitv4.settings                 := Settingshtfitv4
-htfitv4.candles                  := candlesitv4
-htfitv4.bosdata                  := bosdataitv4
+htfitv4.settings                         := Settingshtfitv4
+htfitv4.candles                          := candlesitv4
+htfitv4.bosdata                          := bosdataitv4
 var CandleSet htfitv5                     = CandleSet.new()
-var CandleSettings Settingshtfitv5        = CandleSettings.new(htf=str_itv5,htfint=int_itv5,max_memory=3)
+var CandleSettings Settingshtfitv5        = CandleSettings.new(htf=str_itv5,htfint=int_itv5,max_memory=3,htfintdivD=int_itv5/1440)
 var Candle[] candlesitv5                  = array.new<Candle>(0)
 var BOSdata bosdataitv5                   = BOSdata.new()
-htfitv5.settings                 := Settingshtfitv5
-htfitv5.candles                  := candlesitv5
-htfitv5.bosdata                  := bosdataitv5
+htfitv5.settings                         := Settingshtfitv5
+htfitv5.candles                          := candlesitv5
+htfitv5.bosdata                          := bosdataitv5
 var CandleSet htfitv6                     = CandleSet.new()
-var CandleSettings Settingshtfitv6        = CandleSettings.new(htf=str_itv6,htfint=int_itv6,max_memory=3)
+var CandleSettings Settingshtfitv6        = CandleSettings.new(htf=str_itv6,htfint=int_itv6,max_memory=3,htfintdivD=int_itv6/1440)
 var Candle[] candlesitv6                  = array.new<Candle>(0)
 var BOSdata bosdataitv6                   = BOSdata.new()
-htfitv6.settings                 := Settingshtfitv6
-htfitv6.candles                  := candlesitv6
-htfitv6.bosdata                  := bosdataitv6
+htfitv6.settings                         := Settingshtfitv6
+htfitv6.candles                          := candlesitv6
+htfitv6.bosdata                          := bosdataitv6
 var CandleSet htfitv7                     = CandleSet.new()
-var CandleSettings Settingshtfitv7        = CandleSettings.new(htf=str_itv7,htfint=int_itv7,max_memory=3)
+var CandleSettings Settingshtfitv7        = CandleSettings.new(htf=str_itv7,htfint=int_itv7,max_memory=3,htfintdivD=int_itv7/1440)
 var Candle[] candlesitv7                  = array.new<Candle>(0)
 var BOSdata bosdataitv7                   = BOSdata.new()
-htfitv7.settings                 := Settingshtfitv7
-htfitv7.candles                  := candlesitv7
-htfitv7.bosdata                  := bosdataitv7
+htfitv7.settings                         := Settingshtfitv7
+htfitv7.candles                          := candlesitv7
+htfitv7.bosdata                          := bosdataitv7
 var CandleSet htfitv8                     = CandleSet.new()
-var CandleSettings Settingshtfitv8        = CandleSettings.new(htf=str_itv8,htfint=int_itv8,max_memory=3)
+var CandleSettings Settingshtfitv8        = CandleSettings.new(htf=str_itv8,htfint=int_itv8,max_memory=3,htfintdivD=int_itv8/1440)
 var Candle[] candlesitv8                  = array.new<Candle>(0)
 var BOSdata bosdataitv8                   = BOSdata.new()
-htfitv8.settings                 := Settingshtfitv8
-htfitv8.candles                  := candlesitv8
-htfitv8.bosdata                  := bosdataitv8
+htfitv8.settings                         := Settingshtfitv8
+htfitv8.candles                          := candlesitv8
+htfitv8.bosdata                          := bosdataitv8
 var CandleSet htfitv9                     = CandleSet.new()
-var CandleSettings Settingshtfitv9        = CandleSettings.new(htf=str_itv9,htfint=int_itv9,max_memory=3)
+var CandleSettings Settingshtfitv9        = CandleSettings.new(htf=str_itv9,htfint=int_itv9,max_memory=3,htfintdivD=int_itv9/1440)
 var Candle[] candlesitv9                  = array.new<Candle>(0)
 var BOSdata bosdataitv9                   = BOSdata.new()
-htfitv9.settings                 := Settingshtfitv9
-htfitv9.candles                  := candlesitv9
-htfitv9.bosdata                  := bosdataitv9
+htfitv9.settings                         := Settingshtfitv9
+htfitv9.candles                          := candlesitv9
+htfitv9.bosdata                          := bosdataitv9
 var CandleSet htfitv10                     = CandleSet.new()
-var CandleSettings Settingshtfitv10        = CandleSettings.new(htf=str_itv10,htfint=int_itv10,max_memory=3)
+var CandleSettings Settingshtfitv10        = CandleSettings.new(htf=str_itv10,htfint=int_itv10,max_memory=3,htfintdivD=int_itv10/1440)
 var Candle[] candlesitv10                  = array.new<Candle>(0)
 var BOSdata bosdataitv10                   = BOSdata.new()
-htfitv10.settings                 := Settingshtfitv10
-htfitv10.candles                  := candlesitv10
-htfitv10.bosdata                  := bosdataitv10
+htfitv10.settings                         := Settingshtfitv10
+htfitv10.candles                          := candlesitv10
+htfitv10.bosdata                          := bosdataitv10
 var CandleSet htfitv11                     = CandleSet.new()
-var CandleSettings Settingshtfitv11        = CandleSettings.new(htf=str_itv11,htfint=int_itv11,max_memory=3)
+var CandleSettings Settingshtfitv11        = CandleSettings.new(htf=str_itv11,htfint=int_itv11,max_memory=3,htfintdivD=int_itv11/1440)
 var Candle[] candlesitv11                  = array.new<Candle>(0)
 var BOSdata bosdataitv11                   = BOSdata.new()
-htfitv11.settings                 := Settingshtfitv11
-htfitv11.candles                  := candlesitv11
-htfitv11.bosdata                  := bosdataitv11
+htfitv11.settings                         := Settingshtfitv11
+htfitv11.candles                          := candlesitv11
+htfitv11.bosdata                          := bosdataitv11
 var CandleSet htfitv12                     = CandleSet.new()
-var CandleSettings Settingshtfitv12        = CandleSettings.new(htf=str_itv12,htfint=int_itv12,max_memory=3)
+var CandleSettings Settingshtfitv12        = CandleSettings.new(htf=str_itv12,htfint=int_itv12,max_memory=3,htfintdivD=int_itv12/1440)
 var Candle[] candlesitv12                  = array.new<Candle>(0)
 var BOSdata bosdataitv12                   = BOSdata.new()
-htfitv12.settings                 := Settingshtfitv12
-htfitv12.candles                  := candlesitv12
-htfitv12.bosdata                  := bosdataitv12
+htfitv12.settings                         := Settingshtfitv12
+htfitv12.candles                          := candlesitv12
+htfitv12.bosdata                          := bosdataitv12
 var CandleSet htfitv13                     = CandleSet.new()
-var CandleSettings Settingshtfitv13        = CandleSettings.new(htf=str_itv13,htfint=int_itv13,max_memory=3)
+var CandleSettings Settingshtfitv13        = CandleSettings.new(htf=str_itv13,htfint=int_itv13,max_memory=3,htfintdivD=int_itv13/1440)
 var Candle[] candlesitv13                  = array.new<Candle>(0)
 var BOSdata bosdataitv13                   = BOSdata.new()
-htfitv13.settings                 := Settingshtfitv13
-htfitv13.candles                  := candlesitv13
-htfitv13.bosdata                  := bosdataitv13
+htfitv13.settings                         := Settingshtfitv13
+htfitv13.candles                          := candlesitv13
+htfitv13.bosdata                          := bosdataitv13
 var CandleSet htfitv14                     = CandleSet.new()
-var CandleSettings Settingshtfitv14        = CandleSettings.new(htf=str_itv14,htfint=int_itv14,max_memory=3)
+var CandleSettings Settingshtfitv14        = CandleSettings.new(htf=str_itv14,htfint=int_itv14,max_memory=3,htfintdivD=int_itv14/1440)
 var Candle[] candlesitv14                  = array.new<Candle>(0)
 var BOSdata bosdataitv14                   = BOSdata.new()
-htfitv14.settings                 := Settingshtfitv14
-htfitv14.candles                  := candlesitv14
-htfitv14.bosdata                  := bosdataitv14
+htfitv14.settings                         := Settingshtfitv14
+htfitv14.candles                          := candlesitv14
+htfitv14.bosdata                          := bosdataitv14
 var CandleSet htfitv15                     = CandleSet.new()
-var CandleSettings Settingshtfitv15        = CandleSettings.new(htf=str_itv15,htfint=int_itv15,max_memory=3)
+var CandleSettings Settingshtfitv15        = CandleSettings.new(htf=str_itv15,htfint=int_itv15,max_memory=3,htfintdivD=int_itv15/1440)
 var Candle[] candlesitv15                  = array.new<Candle>(0)
 var BOSdata bosdataitv15                   = BOSdata.new()
-htfitv15.settings                 := Settingshtfitv15
-htfitv15.candles                  := candlesitv15
-htfitv15.bosdata                  := bosdataitv15
+htfitv15.settings                         := Settingshtfitv15
+htfitv15.candles                          := candlesitv15
+htfitv15.bosdata                          := bosdataitv15
 var CandleSet htfitv16                     = CandleSet.new()
-var CandleSettings Settingshtfitv16        = CandleSettings.new(htf=str_itv16,htfint=int_itv16,max_memory=3)
+var CandleSettings Settingshtfitv16        = CandleSettings.new(htf=str_itv16,htfint=int_itv16,max_memory=3,htfintdivD=int_itv16/1440)
 var Candle[] candlesitv16                  = array.new<Candle>(0)
 var BOSdata bosdataitv16                   = BOSdata.new()
-htfitv16.settings                 := Settingshtfitv16
-htfitv16.candles                  := candlesitv16
-htfitv16.bosdata                  := bosdataitv16
+htfitv16.settings                         := Settingshtfitv16
+htfitv16.candles                          := candlesitv16
+htfitv16.bosdata                          := bosdataitv16
 var CandleSet htfitv17                     = CandleSet.new()
-var CandleSettings Settingshtfitv17        = CandleSettings.new(htf=str_itv17,htfint=int_itv17,max_memory=3)
+var CandleSettings Settingshtfitv17        = CandleSettings.new(htf=str_itv17,htfint=int_itv17,max_memory=3,htfintdivD=int_itv17/1440)
 var Candle[] candlesitv17                  = array.new<Candle>(0)
 var BOSdata bosdataitv17                   = BOSdata.new()
-htfitv17.settings                 := Settingshtfitv17
-htfitv17.candles                  := candlesitv17
-htfitv17.bosdata                  := bosdataitv17
+htfitv17.settings                         := Settingshtfitv17
+htfitv17.candles                          := candlesitv17
+htfitv17.bosdata                          := bosdataitv17
 var CandleSet htfitv18                     = CandleSet.new()
-var CandleSettings Settingshtfitv18        = CandleSettings.new(htf=str_itv18,htfint=int_itv18,max_memory=3)
+var CandleSettings Settingshtfitv18        = CandleSettings.new(htf=str_itv18,htfint=int_itv18,max_memory=3,htfintdivD=int_itv18/1440)
 var Candle[] candlesitv18                  = array.new<Candle>(0)
 var BOSdata bosdataitv18                   = BOSdata.new()
-htfitv18.settings                 := Settingshtfitv18
-htfitv18.candles                  := candlesitv18
-htfitv18.bosdata                  := bosdataitv18
+htfitv18.settings                         := Settingshtfitv18
+htfitv18.candles                          := candlesitv18
+htfitv18.bosdata                          := bosdataitv18
 var CandleSet htfitv19                     = CandleSet.new()
-var CandleSettings Settingshtfitv19        = CandleSettings.new(htf=str_itv19,htfint=int_itv19,max_memory=3)
+var CandleSettings Settingshtfitv19        = CandleSettings.new(htf=str_itv19,htfint=int_itv19,max_memory=3,htfintdivD=int_itv19/1440)
 var Candle[] candlesitv19                  = array.new<Candle>(0)
 var BOSdata bosdataitv19                   = BOSdata.new()
-htfitv19.settings                 := Settingshtfitv19
-htfitv19.candles                  := candlesitv19
-htfitv19.bosdata                  := bosdataitv19
+htfitv19.settings                         := Settingshtfitv19
+htfitv19.candles                          := candlesitv19
+htfitv19.bosdata                          := bosdataitv19
 var CandleSet htfitv20                     = CandleSet.new()
-var CandleSettings Settingshtfitv20        = CandleSettings.new(htf=str_itv20,htfint=int_itv20,max_memory=3)
+var CandleSettings Settingshtfitv20        = CandleSettings.new(htf=str_itv20,htfint=int_itv20,max_memory=3,htfintdivD=int_itv20/1440)
 var Candle[] candlesitv20                  = array.new<Candle>(0)
 var BOSdata bosdataitv20                   = BOSdata.new()
-htfitv20.settings                 := Settingshtfitv20
-htfitv20.candles                  := candlesitv20
-htfitv20.bosdata                  := bosdataitv20
+htfitv20.settings                         := Settingshtfitv20
+htfitv20.candles                          := candlesitv20
+htfitv20.bosdata                          := bosdataitv20
 var CandleSet htfitv21                     = CandleSet.new()
-var CandleSettings Settingshtfitv21        = CandleSettings.new(htf=str_itv21,htfint=int_itv21,max_memory=3)
+var CandleSettings Settingshtfitv21        = CandleSettings.new(htf=str_itv21,htfint=int_itv21,max_memory=3,htfintdivD=int_itv21/1440)
 var Candle[] candlesitv21                  = array.new<Candle>(0)
 var BOSdata bosdataitv21                   = BOSdata.new()
-htfitv21.settings                 := Settingshtfitv21
-htfitv21.candles                  := candlesitv21
-htfitv21.bosdata                  := bosdataitv21
+htfitv21.settings                         := Settingshtfitv21
+htfitv21.candles                          := candlesitv21
+htfitv21.bosdata                          := bosdataitv21
 var CandleSet htfitv22                     = CandleSet.new()
-var CandleSettings Settingshtfitv22        = CandleSettings.new(htf=str_itv22,htfint=int_itv22,max_memory=3)
+var CandleSettings Settingshtfitv22        = CandleSettings.new(htf=str_itv22,htfint=int_itv22,max_memory=3,htfintdivD=int_itv22/1440)
 var Candle[] candlesitv22                  = array.new<Candle>(0)
 var BOSdata bosdataitv22                   = BOSdata.new()
-htfitv22.settings                 := Settingshtfitv22
-htfitv22.candles                  := candlesitv22
-htfitv22.bosdata                  := bosdataitv22
+htfitv22.settings                         := Settingshtfitv22
+htfitv22.candles                          := candlesitv22
+htfitv22.bosdata                          := bosdataitv22
 var CandleSet htfitv23                     = CandleSet.new()
-var CandleSettings Settingshtfitv23        = CandleSettings.new(htf=str_itv23,htfint=int_itv23,max_memory=3)
+var CandleSettings Settingshtfitv23        = CandleSettings.new(htf=str_itv23,htfint=int_itv23,max_memory=3,htfintdivD=int_itv23/1440)
 var Candle[] candlesitv23                  = array.new<Candle>(0)
 var BOSdata bosdataitv23                   = BOSdata.new()
-htfitv23.settings                 := Settingshtfitv23
-htfitv23.candles                  := candlesitv23
-htfitv23.bosdata                  := bosdataitv23
+htfitv23.settings                         := Settingshtfitv23
+htfitv23.candles                          := candlesitv23
+htfitv23.bosdata                          := bosdataitv23
 var CandleSet htfitv24                     = CandleSet.new()
-var CandleSettings Settingshtfitv24        = CandleSettings.new(htf=str_itv24,htfint=int_itv24,max_memory=3)
+var CandleSettings Settingshtfitv24        = CandleSettings.new(htf=str_itv24,htfint=int_itv24,max_memory=3,htfintdivD=int_itv24/1440)
 var Candle[] candlesitv24                  = array.new<Candle>(0)
 var BOSdata bosdataitv24                   = BOSdata.new()
-htfitv24.settings                 := Settingshtfitv24
-htfitv24.candles                  := candlesitv24
-htfitv24.bosdata                  := bosdataitv24
+htfitv24.settings                         := Settingshtfitv24
+htfitv24.candles                          := candlesitv24
+htfitv24.bosdata                          := bosdataitv24
 var CandleSet htfitv25                     = CandleSet.new()
-var CandleSettings Settingshtfitv25        = CandleSettings.new(htf=str_itv25,htfint=int_itv25,max_memory=3)
+var CandleSettings Settingshtfitv25        = CandleSettings.new(htf=str_itv25,htfint=int_itv25,max_memory=3,htfintdivD=int_itv25/1440)
 var Candle[] candlesitv25                  = array.new<Candle>(0)
 var BOSdata bosdataitv25                   = BOSdata.new()
-htfitv25.settings                 := Settingshtfitv25
-htfitv25.candles                  := candlesitv25
-htfitv25.bosdata                  := bosdataitv25
+htfitv25.settings                         := Settingshtfitv25
+htfitv25.candles                          := candlesitv25
+htfitv25.bosdata                          := bosdataitv25
 var CandleSet htfitv26                     = CandleSet.new()
-var CandleSettings Settingshtfitv26        = CandleSettings.new(htf=str_itv26,htfint=int_itv26,max_memory=3)
+var CandleSettings Settingshtfitv26        = CandleSettings.new(htf=str_itv26,htfint=int_itv26,max_memory=3,htfintdivD=int_itv26/1440)
 var Candle[] candlesitv26                  = array.new<Candle>(0)
 var BOSdata bosdataitv26                   = BOSdata.new()
-htfitv26.settings                 := Settingshtfitv26
-htfitv26.candles                  := candlesitv26
-htfitv26.bosdata                  := bosdataitv26
+htfitv26.settings                         := Settingshtfitv26
+htfitv26.candles                          := candlesitv26
+htfitv26.bosdata                          := bosdataitv26
 var CandleSet htfitv27                     = CandleSet.new()
-var CandleSettings Settingshtfitv27        = CandleSettings.new(htf=str_itv27,htfint=int_itv27,max_memory=3)
+var CandleSettings Settingshtfitv27        = CandleSettings.new(htf=str_itv27,htfint=int_itv27,max_memory=3,htfintdivD=int_itv27/1440)
 var Candle[] candlesitv27                  = array.new<Candle>(0)
 var BOSdata bosdataitv27                   = BOSdata.new()
-htfitv27.settings                 := Settingshtfitv27
-htfitv27.candles                  := candlesitv27
-htfitv27.bosdata                  := bosdataitv27
+htfitv27.settings                         := Settingshtfitv27
+htfitv27.candles                          := candlesitv27
+htfitv27.bosdata                          := bosdataitv27
 var CandleSet htfitv28                     = CandleSet.new()
-var CandleSettings Settingshtfitv28        = CandleSettings.new(htf=str_itv28,htfint=int_itv28,max_memory=3)
+var CandleSettings Settingshtfitv28        = CandleSettings.new(htf=str_itv28,htfint=int_itv28,max_memory=3,htfintdivD=int_itv28/1440)
 var Candle[] candlesitv28                  = array.new<Candle>(0)
 var BOSdata bosdataitv28                   = BOSdata.new()
-htfitv28.settings                 := Settingshtfitv28
-htfitv28.candles                  := candlesitv28
-htfitv28.bosdata                  := bosdataitv28
+htfitv28.settings                         := Settingshtfitv28
+htfitv28.candles                          := candlesitv28
+htfitv28.bosdata                          := bosdataitv28
 var CandleSet htfitv29                     = CandleSet.new()
-var CandleSettings Settingshtfitv29        = CandleSettings.new(htf=str_itv29,htfint=int_itv29,max_memory=3)
+var CandleSettings Settingshtfitv29        = CandleSettings.new(htf=str_itv29,htfint=int_itv29,max_memory=3,htfintdivD=int_itv29/1440)
 var Candle[] candlesitv29                  = array.new<Candle>(0)
 var BOSdata bosdataitv29                   = BOSdata.new()
-htfitv29.settings                 := Settingshtfitv29
-htfitv29.candles                  := candlesitv29
-htfitv29.bosdata                  := bosdataitv29
+htfitv29.settings                         := Settingshtfitv29
+htfitv29.candles                          := candlesitv29
+htfitv29.bosdata                          := bosdataitv29
 var CandleSet htfitv30                     = CandleSet.new()
-var CandleSettings Settingshtfitv30        = CandleSettings.new(htf=str_itv30,htfint=int_itv30,max_memory=3)
+var CandleSettings Settingshtfitv30        = CandleSettings.new(htf=str_itv30,htfint=int_itv30,max_memory=3,htfintdivD=int_itv30/1440)
 var Candle[] candlesitv30                  = array.new<Candle>(0)
 var BOSdata bosdataitv30                   = BOSdata.new()
-htfitv30.settings                 := Settingshtfitv30
-htfitv30.candles                  := candlesitv30
-htfitv30.bosdata                  := bosdataitv30
+htfitv30.settings                         := Settingshtfitv30
+htfitv30.candles                          := candlesitv30
+htfitv30.bosdata                          := bosdataitv30
 var CandleSet htfitv31                     = CandleSet.new()
-var CandleSettings Settingshtfitv31        = CandleSettings.new(htf=str_itv31,htfint=int_itv31,max_memory=3)
+var CandleSettings Settingshtfitv31        = CandleSettings.new(htf=str_itv31,htfint=int_itv31,max_memory=3,htfintdivD=int_itv31/1440)
 var Candle[] candlesitv31                  = array.new<Candle>(0)
 var BOSdata bosdataitv31                   = BOSdata.new()
-htfitv31.settings                 := Settingshtfitv31
-htfitv31.candles                  := candlesitv31
-htfitv31.bosdata                  := bosdataitv31
+htfitv31.settings                         := Settingshtfitv31
+htfitv31.candles                          := candlesitv31
+htfitv31.bosdata                          := bosdataitv31
 var CandleSet htfitv32                     = CandleSet.new()
-var CandleSettings Settingshtfitv32        = CandleSettings.new(htf=str_itv32,htfint=int_itv32,max_memory=3)
+var CandleSettings Settingshtfitv32        = CandleSettings.new(htf=str_itv32,htfint=int_itv32,max_memory=3,htfintdivD=int_itv32/1440)
 var Candle[] candlesitv32                  = array.new<Candle>(0)
 var BOSdata bosdataitv32                   = BOSdata.new()
-htfitv32.settings                 := Settingshtfitv32
-htfitv32.candles                  := candlesitv32
-htfitv32.bosdata                  := bosdataitv32
+htfitv32.settings                         := Settingshtfitv32
+htfitv32.candles                          := candlesitv32
+htfitv32.bosdata                          := bosdataitv32
 var CandleSet htfitv33                     = CandleSet.new()
-var CandleSettings Settingshtfitv33        = CandleSettings.new(htf=str_itv33,htfint=int_itv33,max_memory=3)
+var CandleSettings Settingshtfitv33        = CandleSettings.new(htf=str_itv33,htfint=int_itv33,max_memory=3,htfintdivD=int_itv33/1440)
 var Candle[] candlesitv33                  = array.new<Candle>(0)
 var BOSdata bosdataitv33                   = BOSdata.new()
-htfitv33.settings                 := Settingshtfitv33
-htfitv33.candles                  := candlesitv33
-htfitv33.bosdata                  := bosdataitv33
+htfitv33.settings                         := Settingshtfitv33
+htfitv33.candles                          := candlesitv33
+htfitv33.bosdata                          := bosdataitv33
 var CandleSet htfitv34                     = CandleSet.new()
-var CandleSettings Settingshtfitv34        = CandleSettings.new(htf=str_itv34,htfint=int_itv34,max_memory=3)
+var CandleSettings Settingshtfitv34        = CandleSettings.new(htf=str_itv34,htfint=int_itv34,max_memory=3,htfintdivD=int_itv34/1440)
 var Candle[] candlesitv34                  = array.new<Candle>(0)
 var BOSdata bosdataitv34                   = BOSdata.new()
-htfitv34.settings                 := Settingshtfitv34
-htfitv34.candles                  := candlesitv34
-htfitv34.bosdata                  := bosdataitv34
+htfitv34.settings                         := Settingshtfitv34
+htfitv34.candles                          := candlesitv34
+htfitv34.bosdata                          := bosdataitv34
 var CandleSet htfitv35                     = CandleSet.new()
-var CandleSettings Settingshtfitv35        = CandleSettings.new(htf=str_itv35,htfint=int_itv35,max_memory=3)
+var CandleSettings Settingshtfitv35        = CandleSettings.new(htf=str_itv35,htfint=int_itv35,max_memory=3,htfintdivD=int_itv35/1440)
 var Candle[] candlesitv35                  = array.new<Candle>(0)
 var BOSdata bosdataitv35                   = BOSdata.new()
-htfitv35.settings                 := Settingshtfitv35
-htfitv35.candles                  := candlesitv35
-htfitv35.bosdata                  := bosdataitv35
+htfitv35.settings                         := Settingshtfitv35
+htfitv35.candles                          := candlesitv35
+htfitv35.bosdata                          := bosdataitv35
 var CandleSet htfitv36                     = CandleSet.new()
-var CandleSettings Settingshtfitv36        = CandleSettings.new(htf=str_itv36,htfint=int_itv36,max_memory=3)
+var CandleSettings Settingshtfitv36        = CandleSettings.new(htf=str_itv36,htfint=int_itv36,max_memory=3,htfintdivD=int_itv36/1440)
 var Candle[] candlesitv36                  = array.new<Candle>(0)
 var BOSdata bosdataitv36                   = BOSdata.new()
-htfitv36.settings                 := Settingshtfitv36
-htfitv36.candles                  := candlesitv36
-htfitv36.bosdata                  := bosdataitv36
+htfitv36.settings                         := Settingshtfitv36
+htfitv36.candles                          := candlesitv36
+htfitv36.bosdata                          := bosdataitv36
 var CandleSet htfitv37                     = CandleSet.new()
-var CandleSettings Settingshtfitv37        = CandleSettings.new(htf=str_itv37,htfint=int_itv37,max_memory=3)
+var CandleSettings Settingshtfitv37        = CandleSettings.new(htf=str_itv37,htfint=int_itv37,max_memory=3,htfintdivD=int_itv37/1440)
 var Candle[] candlesitv37                  = array.new<Candle>(0)
 var BOSdata bosdataitv37                   = BOSdata.new()
-htfitv37.settings                 := Settingshtfitv37
-htfitv37.candles                  := candlesitv37
-htfitv37.bosdata                  := bosdataitv37
+htfitv37.settings                         := Settingshtfitv37
+htfitv37.candles                          := candlesitv37
+htfitv37.bosdata                          := bosdataitv37
 var CandleSet htfitv38                     = CandleSet.new()
-var CandleSettings Settingshtfitv38        = CandleSettings.new(htf=str_itv38,htfint=int_itv38,max_memory=3)
+var CandleSettings Settingshtfitv38        = CandleSettings.new(htf=str_itv38,htfint=int_itv38,max_memory=3,htfintdivD=int_itv38/1440)
 var Candle[] candlesitv38                  = array.new<Candle>(0)
 var BOSdata bosdataitv38                   = BOSdata.new()
-htfitv38.settings                 := Settingshtfitv38
-htfitv38.candles                  := candlesitv38
-htfitv38.bosdata                  := bosdataitv38
+htfitv38.settings                         := Settingshtfitv38
+htfitv38.candles                          := candlesitv38
+htfitv38.bosdata                          := bosdataitv38
 var CandleSet htfitv39                     = CandleSet.new()
-var CandleSettings Settingshtfitv39        = CandleSettings.new(htf=str_itv39,htfint=int_itv39,max_memory=3)
+var CandleSettings Settingshtfitv39        = CandleSettings.new(htf=str_itv39,htfint=int_itv39,max_memory=3,htfintdivD=int_itv39/1440)
 var Candle[] candlesitv39                  = array.new<Candle>(0)
 var BOSdata bosdataitv39                   = BOSdata.new()
-htfitv39.settings                 := Settingshtfitv39
-htfitv39.candles                  := candlesitv39
-htfitv39.bosdata                  := bosdataitv39
+htfitv39.settings                         := Settingshtfitv39
+htfitv39.candles                          := candlesitv39
+htfitv39.bosdata                          := bosdataitv39
 var CandleSet htfitv40                     = CandleSet.new()
-var CandleSettings Settingshtfitv40        = CandleSettings.new(htf=str_itv40,htfint=int_itv40,max_memory=3)
+var CandleSettings Settingshtfitv40        = CandleSettings.new(htf=str_itv40,htfint=int_itv40,max_memory=3,htfintdivD=int_itv40/1440)
 var Candle[] candlesitv40                  = array.new<Candle>(0)
 var BOSdata bosdataitv40                   = BOSdata.new()
-htfitv40.settings                 := Settingshtfitv40
-htfitv40.candles                  := candlesitv40
-htfitv40.bosdata                  := bosdataitv40
+htfitv40.settings                         := Settingshtfitv40
+htfitv40.candles                          := candlesitv40
+htfitv40.bosdata                          := bosdataitv40
 var CandleSet htfitv41                     = CandleSet.new()
-var CandleSettings Settingshtfitv41        = CandleSettings.new(htf=str_itv41,htfint=int_itv41,max_memory=3)
+var CandleSettings Settingshtfitv41        = CandleSettings.new(htf=str_itv41,htfint=int_itv41,max_memory=3,htfintdivD=int_itv41/1440)
 var Candle[] candlesitv41                  = array.new<Candle>(0)
 var BOSdata bosdataitv41                   = BOSdata.new()
-htfitv41.settings                 := Settingshtfitv41
-htfitv41.candles                  := candlesitv41
-htfitv41.bosdata                  := bosdataitv41
+htfitv41.settings                         := Settingshtfitv41
+htfitv41.candles                          := candlesitv41
+htfitv41.bosdata                          := bosdataitv41
 var CandleSet htfitv42                     = CandleSet.new()
-var CandleSettings Settingshtfitv42        = CandleSettings.new(htf=str_itv42,htfint=int_itv42,max_memory=3)
+var CandleSettings Settingshtfitv42        = CandleSettings.new(htf=str_itv42,htfint=int_itv42,max_memory=3,htfintdivD=int_itv42/1440)
 var Candle[] candlesitv42                  = array.new<Candle>(0)
 var BOSdata bosdataitv42                   = BOSdata.new()
-htfitv42.settings                 := Settingshtfitv42
-htfitv42.candles                  := candlesitv42
-htfitv42.bosdata                  := bosdataitv42
+htfitv42.settings                         := Settingshtfitv42
+htfitv42.candles                          := candlesitv42
+htfitv42.bosdata                          := bosdataitv42
 var CandleSet htfitv43                     = CandleSet.new()
-var CandleSettings Settingshtfitv43        = CandleSettings.new(htf=str_itv43,htfint=int_itv43,max_memory=3)
+var CandleSettings Settingshtfitv43        = CandleSettings.new(htf=str_itv43,htfint=int_itv43,max_memory=3,htfintdivD=int_itv43/1440)
 var Candle[] candlesitv43                  = array.new<Candle>(0)
 var BOSdata bosdataitv43                   = BOSdata.new()
-htfitv43.settings                 := Settingshtfitv43
-htfitv43.candles                  := candlesitv43
-htfitv43.bosdata                  := bosdataitv43
+htfitv43.settings                         := Settingshtfitv43
+htfitv43.candles                          := candlesitv43
+htfitv43.bosdata                          := bosdataitv43
 var CandleSet htfitv44                     = CandleSet.new()
-var CandleSettings Settingshtfitv44        = CandleSettings.new(htf=str_itv44,htfint=int_itv44,max_memory=3)
+var CandleSettings Settingshtfitv44        = CandleSettings.new(htf=str_itv44,htfint=int_itv44,max_memory=3,htfintdivD=int_itv44/1440)
 var Candle[] candlesitv44                  = array.new<Candle>(0)
 var BOSdata bosdataitv44                   = BOSdata.new()
-htfitv44.settings                 := Settingshtfitv44
-htfitv44.candles                  := candlesitv44
-htfitv44.bosdata                  := bosdataitv44
+htfitv44.settings                         := Settingshtfitv44
+htfitv44.candles                          := candlesitv44
+htfitv44.bosdata                          := bosdataitv44
 var CandleSet htfitv45                     = CandleSet.new()
-var CandleSettings Settingshtfitv45        = CandleSettings.new(htf=str_itv45,htfint=int_itv45,max_memory=3)
+var CandleSettings Settingshtfitv45        = CandleSettings.new(htf=str_itv45,htfint=int_itv45,max_memory=3,htfintdivD=int_itv45/1440)
 var Candle[] candlesitv45                  = array.new<Candle>(0)
 var BOSdata bosdataitv45                   = BOSdata.new()
-htfitv45.settings                 := Settingshtfitv45
-htfitv45.candles                  := candlesitv45
-htfitv45.bosdata                  := bosdataitv45
+htfitv45.settings                         := Settingshtfitv45
+htfitv45.candles                          := candlesitv45
+htfitv45.bosdata                          := bosdataitv45
 var CandleSet htfitv46                     = CandleSet.new()
-var CandleSettings Settingshtfitv46        = CandleSettings.new(htf=str_itv46,htfint=int_itv46,max_memory=3)
+var CandleSettings Settingshtfitv46        = CandleSettings.new(htf=str_itv46,htfint=int_itv46,max_memory=3,htfintdivD=int_itv46/1440)
 var Candle[] candlesitv46                  = array.new<Candle>(0)
 var BOSdata bosdataitv46                   = BOSdata.new()
-htfitv46.settings                 := Settingshtfitv46
-htfitv46.candles                  := candlesitv46
-htfitv46.bosdata                  := bosdataitv46
+htfitv46.settings                         := Settingshtfitv46
+htfitv46.candles                          := candlesitv46
+htfitv46.bosdata                          := bosdataitv46
 var CandleSet htfitv47                     = CandleSet.new()
-var CandleSettings Settingshtfitv47        = CandleSettings.new(htf=str_itv47,htfint=int_itv47,max_memory=3)
+var CandleSettings Settingshtfitv47        = CandleSettings.new(htf=str_itv47,htfint=int_itv47,max_memory=3,htfintdivD=int_itv47/1440)
 var Candle[] candlesitv47                  = array.new<Candle>(0)
 var BOSdata bosdataitv47                   = BOSdata.new()
-htfitv47.settings                 := Settingshtfitv47
-htfitv47.candles                  := candlesitv47
-htfitv47.bosdata                  := bosdataitv47
+htfitv47.settings                         := Settingshtfitv47
+htfitv47.candles                          := candlesitv47
+htfitv47.bosdata                          := bosdataitv47
 var CandleSet htfitv48                     = CandleSet.new()
-var CandleSettings Settingshtfitv48        = CandleSettings.new(htf=str_itv48,htfint=int_itv48,max_memory=3)
+var CandleSettings Settingshtfitv48        = CandleSettings.new(htf=str_itv48,htfint=int_itv48,max_memory=3,htfintdivD=int_itv48/1440)
 var Candle[] candlesitv48                  = array.new<Candle>(0)
 var BOSdata bosdataitv48                   = BOSdata.new()
-htfitv48.settings                 := Settingshtfitv48
-htfitv48.candles                  := candlesitv48
-htfitv48.bosdata                  := bosdataitv48
+htfitv48.settings                         := Settingshtfitv48
+htfitv48.candles                          := candlesitv48
+htfitv48.bosdata                          := bosdataitv48
 var CandleSet htfitv49                     = CandleSet.new()
-var CandleSettings Settingshtfitv49        = CandleSettings.new(htf=str_itv49,htfint=int_itv49,max_memory=3)
+var CandleSettings Settingshtfitv49        = CandleSettings.new(htf=str_itv49,htfint=int_itv49,max_memory=3,htfintdivD=int_itv49/1440)
 var Candle[] candlesitv49                  = array.new<Candle>(0)
 var BOSdata bosdataitv49                   = BOSdata.new()
-htfitv49.settings                 := Settingshtfitv49
-htfitv49.candles                  := candlesitv49
-htfitv49.bosdata                  := bosdataitv49
+htfitv49.settings                         := Settingshtfitv49
+htfitv49.candles                          := candlesitv49
+htfitv49.bosdata                          := bosdataitv49
 var CandleSet htfitv50                     = CandleSet.new()
-var CandleSettings Settingshtfitv50        = CandleSettings.new(htf=str_itv50,htfint=int_itv50,max_memory=3)
+var CandleSettings Settingshtfitv50        = CandleSettings.new(htf=str_itv50,htfint=int_itv50,max_memory=3,htfintdivD=int_itv50/1440)
 var Candle[] candlesitv50                  = array.new<Candle>(0)
 var BOSdata bosdataitv50                   = BOSdata.new()
-htfitv50.settings                 := Settingshtfitv50
-htfitv50.candles                  := candlesitv50
-htfitv50.bosdata                  := bosdataitv50
+htfitv50.settings                         := Settingshtfitv50
+htfitv50.candles                          := candlesitv50
+htfitv50.bosdata                          := bosdataitv50
 var CandleSet htfitv51                     = CandleSet.new()
-var CandleSettings Settingshtfitv51        = CandleSettings.new(htf=str_itv51,htfint=int_itv51,max_memory=3)
+var CandleSettings Settingshtfitv51        = CandleSettings.new(htf=str_itv51,htfint=int_itv51,max_memory=3,htfintdivD=int_itv51/1440)
 var Candle[] candlesitv51                  = array.new<Candle>(0)
 var BOSdata bosdataitv51                   = BOSdata.new()
-htfitv51.settings                 := Settingshtfitv51
-htfitv51.candles                  := candlesitv51
-htfitv51.bosdata                  := bosdataitv51
+htfitv51.settings                         := Settingshtfitv51
+htfitv51.candles                          := candlesitv51
+htfitv51.bosdata                          := bosdataitv51
 var CandleSet htfitv52                     = CandleSet.new()
-var CandleSettings Settingshtfitv52        = CandleSettings.new(htf=str_itv52,htfint=int_itv52,max_memory=3)
+var CandleSettings Settingshtfitv52        = CandleSettings.new(htf=str_itv52,htfint=int_itv52,max_memory=3,htfintdivD=int_itv52/1440)
 var Candle[] candlesitv52                  = array.new<Candle>(0)
 var BOSdata bosdataitv52                   = BOSdata.new()
-htfitv52.settings                 := Settingshtfitv52
-htfitv52.candles                  := candlesitv52
-htfitv52.bosdata                  := bosdataitv52
+htfitv52.settings                         := Settingshtfitv52
+htfitv52.candles                          := candlesitv52
+htfitv52.bosdata                          := bosdataitv52
 var CandleSet htfitv53                     = CandleSet.new()
-var CandleSettings Settingshtfitv53        = CandleSettings.new(htf=str_itv53,htfint=int_itv53,max_memory=3)
+var CandleSettings Settingshtfitv53        = CandleSettings.new(htf=str_itv53,htfint=int_itv53,max_memory=3,htfintdivD=int_itv53/1440)
 var Candle[] candlesitv53                  = array.new<Candle>(0)
 var BOSdata bosdataitv53                   = BOSdata.new()
-htfitv53.settings                 := Settingshtfitv53
-htfitv53.candles                  := candlesitv53
-htfitv53.bosdata                  := bosdataitv53
+htfitv53.settings                         := Settingshtfitv53
+htfitv53.candles                          := candlesitv53
+htfitv53.bosdata                          := bosdataitv53
 var CandleSet htfitv54                     = CandleSet.new()
-var CandleSettings Settingshtfitv54        = CandleSettings.new(htf=str_itv54,htfint=int_itv54,max_memory=3)
+var CandleSettings Settingshtfitv54        = CandleSettings.new(htf=str_itv54,htfint=int_itv54,max_memory=3,htfintdivD=int_itv54/1440)
 var Candle[] candlesitv54                  = array.new<Candle>(0)
 var BOSdata bosdataitv54                   = BOSdata.new()
-htfitv54.settings                 := Settingshtfitv54
-htfitv54.candles                  := candlesitv54
-htfitv54.bosdata                  := bosdataitv54
+htfitv54.settings                         := Settingshtfitv54
+htfitv54.candles                          := candlesitv54
+htfitv54.bosdata                          := bosdataitv54
 var CandleSet htfitv55                     = CandleSet.new()
-var CandleSettings Settingshtfitv55        = CandleSettings.new(htf=str_itv55,htfint=int_itv55,max_memory=3)
+var CandleSettings Settingshtfitv55        = CandleSettings.new(htf=str_itv55,htfint=int_itv55,max_memory=3,htfintdivD=int_itv55/1440)
 var Candle[] candlesitv55                  = array.new<Candle>(0)
 var BOSdata bosdataitv55                   = BOSdata.new()
-htfitv55.settings                 := Settingshtfitv55
-htfitv55.candles                  := candlesitv55
-htfitv55.bosdata                  := bosdataitv55
+htfitv55.settings                         := Settingshtfitv55
+htfitv55.candles                          := candlesitv55
+htfitv55.bosdata                          := bosdataitv55
 var CandleSet htfitv56                     = CandleSet.new()
-var CandleSettings Settingshtfitv56        = CandleSettings.new(htf=str_itv56,htfint=int_itv56,max_memory=3)
+var CandleSettings Settingshtfitv56        = CandleSettings.new(htf=str_itv56,htfint=int_itv56,max_memory=3,htfintdivD=int_itv56/1440)
 var Candle[] candlesitv56                  = array.new<Candle>(0)
 var BOSdata bosdataitv56                   = BOSdata.new()
-htfitv56.settings                 := Settingshtfitv56
-htfitv56.candles                  := candlesitv56
-htfitv56.bosdata                  := bosdataitv56
+htfitv56.settings                         := Settingshtfitv56
+htfitv56.candles                          := candlesitv56
+htfitv56.bosdata                          := bosdataitv56
 var CandleSet htfitv57                     = CandleSet.new()
-var CandleSettings Settingshtfitv57        = CandleSettings.new(htf=str_itv57,htfint=int_itv57,max_memory=3)
+var CandleSettings Settingshtfitv57        = CandleSettings.new(htf=str_itv57,htfint=int_itv57,max_memory=3,htfintdivD=int_itv57/1440)
 var Candle[] candlesitv57                  = array.new<Candle>(0)
 var BOSdata bosdataitv57                   = BOSdata.new()
-htfitv57.settings                 := Settingshtfitv57
-htfitv57.candles                  := candlesitv57
-htfitv57.bosdata                  := bosdataitv57
+htfitv57.settings                         := Settingshtfitv57
+htfitv57.candles                          := candlesitv57
+htfitv57.bosdata                          := bosdataitv57
 var CandleSet htfitv58                     = CandleSet.new()
-var CandleSettings Settingshtfitv58        = CandleSettings.new(htf=str_itv58,htfint=int_itv58,max_memory=3)
+var CandleSettings Settingshtfitv58        = CandleSettings.new(htf=str_itv58,htfint=int_itv58,max_memory=3,htfintdivD=int_itv58/1440)
 var Candle[] candlesitv58                  = array.new<Candle>(0)
 var BOSdata bosdataitv58                   = BOSdata.new()
-htfitv58.settings                 := Settingshtfitv58
-htfitv58.candles                  := candlesitv58
-htfitv58.bosdata                  := bosdataitv58
+htfitv58.settings                         := Settingshtfitv58
+htfitv58.candles                          := candlesitv58
+htfitv58.bosdata                          := bosdataitv58
 var CandleSet htfitv59                     = CandleSet.new()
-var CandleSettings Settingshtfitv59        = CandleSettings.new(htf=str_itv59,htfint=int_itv59,max_memory=3)
+var CandleSettings Settingshtfitv59        = CandleSettings.new(htf=str_itv59,htfint=int_itv59,max_memory=3,htfintdivD=int_itv59/1440)
 var Candle[] candlesitv59                  = array.new<Candle>(0)
 var BOSdata bosdataitv59                   = BOSdata.new()
-htfitv59.settings                 := Settingshtfitv59
-htfitv59.candles                  := candlesitv59
-htfitv59.bosdata                  := bosdataitv59
+htfitv59.settings                         := Settingshtfitv59
+htfitv59.candles                          := candlesitv59
+htfitv59.bosdata                          := bosdataitv59
 var CandleSet htfitv60                     = CandleSet.new()
-var CandleSettings Settingshtfitv60        = CandleSettings.new(htf=str_itv60,htfint=int_itv60,max_memory=3)
+var CandleSettings Settingshtfitv60        = CandleSettings.new(htf=str_itv60,htfint=int_itv60,max_memory=3,htfintdivD=int_itv60/1440)
 var Candle[] candlesitv60                  = array.new<Candle>(0)
 var BOSdata bosdataitv60                   = BOSdata.new()
-htfitv60.settings                 := Settingshtfitv60
-htfitv60.candles                  := candlesitv60
-htfitv60.bosdata                  := bosdataitv60
+htfitv60.settings                         := Settingshtfitv60
+htfitv60.candles                          := candlesitv60
+htfitv60.bosdata                          := bosdataitv60
 
 htfbase.Monitor().BOSJudge()
 htfitv1.Monitor().BOSJudge()
@@ -1387,9 +1375,9 @@ if settings.add_show and barstate.isrealtime
         line.set_xy2(nowcloseline, bar_index+2, close)
     else
         nowcloseline := line.new(bar_index, close, bar_index, close, xloc= xloc.bar_index, color = color.new(color.gray, 10), style = line.style_dotted , width = 4)       
-    if timeframe.period !="1"
-        label.new(bar_index,close,"please change period to 1 min")
-//    label.new(bar_index,close, str.tostring(htfshadow.bosdata.sbu) + "\n" + str.tostring(htfitv60.bosdata.sbu) + "\n" + "hello")
+    if timeframe.period !="D"
+        label.new(bar_index,close,"please change period to 1 Day")
+//    label.new(bar_index,close, str.tostring(htfshadow.bosdata.sbu) + "\n" + htfitv8.settings.htf + "\n" +htfitv1.bosdata.s_dated + "\n" + "hello")
 
 index += 1
 

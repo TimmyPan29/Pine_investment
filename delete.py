@@ -1,8 +1,7 @@
 # Python script to generate the Pine Script code
 output = ""
-for i in range(2, 91):
-    output += f"""    htfshadow.Shadowing(htfadd{i}).Monitor_Est().BOSJudge()
-    Predictor(htfshadow, estminsbu)
-    Predictor(htfshadow, estmaxsbd)
-"""
+for i in range(2, 61):
+    output += f"htfshadow.Shadowing(htfitv{i}).Monitor_Est().BOSJudge()\n"
+    output += f"Predictor(htfshadow, estminsbu)\n"
+    output += f"Predictor(htfshadow, estmaxsbd)\n"
 print(output)
