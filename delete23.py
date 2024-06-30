@@ -169,6 +169,7 @@ type BOSdata
     int             inttemp1
     int             inttemp2
     int             dateinnumber = 0
+    int             count        = 0
 
 type CandleSettings
     bool            show
@@ -360,16 +361,14 @@ method Monitor_Est(CandleSet candleSet) =>
     candleSet
 
 method BOSJudge(CandleSet candleSet) =>
-    HTFBarTime = time(candleSet.settings.htf)
-    isNewHTFCandle = ta.change(HTFBarTime)
+    HTFBarTime      = time(candleSet.settings.htf)
+    isNewHTFCandle  = ta.change(HTFBarTime)
     BOSdata bosdata = candleSet.bosdata
-    bool fg          = true
-    int tf = time(timeframe.period)
-    int tn = timeframe.in_seconds(candleSet.settings.htf)
-    if fg
-        bosdata.dateinnumber := tf
-        fg                   := false
-    int    intresult = bosdata.dateinnumber
+    bool fg         = true
+    int tp          = Base * 60
+    int tn          = timeframe.in_seconds(candleSet.settings.htf)
+    int k           = math.floor(tn/tp)
+    int intresult   = time(timeframe.period)
     if candleSet.settings.htfint <= Bound
         if (candleSet.candles.size() > 0 and isNewHTFCandle != 0) or fggetnowclose// 就算最新的出現 也必須遵守這個規定 為了讓結構穩定不亂序
             Candle candle = candleSet.candles.first()
@@ -391,35 +390,39 @@ method BOSJudge(CandleSet candleSet) =>
             if(bosdata.state == 2)
                 if(bosdata.slope1 != bosdata.slope2)
                     bosdata.reg1key := bosdata.regclose2
-                    bosdata.reg1key_idx := index==0? 0 : index - 1 - k
+                    bosdata.reg1key_idx := index==0? 0 : index - 1 - tn
                     bosdata.inttemp1    := intresult 
+                else
+                    bosdata.count   += 1
                 //else //Buff_key1維持原樣
                 if(bosdata.regclose3>bosdata.sbu)
-                    bosdata.sbu := na
+                    bosdata.sbu     := na
                     bosdata.sbu_idx := na
-                    bosdata.sbd := bosdata.reg1key
+                    bosdata.sbd     := bosdata.reg1key
                     bosdata.sbd_idx := bosdata.reg1key_idx
-                    bosdata.i_dated := bosdata.inttemp1 - (tn+1)*1000
+                    bosdata.i_dated := bosdata.inttemp1 - 3*1000 - tn*1000
                     bosdata.s_dated := helper.formattedtime(bosdata.i_dated)
+                    bosdata.count   := 0
                 if(bosdata.regclose3<bosdata.sbd)
-                    bosdata.sbd := na 
+                    bosdata.sbd     := na 
                     bosdata.sbd_idx := na
-                    bosdata.sbu := bosdata.reg1key
+                    bosdata.sbu     := bosdata.reg1key
                     bosdata.sbu_idx := bosdata.reg1key_idx
-                    bosdata.i_dateu := bosdata.inttemp1 - (tn+1)*1000
+                    bosdata.i_dateu := bosdata.inttemp1 - 3*1000 - tn*1000
                     bosdata.s_dateu := helper.formattedtime(bosdata.i_dateu)
+                    bosdata.count   := 0
                 bosdata.state := 1
                 
             if(bosdata.state == 3)//no sky
                 if(bosdata.slope1 != bosdata.slope2) // build sky
                     bosdata.inttemp2    := intresult 
                     bosdata.reg2key := bosdata.regclose2
-                    bosdata.reg2key_idx := index - 1 - k
+                    bosdata.reg2key_idx := index - 1 - tn
                     bosdata.sbu := bosdata.reg2key
                     bosdata.sbu_idx:= bosdata.reg2key_idx
                     bosdata.reg1key := bosdata.reg2key
                     bosdata.reg1key_idx := bosdata.reg2key_idx
-                    bosdata.i_dateu := bosdata.inttemp2 - (tn+1)*1000
+                    bosdata.i_dateu := bosdata.inttemp2 - 2*1000 - tn*1000
                     bosdata.s_dateu := helper.formattedtime(bosdata.i_dateu)
                     bosdata.inttemp1 := bosdata.inttemp2 
                 if(bosdata.regclose3<bosdata.sbd)
@@ -431,12 +434,12 @@ method BOSJudge(CandleSet candleSet) =>
                 if(bosdata.slope1 != bosdata.slope2)
                     bosdata.inttemp2    := intresult
                     bosdata.reg2key := bosdata.regclose2
-                    bosdata.reg2key_idx := index - 1 - k
+                    bosdata.reg2key_idx := index - 1 - tn
                     bosdata.sbd := bosdata.reg2key
                     bosdata.sbd_idx:= bosdata.reg2key_idx
                     bosdata.reg1key := bosdata.reg2key
                     bosdata.reg1key_idx := bosdata.reg2key_idx
-                    bosdata.i_dated := bosdata.inttemp2 - (tn+1)*1000
+                    bosdata.i_dated := bosdata.inttemp2 - 2*1000 - tn*1000
                     bosdata.s_dated := helper.formattedtime(bosdata.i_dated)
                     bosdata.inttemp1 := bosdata.inttemp2 
                 if(bosdata.regclose3>bosdata.sbu)
@@ -565,10 +568,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
         m1.value   := 0
     if m1.vdecisionname == "estminsbu"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset+3, m1.value)
+            label.set_xy(m1.vlb, offset+6, m1.value)
             label.set_text(m1.vlb,m1.vtext + str.tostring(m1.value)  + "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset+3,m1.value,text= m1.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset+6,m1.value,text= m1.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" +"HTF= " + m1.vname +"min" + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -576,10 +579,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
         if settings.afterdateadd_show
             if not na(m1.vlbat)
-                label.set_xy(m1.vlbat, offset+9, m1.valueat)
+                label.set_xy(m1.vlbat, offset+12, m1.valueat)
                 label.set_text(m1.vlbat,m1.vtextat + "\n" + attimestr + "\n" + str.tostring(m1.valueat) + "\n" + "@" + m1.vdateat + "\n" +"HTF= " + m1.vnameat +"min" + "\n" + m1.vremntimeat)
             else
-                m1.vlbat := label.new(offset+9,m1.valueat, text= m1.vtextat + "\n" +attimestr + "\n" + str.tostring(m1.valueat)+ "\n" + "@" + m1.vdateat + "\n" +"HTF= " + m1.vnameat +"min" + "\n" + m1.vremntimeat,style = label.style_label_up, color = color_transparent)
+                m1.vlbat := label.new(offset+12,m1.valueat, text= m1.vtextat + "\n" +attimestr + "\n" + str.tostring(m1.valueat)+ "\n" + "@" + m1.vdateat + "\n" +"HTF= " + m1.vnameat +"min" + "\n" + m1.vremntimeat,style = label.style_label_up, color = color_transparent)
             if not na(m1.vlnat)
                 line.set_xy1(m1.vlnat, bar_index, m1.valueat)
                 line.set_xy2(m1.vlnat, offset+3, m1.valueat)
@@ -600,7 +603,9 @@ method Shadowing(CandleSet sh, CandleSet cd) =>
         sh.bosdata.sbd_idx      := cd.bosdata.sbd_idx
         sh.bosdata.regclose3    := cd.bosdata.regclose3
         sh.bosdata.regclose2    := cd.bosdata.regclose2
+        sh.bosdata.i_dated      := cd.bosdata.i_dated
         sh.bosdata.s_dated      := cd.bosdata.s_dated
+        sh.bosdata.i_dateu      := cd.bosdata.i_dateu
         sh.bosdata.s_dateu      := cd.bosdata.s_dateu
         Candle candleshadow = Candle.new()
         candleshadow := cd.candles.first()

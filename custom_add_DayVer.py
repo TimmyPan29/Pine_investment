@@ -4,8 +4,8 @@
 indicator("add_60Day_setBaseAndItv", overlay=true, max_boxes_count = 500, max_lines_count = 500, max_bars_back = 5000)
 //+----------------------------------------+//
 //+- Custom Variable
-int Baseint  = input.int(1,"Base",inline='custom_setting',options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60])
-int Interval = input.int(1,"Interval",inline='custom_setting',options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60])
+int Baseint  = input.int(1,"Base",inline='custom_setting',minval=1,maxval=365,tooltip="最大只能365")
+int Interval = input.int(1,"Interval",inline='custom_setting',minval=1,maxval=364)
 int CmprSet  = input.int(10,"Nunber of Compared Set",inline='custom_setting',minval=1,maxval=60,tooltip="總共要和幾組比 最少和1組比 最多60組比")
 int Bound    = (Baseint + Interval*CmprSet)*1440
 // there is four line a set, totally. 
