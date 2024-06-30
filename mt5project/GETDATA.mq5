@@ -4,12 +4,12 @@ void Fetcher::void Setarrsize(int count){
     ArrayResize(Vec_rawdata.datadate, count);
 }
 void Fetcher::Getprice(string symbol, int count){
-    int copiedPrices = CopyClose(symbol, PERIOD_M1, count , count, Vec_rawdata.rawprices);
+    int copiedPrices = CopyClose(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawprices);
         if (copiedPrices < count) {
             Print("Error fetching prices, only fetched ", copiedPrices, " prices.");
 }
 void Fetcher::Getdate(string symbol, int count){
-    int copiedTimes = CopyTime(symbol, PERIOD_M1, count , count, Vec_rawdata.datadate);
+    int copiedTimes = CopyTime(symbol, PERIOD_M1, 0 , count, Vec_rawdata.datadate);
         if (copiedTimes < count) {
             Print("Error fetching times, only fetched ", copiedTimes, " times.");
 }
