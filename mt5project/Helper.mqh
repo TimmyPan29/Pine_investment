@@ -1,6 +1,9 @@
 #ifndef __HELPER_MQH__
 #define __HELPER_MQH__
-
-int BarTimeCal(Helper helper)
+struct Helper{
+    string      name;
+};
+int BarTimeCal(Helper helper, datetime t)
+    
 
 #endif

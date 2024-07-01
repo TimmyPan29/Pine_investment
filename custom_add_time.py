@@ -152,13 +152,11 @@ type BOSdata
     float           regclose2   = 0
     float           regclose3   = 0
     label           sbu_l
-    label           sbu_date
     string          s_dateu
     int             i_dateu
     label           sbu_price
     line            sbu_line
     label           sbd_l
-    label           sbd_date
     string          s_dated
     int             i_dated
     label           sbd_price

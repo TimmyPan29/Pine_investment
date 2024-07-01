@@ -19,16 +19,14 @@ void Fetcher::Printdata(){
         Print("date in idx: ", i, ":", timeStr, "\n", "prices in idx ", i, ":", Vec_rawdata.rawprices[i])
     }
 }
-int Fetcher::Searchdateidx(){
-    bool flag = true;
-    int  i    = 0;
-    while (flag) {
+int Fetcher::Searchdateidx() {
+    int i = 0;
+    while (true) {
         string timestr = TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES);
-        if(timestr == "00:00")
-            flag = false;
-            break;
-        i++
+        if(timestr == "00:00") {
+            return i;
+        }
+        i++;
     }
-    return i;
-        
 }
+        
