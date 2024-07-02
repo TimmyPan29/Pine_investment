@@ -1,9 +1,8 @@
 #ifndef __GETDATA_MQH__
 #define __GETDATA_MQH__
 struct Rawdatagroup{
-    double rawprices[];
-    datetime datadate[];
-
+    double      rawprices[];
+    datetime    datadate[];
 };
 class Fetcher{
 private:
@@ -12,7 +11,7 @@ public:
     void Setarrsize(int count);
     void Getprice(string symbol, int count);
     void Getdate (string symbol, int count);
-    int  Searchdateidx();
+    int  Searchdateidx(string tstr);
     void Printdata() const;
 };
 

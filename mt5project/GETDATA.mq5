@@ -1,4 +1,4 @@
-#include "GETDATA.mqh"
+#include "Getdata.mqh"
 void Fetcher::void Setarrsize(int count){
     ArrayResize(Vec_rawdata.rawprices, count);
     ArrayResize(Vec_rawdata.datadate, count);
@@ -19,14 +19,15 @@ void Fetcher::Printdata(){
         Print("date in idx: ", i, ":", timeStr, "\n", "prices in idx ", i, ":", Vec_rawdata.rawprices[i])
     }
 }
-int Fetcher::Searchdateidx() {
+int Fetcher::Searchdateidx(int tint) {
     int i = 0;
     while (true) {
-        string timestr = TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES);
-        if(timestr == "00:00") {
+        int timeint = TimeHour(Vec_rawdata.datadate[i]);
+        if(timeint == tint) {
             return i;
         }
         i++;
     }
 }
         
+//TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful
