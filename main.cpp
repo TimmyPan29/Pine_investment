@@ -3,7 +3,7 @@
 //+------------------------------------------------------------------+
 Helper helper;
 input Timebase tb   = Time00_00;
-int            tint = helper.inputtimebase(tb)
+int            tint = helper.inputtimebase(tb)*60;
 int OnInit() {
     int timezone = helper.Extimeoffset();
     // 调用自定义的OnStart函数

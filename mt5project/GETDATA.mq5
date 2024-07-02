@@ -22,7 +22,7 @@ void Fetcher::Printdata(){
 int Fetcher::Searchdateidx(int tint) {
     int i = 0;
     while (true) {
-        int timeint = TimeHour(Vec_rawdata.datadate[i]);
+        int timeint = TimeHour(Vec_rawdata.datadate[i])*60+TimeMinute(Vec_rawdata.datadate[i]);
         if(timeint == tint) {
             return i;
         }

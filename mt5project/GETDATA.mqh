@@ -11,7 +11,7 @@ public:
     void Setarrsize(int count);
     void Getprice(string symbol, int count);
     void Getdate (string symbol, int count);
-    int  Searchdateidx(string tstr);
+    int  Searchdateidx(int tint);
     void Printdata() const;
 };
 

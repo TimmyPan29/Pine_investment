@@ -13,7 +13,7 @@ struct label{
         // Add more fonts if needed
         return OBJPROP_FONT_ARIAL; // Default font
     }
-    void new(string name="templa", datetime x, double y, string text, color textColor = clrBlack, int fontSize = 12, ENUM_ALIGN_MODE textAlign = ALIGN_CENTER, string fontType, bool bgshow, color bgColor = clrGray) {
+    void Create(string name="templb", datetime x=TimeCurrent(), double y=0, string text="somethinghappen", color textColor = clrBlack, int fontSize = 12, ENUM_ALIGN_MODE textAlign = ALIGN_CENTER, string fontType="Arial", bool bgshow=false, color bgColor = clrGray) {
         if(ObjectFind(0, name) != -1) {
             ObjectDelete(0, name); // 删除同名对象
         }
@@ -43,7 +43,7 @@ struct label{
 };
 struct line{
     string name;
-    void new(string name="templ", datetime time1, double price1, datetime time2, double price2, color clr) {
+    void Create(string name="templ", datetime time1, double price1, datetime time2, double price2, color clr) {
         if(ObjectFind(0, name) != -1) {
             ObjectDelete(0, name); // 删除同名对象
         }
