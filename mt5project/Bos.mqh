@@ -1,33 +1,30 @@
 #ifndef __BOS_MQH__
 #define __BOS_MQH__
-#ifndef __GETDATA_MQH__
-#define __GETDATA_MQH__
-#ifndef __PLOTPACK_MQH__
-#define __PLOTPACK_MQH__
-#ifndef __HELPER_MQH__
-#define __HELPER_MQH__
+#include "Plotpack.mqh"
+#include "GETDATA.mqh"
+#include "Helper.mqh"
 struct BOS{
-    int             htfint             ;//=i
-    int             baraday            ;//= MathCeil(__DAYMIN/htfint);
-    int             baradayrm          ;// __DAYMIN;
-    string          htfname            ;//inttostring
-    double          sbu             = 0;
-    double          sbd             = 0;
-    datetime        sbu_t              ;
-    datetime        sbd_t              ;
-    int             slope1          = 0;
-    int             slope2          = 0;
-    int             state           = 1; //ini 
-    int             reg1key         = 0;
-    datetime        reg1key_t          ;
-    int             reg2key         = 0;
-    datetime        reg2key_t          ;
-    double          regclose1_t     = 0;
-    double          regclose2_t     = 0;
-    double          regclose3_t     = 0;
-    datetime        regclose1_t     = 0;
-    datetime        regclose2_t     = 0;
-    datetime        regclose3_t     = 0;
+    int             htfint      ;//=i
+    int             baraday     ;//= MathCeil(__DAYMIN/htfint);
+    int             baradayrm   ;// __DAYMIN%i;
+    string          htfname     ;//IntegerToString(i)
+    double          sbu         ;
+    double          sbd         ;
+    datetime        sbu_t       ;
+    datetime        sbd_t       ;
+    int             slope1      ;
+    int             slope2      ;
+    int             state       ; //ini 
+    int             reg1key     ;
+    datetime        reg1key_t   ;
+    int             reg2key     ;
+    datetime        reg2key_t   ;
+    double          regclose1   ;
+    double          regclose2   ;
+    double          regclose3   ;
+    datetime        regclose1_t ;
+    datetime        regclose2_t ;
+    datetime        regclose3_t ;
     label           sbu_l       ;
     label           sbu_price   ;
     line            sbu_line    ;
@@ -38,10 +35,29 @@ struct BOS{
     string          s_ddate     ;
     datetime        t_temp1     ;
     datetime        t_temp2     ;
+
+    BOS(int i){
+        htfint      = i ;
+        baraday     = MathCeil(__DAYMIN/htfint);
+        baradayrm   = __DAYMIN%i ;
+        htfname     = IntegerToString(i);
+        sbu         = 0;
+        sbd         = 0;
+        slope1      = 0;
+        slope2      = 0;
+        state       = 1;
+        regclose1   = 0;
+        regclose2   = 0;
+        regclose3   = 0;
+        regclose1_t = 0;
+        regclose2_t = 0;
+        regclose3_t = 0;
+    }
 };
 
 struct Triset{
-    uint    comparecode = 0 ;
+    uint    comparecode ;
+    Triset(){comparecode=0}
 };
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
@@ -53,7 +69,7 @@ uint RightRotate(uint value, int shift) {
     shift = shift % bits; // 处理移位大于位数的情况
     return (value >> shift) | (value << (bits - shift));
 }
-void Insertalg(double arr[], int index[]){
+void Insertalg(double& arr[], int& index[]){
     for (int i = 1; i < 8; ++i) {
         double key = arr[i];
         int keyIndex = index[i];
@@ -158,8 +174,8 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
     }//while end
 }//func end
 
-uint& TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
-    uint&  code     = ts.comparecode ;
+uint TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
+    uint  code     = ts.comparecode ;
     code            = 0 ;
     double arr[8]   ={bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
     int    index[8] ={0, 1, 2, 3, 4, 5, 6, 7}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.

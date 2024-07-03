@@ -23,23 +23,23 @@
 #define __LEVEL4SBDMASK       15         //0x0000000f
 #define __107fMASK            268435455  //0x0fffffff
 enum Timebase{
-    OANDA_FOREX    
-    OANDA_CFD    
-    OANDA_CRYPTO   
-    BINANCE_CRYPTO 
-    SAXO_FOREX     
-    SAXO_CFD       
-    SAXO_CRYPTO    
-    EIGHTCAP_FOREX 
-    EIGHTCAP_CFD   
-    EIGHTCAP_CRYPTO
+    OANDA_FOREX,    
+    OANDA_CFD,    
+    OANDA_CRYPTO,   
+    BINANCE_CRYPTO, 
+    SAXO_FOREX,     
+    SAXO_CFD,       
+    SAXO_CRYPTO,    
+    EIGHTCAP_FOREX, 
+    EIGHTCAP_CFD,   
+    EIGHTCAP_CRYPTO,
     TIME00_00
 };
 struct Helper{
     string      name;
-    int BarTimeCal(Helper helper, datetime t);
-    int Extimeoffset(Helper helper);
-    int inputtimebase(Helper helper,Timebase tb);
+    int BarTimeCal(Helper& helper, datetime dt);
+    int Extimeoffset(Helper& helper);
+    int Inputtimebase(Helper& helper,Timebase tb);
 };
 
 

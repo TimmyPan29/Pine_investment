@@ -1,13 +1,21 @@
+#include "Bos.mqh"
+
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-Helper helper;
-input Timebase tb   = Time00_00;
-int            tint = helper.inputtimebase(tb)*60;
+input Timebase tb   = __TIME00_00;
+
+
 int OnInit() {
-    int timezone = helper.Extimeoffset();
+
+    int    tint ;
+    Helper helper;
+    Timebase tb_temp = tb;
+    tint  = helper.Inputtimebase(helper,tb_temp)*60;
+    Print("hello world",tint);
+    int timezone = helper.Extimeoffset(helper);
     // 调用自定义的OnStart函数
-    OnStart();
+
 
     // Print a message to indicate the EA has been initialized
     Print("EA has been initialized.");
@@ -41,17 +49,6 @@ void OnTick() {
 
 //+------------------------------------------------------------------+
 //| Custom start function                                            |
-//+------------------------------------------------------------------+
-void OnStart() {
-    // This function is called once when the EA starts
-    // Add your startup code here
-    
-    // Example: Print a startup message
-    Print("OnStart function has been called.");
-}
-
-//+------------------------------------------------------------------+
-//| Custom functions                                                 |
 //+------------------------------------------------------------------+
 
 // Add your custom functions here

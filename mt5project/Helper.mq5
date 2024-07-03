@@ -1,17 +1,18 @@
 #include "Helper.mqh"
 
-int Helper::BarTimeCal(Helper helper, datetime dt) {
+int Helper::BarTimeCal(Helper& helper, datetime dt) {
     helper.name = "BarTimeCal";
     dt          =  TimeHour(dt)*60 + TimeMinute(dt); 
     return int(dt);
 }
-int Helper::xtimeoffset(Helper helper){
+int Helper::Extimeoffset(Helper& helper){
     helper.name = "serverTimeZoneCal";
     datetime serverTime = TimeCurrent(); 
     datetime utcTime    = TimeGMT();
     return (int)(serverTime - utcTime)/3600;
 }
-int Helper::inputtimebase(Helper helper,Timebase tb){
+int Helper::Inputtimebase(Helper& helper,Timebase tb){
+    helper.name = "Inputtimebase";
     switch (tb){
         case OANDA_FOREX:
             return __OANDA_FOREX ;

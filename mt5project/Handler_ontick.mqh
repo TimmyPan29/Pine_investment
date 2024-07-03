@@ -13,7 +13,7 @@ private:
     MqlTick     mtick;
     bool        mtickflag;
 public:
-    Handler_ontick(comedata &ini):cd(ini){}
+    Handler_ontick(comedata &ini, MqlTick mk, bool fg):cd(ini),mtick(mk),mtickflag(fg) {}//at start, let lastprice=nowprice
     void Update(comedata &cd){
         if(SymbolInfoTick(_Symbol, mtick)){
             cd.nowprice = mtick.last;
