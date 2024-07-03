@@ -13,6 +13,15 @@
 #define __EIGHTCAP_CRYPTO     0
 #define __TIME00_00           0
 #define __DAYMIN              1440
+#define __LEVEL4SBUMASK       4026531840 //0xf0000000
+#define __LEVEL2SBUMASK       251658240  //0x0f000000  
+#define __LEVEL3SBUMASK       15728640   //0x00f00000
+#define __LEVEL1SBUMASK       983040     //0x000f0000
+#define __LEVEL1SBDMASK       61440      //0x0000f000
+#define __LEVEL2SBDMASK       3840       //0x00000f00
+#define __LEVEL3SBDMASK       240        //0x000000f0
+#define __LEVEL4SBDMASK       15         //0x0000000f
+#define __107fMASK            268435455  //0x0fffffff
 enum Timebase{
     OANDA_FOREX    
     OANDA_CFD    

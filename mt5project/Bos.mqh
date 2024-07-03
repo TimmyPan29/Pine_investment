@@ -4,6 +4,8 @@
 #define __GETDATA_MQH__
 #ifndef __PLOTPACK_MQH__
 #define __PLOTPACK_MQH__
+#ifndef __HELPER_MQH__
+#define __HELPER_MQH__
 struct BOS{
     int             htfint             ;//=i
     int             baraday            ;//= MathCeil(__DAYMIN/htfint);
@@ -38,6 +40,34 @@ struct BOS{
     datetime        t_temp2     ;
 };
 
+struct Triset{
+    uint    comparecode = 0 ;
+};
+uint LeftRotate(uint value, int shift) {
+    int bits = 32; // 假设是32位无符号整数
+    shift = shift % bits; // 处理移位大于位数的情况
+    return (value << shift) | (value >> (bits - shift));
+}
+uint RightRotate(uint value, int shift) {
+    int bits = 32; // 假设是32位无符号整数
+    shift = shift % bits; // 处理移位大于位数的情况
+    return (value >> shift) | (value << (bits - shift));
+}
+void Insertalg(double arr[], int index[]){
+    for (int i = 1; i < 8; ++i) {
+        double key = arr[i];
+        int keyIndex = index[i];
+        int j = i - 1; // 
+        while (j >= 0 && arr[j] > key) {//從左比到現在的key 有種n階梯比較的概念 
+            arr[j + 1] = arr[j];
+            index[j + 1] = index[j];
+            j = j - 1;
+        }
+        arr[j + 1] = key; //swap
+        index[j + 1] = keyIndex;
+    }
+
+}
 void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& starti, int tint){
     int k         = starti      ;                     
     int count     = 1           ;
@@ -126,9 +156,19 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
         }
 
     }//while end
-
-
 }//func end
+
+uint& TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
+    uint&  code     = ts.comparecode ;
+    code            = 0 ;
+    double arr[8]   ={bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
+    int    index[8] ={0, 1, 2, 3, 4, 5, 6, 7}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
+    Insertalg(arr, index);
+    for (int i = 0; i < 8; ++i) {
+        code = (arr[i] == 0) ? (code & (RightRotate(__107fMASK, (index[i]>>2)))) : (code | ((i + 1) >> (index[i] >> 2)));
+    }
+    return code;
+}
 
 #endif
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful
