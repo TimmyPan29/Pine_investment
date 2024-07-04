@@ -7,15 +7,12 @@ input Timebase tb   = __TIME00_00;
 
 
 int OnInit() {
-
-    int    tint ;
     Helper helper;
+    int    tint ;
     Timebase tb_temp = tb;
-    tint  = helper.Inputtimebase(helper,tb_temp)*60;
-    Print("hello world",tint);
-    int timezone = helper.Extimeoffset(helper);
+    tint = helper.Inputtimebase(tb);
+    Print("Exchange Time initiation:",tint,"hr","\nyou choose: ",helper.Inputtimetostring(tb));
     // 调用自定义的OnStart函数
-
 
     // Print a message to indicate the EA has been initialized
     Print("EA has been initialized.");

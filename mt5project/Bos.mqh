@@ -36,28 +36,36 @@ struct BOS{
     datetime        t_temp1     ;
     datetime        t_temp2     ;
 
-    BOS(int i){
+    BOS(int i,string ulb, string up, string ul, string dlb, string dp, string dl):sbu_l(ulb), sbu_price(up), sbu_line(ul),sbd_l(dlb), sbd_price(dp), sbd_line(dl){
         htfint      = i ;
         baraday     = MathCeil(__DAYMIN/htfint);
         baradayrm   = __DAYMIN%i ;
         htfname     = IntegerToString(i);
-        sbu         = 0;
-        sbd         = 0;
+        sbu         = -2;
+        sbd         = -1;
         slope1      = 0;
         slope2      = 0;
         state       = 1;
-        regclose1   = 0;
-        regclose2   = 0;
-        regclose3   = 0;
-        regclose1_t = 0;
-        regclose2_t = 0;
-        regclose3_t = 0;
+        regclose1   = -1;
+        regclose2   = -1;
+        regclose3   = -1;
+        regclose1_t = -1;
+        regclose2_t = -1;
+        regclose3_t = -1;
     }
 };
 
 struct Triset{
     uint    comparecode ;
-    Triset(){comparecode=0}
+    int     base        ;
+    int     itv         ;
+    bool    u_inside    ;
+    bool    d_inside    ;
+    Triset(){
+        comparecode = 0;
+        u_inside    = false;
+        d_inside    = false;
+    }
 };
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
@@ -97,17 +105,17 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
             bosdata.regclose3_t = rd.datadate[k];
             bosdata.slope1 = bosdata.regclose2 - bosdata.regclose1>0? 1 : -1;
             bosdata.slope2 = bosdata.regclose3 - bosdata.regclose2>0? 1 : -1;
-            if((not na(bosdata.sbd)) and (not na(bosdata.sbu))){
+            if(bosdata.sbd != -1 && bosdata.sbu != -2){
                 bosdata.state = 2 ;
             }
-            else if(not na(bosdata.sbd) and na(bosdata.sbu)){
+            else if(bosdata.sbd !=-1 && bosdata.sbu==-2){
                 bosdata.state = 3 ;
             }
-            else if(na(bosdata.sbd) and (not na(bosdata.sbu))){
+            else if(bosdata.sbd ==-1 && bosdata.sbu != -2){
                 bosdata.state = 4 ;
             }
             else{
-                label lb;
+                label lb("templb");
                 lb.Create();
             }
         }
@@ -118,14 +126,14 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
             }
             //else //Buff_key1維持原樣
             if(bosdata.regclose3>bosdata.sbu){
-                bosdata.sbu     = 0;
-                bosdata.sbu_t   = 0;
+                bosdata.sbu     = -2;
+                bosdata.sbu_t   = -2;
                 bosdata.sbd     = bosdata.reg1key;
                 bosdata.sbd_t   = bosdata.reg1key_t;
             }
             if(bosdata.regclose3<bosdata.sbd){
-                bosdata.sbd     = 0 ;
-                bosdata.sbd_t   = 0 ;
+                bosdata.sbd     = -1 ;
+                bosdata.sbd_t   = -1 ;
                 bosdata.sbu     = bosdata.reg1key;
                 bosdata.sbu_t   = bosdata.reg1key_t;
             }
@@ -141,8 +149,8 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
                 bosdata.reg1key_t    = bosdata.reg2key_t;
             }
             if(bosdata.regclose3<bosdata.sbd){
-                bosdata.sbd         = 0;
-                bosdata.sbd_t       = 0;
+                bosdata.sbd         = -1;
+                bosdata.sbd_t       = -1;
             }
             bosdata.state = 1;
         }
@@ -156,8 +164,8 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
                 bosdata.reg1key_t   = bosdata.reg2key_t;
             }
             if(bosdata.regclose3>bosdata.sbu){
-                bosdata.sbu         = 0;
-                bosdata.sbu_t       = 0;
+                bosdata.sbu         = -2;
+                bosdata.sbu_t       = -2;
             }
             bosdata.state = 1;
         }
@@ -174,16 +182,21 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
     }//while end
 }//func end
 
-uint TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
-    uint  code     = ts.comparecode ;
+Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
+    //-1 == no sbd, -2 == no sbu
+    uint  code      = ts.comparecode ;
     code            = 0 ;
-    double arr[8]   ={bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
-    int    index[8] ={0, 1, 2, 3, 4, 5, 6, 7}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
+    ts.base         = bos1.htfint    ;
+    ts.itv          = bos2.htfint-bos1.htfint;
+    double arr[8]   ={bos4.sbu, bos3.sbu, bos2.sbu, bos1.sbu, bos1.sbd, bos2.sbd, bos3.sbd, bos4.sbd};
+    int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
     Insertalg(arr, index);
     for (int i = 0; i < 8; ++i) {
-        code = (arr[i] == 0) ? (code & (RightRotate(__107fMASK, (index[i]>>2)))) : (code | ((i + 1) >> (index[i] >> 2)));
+        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code & (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
     }
-    return code;
+    ts.u_inside = 0x000f0000 & code ;
+    ts.d_inside = 0x0000f000 & code ;
+    return ts;
 }
 
 #endif
