@@ -74,7 +74,7 @@ void Insertalg(double& arr[], int& index[]){
         double key = arr[i];
         int keyIndex = index[i];
         int j = i - 1; // 
-        while (j >= 0 && arr[j] > key) {//從左比到現在的key 有種n階梯比較的概念 
+        while (j >= 0 && arr[j] > key) {//從左比到現在的key 有種n階梯比較的概念 //
             arr[j + 1] = arr[j];
             index[j + 1] = index[j];
             j = j - 1;
