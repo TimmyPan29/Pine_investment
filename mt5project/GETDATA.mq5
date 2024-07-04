@@ -32,4 +32,4 @@ int Fetcher::Searchdateidx(int tint) {
     }
 }
         
-//TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful
+//TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful //
