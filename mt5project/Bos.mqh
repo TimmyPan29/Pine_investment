@@ -186,16 +186,37 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
     //-1 == no sbd, -2 == no sbu
     uint  code      = ts.comparecode ;
     code            = 0 ;
+    int count1      = 0 ;
+    int count2      = 0 ;
     ts.base         = bos1.htfint    ;
     ts.itv          = bos2.htfint-bos1.htfint;
     double arr[8]   ={bos4.sbu, bos3.sbu, bos2.sbu, bos1.sbu, bos1.sbd, bos2.sbd, bos3.sbd, bos4.sbd};
     int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
     Insertalg(arr, index);
     for (int i = 0; i < 8; ++i) {
-        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code & (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
+        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
     }
-    ts.u_inside = 0x000f0000 & code ;
-    ts.d_inside = 0x0000f000 & code ;
+    if((code & __LEVEL1SBDMASK)>>4 > (code & __LEVEL2SBDMASK)){
+        ++count1 ;
+    }
+    if((code & __LEVEL1SBDMASK)>>8 > (code & __LEVEL3SBDMASK)){
+        ++count1 ;
+    }
+    if((code & __LEVEL1SBDMASK)>>12 > (code & __LEVEL4SBDMASK)){
+        ++count1 ;
+    }
+    if((code & __LEVEL1SBUMASK)<<4  < (code & __LEVEL2SBUMASK)){
+        ++count2 ;
+    }
+    if((code & __LEVEL1SBUMASK)<<8  < (code & __LEVEL3SBUMASK)){
+        ++count2 ;
+    }
+    if((code & __LEVEL1SBUMASK)<<12 < (code & __LEVEL4SBUMASK)){
+        ++count2 ;
+    }
+    
+    ts.u_inside = count1==3? true : false ;
+    ts.d_inside = count2==3? true : false ; 
     return ts;
 }
 

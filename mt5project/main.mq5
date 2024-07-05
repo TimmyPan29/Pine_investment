@@ -3,8 +3,8 @@
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-input Timebase tb   = __TIME00_00;
-
+input Timebase tb           = __TIME00_00;
+input int      maxperiod    = 360   ;
 
 int OnInit() {
     Helper helper;
@@ -12,13 +12,13 @@ int OnInit() {
     Timebase tb_temp = tb;
     tint = helper.Inputtimebase(tb);
     Print("Exchange Time initiation:",tint,"hr","\nyou choose: ",helper.Inputtimetostring(tb));
-    // 调用自定义的OnStart函数
-
-    // Print a message to indicate the EA has been initialized
+    Print("maxperiod: ", maxperiod);
     Print("EA has been initialized.");
+    Fetcher Rawdata ;
+    Rawdata.Setarrsize(maxperiod) ;
+    Rawdata.Getprice(__)
     
-    // Add your initialization code here
-    
+   
     return(INIT_SUCCEEDED);
 }
 
