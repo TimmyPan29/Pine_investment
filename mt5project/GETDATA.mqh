@@ -1,8 +1,8 @@
 #ifndef __GETDATA_MQH__
 #define __GETDATA_MQH__
 struct Rawdatagroup{
-    double      rawprices[];
-    datetime    datadate[];
+   double      rawprices[];
+   datetime    datadate[];
 };
 class Fetcher{
 private:
@@ -13,7 +13,11 @@ public:
     void Getdate (string symbol, int count);
     int  Searchdateidx(int tint);
     void Printdata() const;
+    datetime Getdateinfo(int idx);
+    double Getpriceinfo(int idx);
+    Rawdatagroup GetRaw();
 };
+
 void Fetcher::Setarrsize(int count){
     ArrayResize(Vec_rawdata.rawprices, count);
     ArrayResize(Vec_rawdata.datadate, count);
@@ -33,18 +37,27 @@ void Fetcher::Getdate(string symbol, int count){
 void Fetcher::Printdata()const{
     for (int i=0; i<ArraySize(Vec_rawdata.rawprices); i++){
         string timeStr = TimeToString(Vec_rawdata.datadate[i], TIME_DATE | TIME_MINUTES);
-        Print("date in idx: ", i, ":", timeStr, "\n", "prices in idx ", i, ":", Vec_rawdata.rawprices[i])
+        Print("date in idx: ", i, ":", timeStr, "\n", "prices in idx ", i, ":", Vec_rawdata.rawprices[i]);
     }
 }
 int Fetcher::Searchdateidx(int tint) {
     int i = 0;
     while (true) {
-        int timeint = TimeHour(Vec_rawdata.datadate[i])*60+TimeMinute(Vec_rawdata.datadate[i]);
+        int timeint = (Vec_rawdata.datadate[i]%86400);
         if(timeint == tint) {
             return i;
         }
         i++;
     }
 }
+datetime Fetcher::Getdateinfo(int idx){
+   return Vec_rawdata.datadate[idx];
+}
+double Fetcher::Getpriceinfo(int idx){
+   return Vec_rawdata.rawprices[idx];
+}
+Rawdatagroup Fetcher::GetRaw(){
+   return Vec_rawdata;
+} 
+//TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful //
 #endif
-

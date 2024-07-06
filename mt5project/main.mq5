@@ -3,22 +3,46 @@
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-input Timebase tb           = __TIME00_00;
-input int      maxperiod    = 360   ;
+input Timebase tb       = __TIME00_00;
+input int      period   =360; 
+input int      datasize =100000;
+
 
 int OnInit() {
+    //+----------initiation---------+//
     Helper helper;
-    int    tint ;
-    Timebase tb_temp = tb;
-    tint = helper.Inputtimebase(tb);
-    Print("Exchange Time initiation:",tint,"hr","\nyou choose: ",helper.Inputtimetostring(tb));
-    Print("maxperiod: ", maxperiod);
-    Print("EA has been initialized.");
-    Fetcher Rawdata ;
-    Rawdata.Setarrsize(maxperiod) ;
-    Rawdata.Getprice(__)
+    int      tint ;
+    int      starti ;
+    Timebase tb_temp       = tb;
+    tint                   = helper.Inputtimebase(tb)*3600; //second
+    Fetcher fc ;
+    BOS Bosarr[1440] ;
+ 
+    //+----------initiation end---------+//
+    //+----------Put Data---------+//
     
-   
+    fc.Setarrsize(datasize);
+    fc.Getprice(_Symbol, datasize);
+    fc.Getdate(_Symbol, datasize);
+    Rawdatagroup rd = fc.GetRaw();
+    starti          = fc.Searchdateidx(tint);
+    Print("Exchange Time initiation:",tint/60,"min","\nyou choose: ",helper.Inputtimetostring(tb));
+    Print("EA has been initialized.");
+    Print("Starti: ", starti);
+    Print("price: ",fc.Getpriceinfo(starti)," date: ",fc.Getdateinfo(starti));
+    //+----------Put Data end---------+//
+    
+    // u cannot write this way: ArrayResize(Bosarr,staticarraysize, staticarraysize);
+    // cuz u s still have not initialize the BOS type;
+    
+    for (int i=0; i<ArraySize(Bosarr); ++i){
+        Bosarr[i] = BOS(i+1);
+        BOSJudge(Bosarr[i], datasize, rd, starti);
+    }
+    Print("BOS[1438].baraday= ", Bosarr[1438].baraday);
+    Print("BOS[0].htfint= ", Bosarr[0].htfint);
+    Print("rd.rawprices[37]= ", rd.rawprices[37]);
+    Print("Bosarr[37].sbu= ", Bosarr[37].sbu);
     return(INIT_SUCCEEDED);
 }
 
@@ -41,7 +65,8 @@ void OnTick() {
     
     // Example: Print the current Bid price
     double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-    Print("Current Bid price: ", bid);
+    Print("Current Bid price: ", bid,TimeCurrent());
+    Sleep(10000);
 }
 
 //+------------------------------------------------------------------+
