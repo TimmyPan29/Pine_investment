@@ -77,16 +77,10 @@ struct BOS{
 };
 
 struct Triset{
-    uint    comparecode ;
-    int     base        ;
-    int     itv         ;
-    bool    u_inside    ;
-    bool    d_inside    ;
-    Triset(){
-        comparecode = 0;
-        u_inside    = false;
-        d_inside    = false;
-    }
+    uint    comparecode[] ;
+    bool    u_inside[]   ;
+    bool    d_inside[]    ;
+   
 };
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
@@ -199,15 +193,15 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int& starti)
             k += bosdata.htfint;
             ++count ;
         }
-        Print("k: ", k, "count: ", count, " state: ", bosdata.state, " bosdata.baraday: ", bosdata.baraday, " bosdata.baradayrm: ", bosdata.baradayrm, " bosdata.htfint: ", bosdata.htfint);
+        //Print("k: ", k, "count: ", count, " state: ", bosdata.state, " bosdata.baraday: ", bosdata.baraday, " bosdata.baradayrm: ", bosdata.baradayrm, " bosdata.htfint: ", bosdata.htfint);
 
     }//while end
 }//func end
 
-Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
+Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
     //-1 == no sbd, NULL == no sbu
-    uint  code      = ts.comparecode ;
-    code            = 0 ;
+    uint  code      = ts.comparecode[j] ;
+    code = 0 ;
     int count1      = 0 ;
     int count2      = 0 ;
     double arr[8]   ={bos4.sbu, bos3.sbu, bos2.sbu, bos1.sbu, bos1.sbd, bos2.sbd, bos3.sbd, bos4.sbd};
@@ -234,9 +228,9 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
     if((code & __LEVEL1SBUMASK)<<12 < (code & __LEVEL4SBUMASK)){
         ++count2 ;
     }
-    
-    ts.u_inside = count1==3? true : false ;
-    ts.d_inside = count2==3? true : false ; 
+    ts.comparecode[j]= code ;
+    ts.u_inside[j]   = count1==3? true : false ;
+    ts.d_inside[j]   = count2==3? true : false ; 
     return ts;
 }
 

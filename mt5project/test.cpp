@@ -10,6 +10,11 @@ int main() {
     ref = y;        // 修改引用的值，实际是将 x 的值改为 y 的值
     std::cout << "x: " << x << std::endl; // x 的值现在是 y 的值
     std::cout << "ref: " << ref << std::endl; // ref 仍然引用 x，所以 ref 的值是 x 的值
+    float value1 = 12.3456;
+    float value2 = 0.00123;
+
+    printf("%02.9f\n", value1); // Output: 012.346 (minimum width met, 3 decimal places shown)
+    printf("%04.3f\n", value2); //
 
     // ref = &y;    // 错误：不能更改引用以指向其他变量
 
