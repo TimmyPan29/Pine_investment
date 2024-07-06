@@ -61,4 +61,4 @@ Rawdatagroup Fetcher::GetRaw(){
 } 
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful //
 #endif
->>>>>>> a518d9b06617ae2412111e10598e354bd1ff88fb
+

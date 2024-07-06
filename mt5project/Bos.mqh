@@ -199,6 +199,7 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int& starti)
             k += bosdata.htfint;
             ++count ;
         }
+        Print("k: ", k, "count: ", count, " state: ", bosdata.state, " bosdata.baraday: ", bosdata.baraday, " bosdata.baradayrm: ", bosdata.baradayrm, " bosdata.htfint: ", bosdata.htfint);
 
     }//while end
 }//func end

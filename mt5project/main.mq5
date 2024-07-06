@@ -4,7 +4,7 @@
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 input Timebase tb       = __TIME00_00;
-input int      period   =360; 
+input int      period   =359; 
 input int      datasize =100000;
 
 
@@ -16,7 +16,7 @@ int OnInit() {
     Timebase tb_temp       = tb;
     tint                   = helper.Inputtimebase(tb)*3600; //second
     Fetcher fc ;
-    BOS Bosarr[1440] ;
+    BOS Bosarr[1436] ;//設一天會卡死 base最多到359 超過360要再想辦法
  
     //+----------initiation end---------+//
     //+----------Put Data---------+//
@@ -39,7 +39,7 @@ int OnInit() {
         Bosarr[i] = BOS(i+1);
         BOSJudge(Bosarr[i], datasize, rd, starti);
     }
-    Print("BOS[1438].baraday= ", Bosarr[1438].baraday);
+    Print("BOS[1435].baraday= ", Bosarr[1435].baraday);
     Print("BOS[0].htfint= ", Bosarr[0].htfint);
     Print("rd.rawprices[37]= ", rd.rawprices[37]);
     Print("Bosarr[37].sbu= ", Bosarr[37].sbu);
@@ -73,5 +73,4 @@ void OnTick() {
 //| Custom start function                                            |
 //+------------------------------------------------------------------+
 
->>>>>>> a518d9b06617ae2412111e10598e354bd1ff88fb
 // Add your custom functions here
