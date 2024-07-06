@@ -1,8 +1,8 @@
 #ifndef __GETDATA_MQH__
 #define __GETDATA_MQH__
 struct Rawdatagroup{
-    double      rawprices[];
-    datetime    datadate[];
+   double      rawprices[];
+   datetime    datadate[];
 };
 class Fetcher{
 private:
@@ -15,6 +15,7 @@ public:
     void Printdata() const;
     datetime Getdateinfo(int idx);
     double Getpriceinfo(int idx);
+    Rawdatagroup GetRaw();
 };
 
 void Fetcher::Setarrsize(int count){
@@ -54,7 +55,10 @@ datetime Fetcher::Getdateinfo(int idx){
 }
 double Fetcher::Getpriceinfo(int idx){
    return Vec_rawdata.rawprices[idx];
-}      
+}
+Rawdatagroup Fetcher::GetRaw(){
+   return Vec_rawdata;
+} 
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful //
 #endif
-
+>>>>>>> a518d9b06617ae2412111e10598e354bd1ff88fb

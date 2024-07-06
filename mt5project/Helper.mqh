@@ -101,7 +101,7 @@ string Helper::Inputtimetostring(Timebase tb){
         case SAXO_CFD:
             return "SAXO_CFD" ;
         case SAXO_CRYPTO:
-            return "AXO_CRYPTO" ;
+            return "SAXO_CRYPTO" ;
         case EIGHTCAP_FOREX:
             return "EIGHTCAP_FOREX" ;
         case EIGHTCAP_CFD:

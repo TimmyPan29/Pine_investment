@@ -4,8 +4,8 @@
 #include "GETDATA.mqh"
 #include "Helper.mqh"
 struct BOS{
-    int             htfint      ;//=i
-    int             baraday     ;//= MathCeil(__DAYMIN/htfint);
+    double          htfint      ;//=i
+    double          baraday     ;//= MathCeil(__DAYMIN/htfint);
     int             baradayrm   ;// __DAYMIN%i;
     string          htfname     ;//IntegerToString(i)
     double          sbu         ;
@@ -25,33 +25,54 @@ struct BOS{
     datetime        regclose1_t ;
     datetime        regclose2_t ;
     datetime        regclose3_t ;
-    label           sbu_l       ;
-    label           sbu_price   ;
-    line            sbu_line    ;
+    label           sbu_lb      ;
+    line            sbu_ln      ;
     string          s_udate     ;
-    label           sbd_l       ;
-    label           sbd_price   ;
-    line            sbd_line    ;
+    label           sbd_lb      ;
+    line            sbd_ln      ;
     string          s_ddate     ;
     datetime        t_temp1     ;
     datetime        t_temp2     ;
 
-    BOS(int i,string ulb, string up, string ul, string dlb, string dp, string dl):sbu_l(ulb), sbu_price(up), sbu_line(ul),sbd_l(dlb), sbd_price(dp), sbd_line(dl){
-        htfint      = i ;
-        baraday     = MathCeil(__DAYMIN/htfint);
-        baradayrm   = __DAYMIN%i ;
-        htfname     = IntegerToString(i);
-        sbu         = -2;
-        sbd         = -1;
-        slope1      = 0;
-        slope2      = 0;
-        state       = 1;
-        regclose1   = -1;
-        regclose2   = -1;
-        regclose3   = -1;
-        regclose1_t = -1;
-        regclose2_t = -1;
-        regclose3_t = -1;
+    BOS():sbu_lb(""),sbu_ln(""),sbd_lb(""),sbd_ln(""){
+        htfint = 0;
+        baraday = 0;
+        baradayrm = 0;
+        htfname = "";
+        sbu = 0.0;
+        sbd = 0.0;
+        sbu_t = 0;
+        sbd_t = 0;
+        slope1 = 0.0;
+        slope2 = 0.0;
+        state = 1;
+        regclose1 = 0.0;
+        regclose2 = 0.0;
+        regclose3 = 0.0;
+        regclose1_t = 0.0;
+        regclose2_t = 0.0;
+        regclose3_t = 0.0;
+    }
+
+    // 带参数的构造函数
+    BOS(int i):sbu_lb("sbu_lb" + IntegerToString(i)),sbu_ln("sbu_line" + IntegerToString(i)),sbd_lb("sbd_lb" + IntegerToString(i)),sbd_ln("sbd_line" + IntegerToString(i)) {
+        htfint = i;
+        baraday = MathCeil(__DAYMIN / htfint);
+        baradayrm = __DAYMIN % i;
+        htfname = IntegerToString(i);
+        sbu = 0;
+        sbd = 0;
+        sbu_t = 0;
+        sbu_t = 0;
+        slope1 = 0;
+        slope2 = 0;
+        state = 1;
+        regclose1 = 0;
+        regclose2 = 0;
+        regclose3 = 0;
+        regclose1_t = 0;
+        regclose2_t = 0;
+        regclose3_t = 0;
     }
 };
 
@@ -92,7 +113,7 @@ void Insertalg(double& arr[], int& index[]){
     }
 
 }
-void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& starti, int tint){
+void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int& starti){
     int k         = starti      ;                     
     int count     = 1           ;
     while(k < size){
@@ -105,18 +126,18 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
             bosdata.regclose3_t = rd.datadate[k];
             bosdata.slope1 = bosdata.regclose2 - bosdata.regclose1>0? 1 : -1;
             bosdata.slope2 = bosdata.regclose3 - bosdata.regclose2>0? 1 : -1;
-            if(bosdata.sbd != -1 && bosdata.sbu != -2){
+            if(bosdata.sbd != -1 && bosdata.sbu != NULL){
                 bosdata.state = 2 ;
             }
-            else if(bosdata.sbd !=-1 && bosdata.sbu==-2){
+            else if(bosdata.sbd !=-1 && bosdata.sbu==NULL){
                 bosdata.state = 3 ;
             }
-            else if(bosdata.sbd ==-1 && bosdata.sbu != -2){
+            else if(bosdata.sbd ==-1 && bosdata.sbu != NULL){
                 bosdata.state = 4 ;
             }
             else{
                 label lb("templb");
-                lb.Create();
+                lb.Create(lb.name1);
             }
         }
         if(bosdata.state == 2){
@@ -126,8 +147,8 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
             }
             //else //Buff_key1維持原樣
             if(bosdata.regclose3>bosdata.sbu){
-                bosdata.sbu     = -2;
-                bosdata.sbu_t   = -2;
+                bosdata.sbu     = NULL;
+                bosdata.sbu_t   = NULL;
                 bosdata.sbd     = bosdata.reg1key;
                 bosdata.sbd_t   = bosdata.reg1key_t;
             }
@@ -146,7 +167,7 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
                 bosdata.sbu         = bosdata.reg2key;
                 bosdata.sbu_t       = bosdata.reg2key_t;
                 bosdata.reg1key     = bosdata.reg2key;
-                bosdata.reg1key_t    = bosdata.reg2key_t;
+                bosdata.reg1key_t   = bosdata.reg2key_t;
             }
             if(bosdata.regclose3<bosdata.sbd){
                 bosdata.sbd         = -1;
@@ -164,8 +185,8 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
                 bosdata.reg1key_t   = bosdata.reg2key_t;
             }
             if(bosdata.regclose3>bosdata.sbu){
-                bosdata.sbu         = -2;
-                bosdata.sbu_t       = -2;
+                bosdata.sbu         = NULL;
+                bosdata.sbu_t       = NULL;
             }
             bosdata.state = 1;
         }
@@ -183,19 +204,38 @@ void BOSJudge(BOS& bosdata, const int size, const Rawdatagroup& rd, const int& s
 }//func end
 
 Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4){
-    //-1 == no sbd, -2 == no sbu
+    //-1 == no sbd, NULL == no sbu
     uint  code      = ts.comparecode ;
     code            = 0 ;
-    ts.base         = bos1.htfint    ;
-    ts.itv          = bos2.htfint-bos1.htfint;
+    int count1      = 0 ;
+    int count2      = 0 ;
     double arr[8]   ={bos4.sbu, bos3.sbu, bos2.sbu, bos1.sbu, bos1.sbd, bos2.sbd, bos3.sbd, bos4.sbd};
     int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
     Insertalg(arr, index);
     for (int i = 0; i < 8; ++i) {
-        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code & (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
+        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == NULL) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
     }
-    ts.u_inside = 0x000f0000 & code ;
-    ts.d_inside = 0x0000f000 & code ;
+    if((code & __LEVEL1SBDMASK)>>4 > (code & __LEVEL2SBDMASK)){
+        ++count1 ;
+    }
+    if((code & __LEVEL1SBDMASK)>>8 > (code & __LEVEL3SBDMASK)){
+        ++count1 ;
+    }
+    if((code & __LEVEL1SBDMASK)>>12 > (code & __LEVEL4SBDMASK)){
+        ++count1 ;
+    }
+    if((code & __LEVEL1SBUMASK)<<4  < (code & __LEVEL2SBUMASK)){
+        ++count2 ;
+    }
+    if((code & __LEVEL1SBUMASK)<<8  < (code & __LEVEL3SBUMASK)){
+        ++count2 ;
+    }
+    if((code & __LEVEL1SBUMASK)<<12 < (code & __LEVEL4SBUMASK)){
+        ++count2 ;
+    }
+    
+    ts.u_inside = count1==3? true : false ;
+    ts.d_inside = count2==3? true : false ; 
     return ts;
 }
 
