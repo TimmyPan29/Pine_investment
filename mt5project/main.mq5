@@ -65,7 +65,7 @@ int OnInit() {
             }
         }
     }
-    int z = 684 ;
+    int z = 685 ;
     TimeToString(Bosarr[0].sbu_t,TIME_DATE|TIME_MINUTES); 
     string teststr   = TimeToString(rd.datadate[0],TIME_DATE|TIME_MINUTES); 
     string s_sbudate = TimeToString(Bosarr[z-1].sbu_t,TIME_DATE|TIME_MINUTES); 

@@ -110,8 +110,10 @@ void Insertalg(double& arr[], int& index[]){
 void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
     int k           = starti      ;                     
     int count       = 1           ;
+    int r                         ;
     if (bosdata.htfint<91){
-      k = starti - __DAYMIN * MathFloor((starti-1000*bosdata.htfint)/__DAYMIN);
+      r = MathFloor((starti-1000*bosdata.htfint)/__DAYMIN);
+      k = starti - __DAYMIN * r;
     }
     while(k > 0){//last one can not be considered cuz it's not closed
         if(bosdata.state == 1){
@@ -193,8 +195,13 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
 
         }
         else{
-            k -= bosdata.htfint;
-            ++count ;
+            if((k == starti || k == starti - __DAYMIN * r)&& bosdata.htfint != 1){
+                k -= (bosdata.htfint-1);
+            }
+            else{
+                k -= bosdata.htfint;
+            }
+            ++count ;  
         }
         
         //Print("k: ", k, "count: ", count, " state: ", bosdata.state, " bosdata.baraday: ", bosdata.baraday, " bosdata.baradayrm: ", bosdata.baradayrm, " bosdata.htfint: ", bosdata.htfint);
