@@ -11,7 +11,7 @@ input int      datasize =100000;
 
 
 int OnInit() {
-    EventSetTimer(100);
+    EventSetTimer(300);
     //+----------initiation---------+//
     Helper helper;
     int      tint ;
