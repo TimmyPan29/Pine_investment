@@ -83,7 +83,7 @@ int OnInit() {
     Print("diff zone  ", helper.Extime());
     PrintFormat("Period 1.comparecode= 0x%08X", Tri[0].comparecode[0]);
 
-    string filename =StringFormat("Tri_%s_%s.txt", AccountInfoString(ACCOUNT_COMPANY), _Symbol);
+    string filename  =StringFormat("Tri_%s_%s.txt", AccountInfoString(ACCOUNT_COMPANY), _Symbol);
     int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
     if(filehandle!=INVALID_HANDLE){
         FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", _Symbol);
@@ -96,13 +96,46 @@ int OnInit() {
             else line2= "         ";
             line += StringFormat("Period %d ", i+1);
             for(int j=0; j<=i; ++j){
-                line2 += StringFormat("Itv %d      ", j+1);
+                if (((j+1)/10)<1) line2 += StringFormat("Itv %d      ", j+1);
+                else if (((j+1)/10)<10) line2 += StringFormat("Itv %d     ", j+1);
+                else if (((j+1)/10)<100) line2 += StringFormat("Itv %d    ", j+1);
+                else line2 += StringFormat("Itv %d      ", j+1);
                 line  += StringFormat("0x%08X ", Tri[i].comparecode[j]);
             }
             FileWrite(filehandle, line2);
             FileWrite(filehandle, line);
         }
     FileClose(filehandle);
+    Print("FileOpen OK");
+    }
+    else Print("Operation FileOpen failed, error ",GetLastError());
+    ResetLastError();
+
+    string filename2 =StringFormat("Tri_flt%s_%s.txt", AccountInfoString(ACCOUNT_COMPANY), _Symbol);
+    int filehandle2=FileOpen(filename2,FILE_WRITE|FILE_TXT);
+    if(filehandle2!=INVALID_HANDLE){
+        FileWrite(filehandle2, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", _Symbol);
+        for(int i=0; i<period; ++i){
+            string line2 = "";
+            string line  = "";
+            if (((i+1)/10)<1) line2= "         ";
+            else if (((i+1)/10)<10) line2= "          ";
+            else if (((i+1)/10)<100) line2= "           ";
+            else line2= "         ";
+            line += StringFormat("Period %d ", i+1);
+            for(int j=0; j<=i; ++j){
+                if(Tri[i].u_inside[j] || Tri[i].d_inside[j]){
+                    if (((j+1)/10)<1) line2 += StringFormat("Itv %d      ", j+1);
+                    else if (((j+1)/10)<10) line2 += StringFormat("Itv %d     ", j+1);
+                    else if (((j+1)/10)<100) line2 += StringFormat("Itv %d    ", j+1);
+                    else line2 += StringFormat("Itv %d      ", j+1);
+                    line  += StringFormat("%d %d        ", Tri[i].d_inside[j],Tri[i].u_inside[j]);
+                }
+            }
+            FileWrite(filehandle2, line2);
+            FileWrite(filehandle2, line);
+        }
+    FileClose(filehandle2);
     Print("FileOpen OK");
     }
     else Print("Operation FileOpen failed, error ",GetLastError());
