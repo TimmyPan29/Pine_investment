@@ -15,7 +15,7 @@ void OnStart()
  
 //--- correct way of working in the "file sandbox"
    ResetLastError();
-   filehandle=FileOpen("fractals.txt",FILE_WRITE|FILE_TXT);
+   filehandle=FileOpen("Tri.txt",FILE_WRITE|FILE_TXT);
    if(filehandle!=INVALID_HANDLE)
      {
       FileWrite(filehandle,"miaomiao",TimeCurrent(),Symbol(), EnumToString(_Period),"狗狗","\n ddd");
@@ -23,6 +23,7 @@ void OnStart()
       Print("FileOpen OK");
      }
    else Print("Operation FileOpen failed, error ",GetLastError());
+   ResetLastError();
 //--- another example with the creation of an enclosed directory in MQL5\Files\
    string subfolder="Research";
    filehandle=FileOpen(subfolder+"\\fractals.txt",FILE_WRITE|FILE_TXT);

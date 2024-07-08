@@ -1,26 +1,26 @@
 #ifndef __HELPER_MQH__
 #define __HELPER_MQH__
 
-#define __OANDA_FOREX         17
-#define __OANDA_CFD           17
-#define __OANDA_CRYPTO        17
+#define __OANDA_FOREX         1020
+#define __OANDA_CFD           1020
+#define __OANDA_CRYPTO        1020
 #define __BINANCE_CRYPTO      0
-#define __SAXO_FOREX          17
-#define __SAXO_CFD            18
-#define __SAXO_CRYPTO         17
+#define __SAXO_FOREX          1020
+#define __SAXO_CFD            1080
+#define __SAXO_CRYPTO         1020
 #define __EIGHTCAP_FOREX      0
-#define __EIGHTCAP_CFD        1
+#define __EIGHTCAP_CFD        60
 #define __EIGHTCAP_CRYPTO     0
 #define __TIME00_00           0
 #define __DAYMIN              1440
-#define __LEVEL4SBUMASK       0xf0000000
-#define __LEVEL2SBUMASK       0x0f000000  
-#define __LEVEL3SBUMASK       0x00f00000
-#define __LEVEL1SBUMASK       0x000f0000
-#define __LEVEL1SBDMASK       0x0000f000
-#define __LEVEL2SBDMASK       0x00000f00
-#define __LEVEL3SBDMASK       0x000000f0
-#define __LEVEL4SBDMASK       0x0000000f
+#define __LEVEL4SBDMASK       0xf0000000
+#define __LEVEL3SBDMASK       0x0f000000  
+#define __LEVEL2SBDMASK       0x00f00000
+#define __LEVEL1SBDMASK       0x000f0000
+#define __LEVEL1SBUMASK       0x0000f000
+#define __LEVEL2SBUMASK       0x00000f00
+#define __LEVEL3SBUMASK       0x000000f0
+#define __LEVEL4SBUMASK       0x0000000f
 #define __7f10fMASK           0xfffffff0
 #define __701ffMASK           0x0000000f
 enum Timebase{
@@ -42,6 +42,9 @@ struct Helper{
     int Extime();
     int Inputtimebase(Timebase tb);
     string Inputtimetostring(Timebase tb);
+    int ServerExtime();
+    int Inputoffset(Timebase tb);
+    int Inputtimeoffset(Timebase tb);
 };
 
 
@@ -51,12 +54,20 @@ int Helper::BarTimeCal(datetime dt) {
     return int(dt);
 }
 int Helper::Extime(){
-    int d ;
-    name = "serverTimeZoneCal";
-    datetime serverTime = TimeCurrent(); 
-    datetime utcTime    = TimeGMT();
-    d = (serverTime - utcTime)/3600 ;
-    return d ;
+    MqlDateTime tm={}; 
+    name = "localoffsetTimeZoneCal";
+    datetime    time1=TimeLocal();            
+    datetime    time2=TimeGMT(tm);           
+    int         shift=int(time1-time2)/3600;
+    return shift ;
+}
+int Helper::ServerExtime(){
+    MqlDateTime tm={}; 
+    name = "localoffsetTimeZoneCal";
+    datetime    time1=TimeCurrent();            
+    datetime    time2=TimeGMT(tm);           
+    int         shift=int(time1-time2)/3600;
+    return shift ;
 }
 int Helper::Inputtimebase(Timebase tb){
     name = "Inputtimebase";
@@ -112,6 +123,59 @@ string Helper::Inputtimetostring(Timebase tb){
             return "TIME00_00"   ;
     }
 }
-
+int Helper::Inputoffset(Timebase tb){
+    name = "Inputoffset";
+    switch (tb){
+        case OANDA_FOREX:
+            return 6 ;
+        case OANDA_CFD:
+            return 6 ;
+        case OANDA_CRYPTO:
+            return 6 ;
+        case BINANCE_CRYPTO:
+            return 6 ;
+        case SAXO_FOREX:
+            return 6 ;
+        case SAXO_CFD:
+            return 6 ;
+        case SAXO_CRYPTO:
+            return 6 ;
+        case EIGHTCAP_FOREX:
+            return 6 ;
+        case EIGHTCAP_CFD:
+            return 6 ;
+        case EIGHTCAP_CRYPTO:
+            return 6 ;
+        default:
+            return 6 ;
+    }
+}
+int Helper::Inputtimeoffset(Timebase tb){
+    name = "Inputtimeoffset";
+    switch (tb){
+        case OANDA_FOREX:
+            return 5 ;
+        case OANDA_CFD:
+            return 5 ;
+        case OANDA_CRYPTO:
+            return 5 ;
+        case BINANCE_CRYPTO:
+            return 5 ;
+        case SAXO_FOREX:
+            return 5 ;
+        case SAXO_CFD:
+            return 5 ;
+        case SAXO_CRYPTO:
+            return 5 ;
+        case EIGHTCAP_FOREX:
+            return 5 ;
+        case EIGHTCAP_CFD:
+            return 5 ;
+        case EIGHTCAP_CRYPTO:
+            return 5 ;
+        default:
+            return 5 ;
+    }
+}
 
 #endif

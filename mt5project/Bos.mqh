@@ -15,9 +15,9 @@ struct BOS{
     int             slope1      ;
     int             slope2      ;
     int             state       ; //ini 
-    int             reg1key     ;
+    double          reg1key     ;
     datetime        reg1key_t   ;
-    int             reg2key     ;
+    double          reg2key     ;
     datetime        reg2key_t   ;
     double          regclose1   ;
     double          regclose2   ;
@@ -107,10 +107,13 @@ void Insertalg(double& arr[], int& index[]){
     }
 
 }
-void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int& starti){
-    int k         = starti      ;                     
-    int count     = 1           ;
-    while(k < size){
+void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
+    int k           = starti      ;                     
+    int count       = 1           ;
+    if (bosdata.htfint<91){
+      k = starti - __DAYMIN * MathFloor((starti-1000*bosdata.htfint)/__DAYMIN);
+    }
+    while(k > 0){//last one can not be considered cuz it's not closed
         if(bosdata.state == 1){
             bosdata.regclose1 = bosdata.regclose2;
             bosdata.regclose2 = bosdata.regclose3;
@@ -184,18 +187,19 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int& starti)
             }
             bosdata.state = 1;
         }
-        if (count == bosdata.baraday){
-            k     += bosdata.baradayrm;
+        if (count == bosdata.baraday && bosdata.baradayrm!=0){
+            k     -= bosdata.baradayrm;
             count  = 1; 
 
         }
         else{
-            k += bosdata.htfint;
+            k -= bosdata.htfint;
             ++count ;
         }
+        
         //Print("k: ", k, "count: ", count, " state: ", bosdata.state, " bosdata.baraday: ", bosdata.baraday, " bosdata.baradayrm: ", bosdata.baradayrm, " bosdata.htfint: ", bosdata.htfint);
-
     }//while end
+    
 }//func end
 
 Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
@@ -204,33 +208,34 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
     code = 0 ;
     int count1      = 0 ;
     int count2      = 0 ;
-    double arr[8]   ={bos4.sbu, bos3.sbu, bos2.sbu, bos1.sbu, bos1.sbd, bos2.sbd, bos3.sbd, bos4.sbd};
+    double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
     int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
     Insertalg(arr, index);
     for (int i = 0; i < 8; ++i) {
         code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == NULL) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
     }
-    if((code & __LEVEL1SBDMASK)>>4 > (code & __LEVEL2SBDMASK)){
+    if((code & __LEVEL1SBDMASK)<<4 > (code & __LEVEL2SBDMASK)){
         ++count1 ;
     }
-    if((code & __LEVEL1SBDMASK)>>8 > (code & __LEVEL3SBDMASK)){
+    if((code & __LEVEL1SBDMASK)<<8 > (code & __LEVEL3SBDMASK)){
         ++count1 ;
     }
-    if((code & __LEVEL1SBDMASK)>>12 > (code & __LEVEL4SBDMASK)){
+    if((code & __LEVEL1SBDMASK)<<12 > (code & __LEVEL4SBDMASK)){
         ++count1 ;
     }
-    if((code & __LEVEL1SBUMASK)<<4  < (code & __LEVEL2SBUMASK)){
+    if((code & __LEVEL1SBUMASK)>>4  < (code & __LEVEL2SBUMASK)){
         ++count2 ;
     }
-    if((code & __LEVEL1SBUMASK)<<8  < (code & __LEVEL3SBUMASK)){
+    if((code & __LEVEL1SBUMASK)>>8  < (code & __LEVEL3SBUMASK)){
         ++count2 ;
     }
-    if((code & __LEVEL1SBUMASK)<<12 < (code & __LEVEL4SBUMASK)){
+    if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)){
         ++count2 ;
     }
     ts.comparecode[j]= code ;
     ts.u_inside[j]   = count1==3? true : false ;
-    ts.d_inside[j]   = count2==3? true : false ; 
+    ts.d_inside[j]   = count2==3? true : false ;
+    //Print("bos1.htfint: ", bos1.htfint);
     return ts;
 }
 
