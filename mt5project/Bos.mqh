@@ -125,13 +125,13 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
             bosdata.regclose3_t = rd.datadate[k];
             bosdata.slope1 = bosdata.regclose2 - bosdata.regclose1>0? 1 : -1;
             bosdata.slope2 = bosdata.regclose3 - bosdata.regclose2>0? 1 : -1;
-            if(bosdata.sbd != -1 && bosdata.sbu != NULL){
+            if(bosdata.sbd != -1 && bosdata.sbu != -2){
                 bosdata.state = 2 ;
             }
-            else if(bosdata.sbd !=-1 && bosdata.sbu==NULL){
+            else if(bosdata.sbd !=-1 && bosdata.sbu==-2){
                 bosdata.state = 3 ;
             }
-            else if(bosdata.sbd ==-1 && bosdata.sbu != NULL){
+            else if(bosdata.sbd ==-1 && bosdata.sbu != -2){
                 bosdata.state = 4 ;
             }
             else{
@@ -146,8 +146,8 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
             }
             //else //Buff_key1維持原樣
             if(bosdata.regclose3>bosdata.sbu){
-                bosdata.sbu     = NULL;
-                bosdata.sbu_t   = NULL;
+                bosdata.sbu     = -2;
+                bosdata.sbu_t   = -2;
                 bosdata.sbd     = bosdata.reg1key;
                 bosdata.sbd_t   = bosdata.reg1key_t;
             }
@@ -184,8 +184,8 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
                 bosdata.reg1key_t   = bosdata.reg2key_t;
             }
             if(bosdata.regclose3>bosdata.sbu){
-                bosdata.sbu         = NULL;
-                bosdata.sbu_t       = NULL;
+                bosdata.sbu         = -2;
+                bosdata.sbu_t       = -2;
             }
             bosdata.state = 1;
         }
@@ -210,7 +210,7 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
 }//func end
 
 Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
-    //-1 == no sbd, NULL == no sbu
+    //-1 == no sbd, -2 == no sbu
     uint  code      = ts.comparecode[j] ;
     code = 0 ;
     int count1      = 0 ;
@@ -219,7 +219,7 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
     int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
     Insertalg(arr, index);
     for (int i = 0; i < 8; ++i) {
-        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == NULL) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
+        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
     }
     if((code & __LEVEL1SBDMASK)<<4 > (code & __LEVEL2SBDMASK)){
         ++count1 ;
@@ -240,8 +240,8 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
         ++count2 ;
     }
     ts.comparecode[j]= code ;
-    ts.u_inside[j]   = count1==3? true : false ;
-    ts.d_inside[j]   = count2==3? true : false ;
+    ts.d_inside[j]   = count1==3? true : false ;
+    ts.u_inside[j]   = count2==3? true : false ;
     //Print("bos1.htfint: ", bos1.htfint);
     return ts;
 }
