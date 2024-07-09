@@ -257,7 +257,7 @@ settings.add_show          := input.bool(true, "add_function enable? ", inline="
 settings.offset            := input.int(10, "padding from current candles", minval = 1)
 settings.text_buffer       := input.int(10, "space between text features", minval = 1, maxval = 10)
 settings.afterdateadd_show := input.bool(true, "datecomparison_show?",inline="dateadd")
-settings.i_datetime        := input.time(timestamp("22 Sep 2023 00:00 +0000"), title="add comparison after date", inline="dateadd") 
+settings.i_datetime        := input.time(timestamp("22 Sep 2024 00:00 +0000"), title="add comparison after date", inline="dateadd") 
 // sbu sbd, period, date happen, remain time, price, line color
 
 Helper    helper        = Helper.new()
