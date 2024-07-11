@@ -83,7 +83,7 @@ int OnInit() {
     Print("diff zone  ", helper.Extime());
     PrintFormat("Period 1.comparecode= 0x%08X", Tri[0].comparecode[0]);
 
-    string filename  =StringFormat("Tri_%s_%s.txt", AccountInfoString(ACCOUNT_COMPANY), _Symbol);
+    string filename  =StringFormat("Tricode"+"\\Tri_%s_%s.txt", AccountInfoString(ACCOUNT_COMPANY), _Symbol);
     int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
     if(filehandle!=INVALID_HANDLE){
         FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", _Symbol);
@@ -110,8 +110,8 @@ int OnInit() {
     }
     else Print("Operation FileOpen failed, error ",GetLastError());
     ResetLastError();
-
-    string filename2 =StringFormat("Tri_flt%s_%s.txt", AccountInfoString(ACCOUNT_COMPANY), _Symbol);
+    
+    string filename2 =StringFormat("Tribool"+"\\Tri_flt%s_%s.txt", AccountInfoString(ACCOUNT_COMPANY), _Symbol);
     int filehandle2=FileOpen(filename2,FILE_WRITE|FILE_TXT);
     if(filehandle2!=INVALID_HANDLE){
         FileWrite(filehandle2, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", _Symbol);

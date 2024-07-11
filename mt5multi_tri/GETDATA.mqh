@@ -1,30 +1,34 @@
 #ifndef __GETDATA_MQH__
 #define __GETDATA_MQH__
 
-struct Rawdatagroup{
+struct RawCandles{
    double      rawprices[];
+   double      rawclose[];
+   double      rawopen[];
+   double      rawhigh[];
+   double      rawlow[];
    datetime    datadate[];
 };
 class Fetcher{
 private:
-    Rawdatagroup Vec_rawdata;
+    RawCandles Vec_rawdata;
 public:
     void Setarrsize(int count);
     // void Getprice(string symbol, int count);
     // void Getdate (string symbol, int count);
-    void GetRawData(string symbol, int size, int offset, int timeoffset);
+    void GetRawData(string symbol, int size);
     int  Searchdateidx(int tint, int size);
     void Printdata() const;
     datetime Getdateinfo(int idx);
     double Getpriceinfo(int idx);
-    Rawdatagroup GetRaw();
+    RawCandles GetRaw();
 };
 
 void Fetcher::Setarrsize(int count){
     ArrayResize(Vec_rawdata.rawprices, count);
     ArrayResize(Vec_rawdata.datadate, count);
 }
-void Fetcher::GetRawData(string symbol, int size, int offset, int timeoffset){
+void Fetcher::GetRawData(string symbol, int size){
     int cnt  = 1;
     int cnti = 1 ; //bar from iTime iClose
     int barrm ;
@@ -36,7 +40,8 @@ void Fetcher::GetRawData(string symbol, int size, int offset, int timeoffset){
         if((iTime(symbol, PERIOD_M1, cnti-1) - iTime(symbol, PERIOD_M1, cnti)) != 60){
             temptime = iTime(symbol, PERIOD_M1, cnti-1) ;
             tempprice= iOpen(symbol, PERIOD_M1, cnti-1) ;
-            barrm = ((temptime - iTime(symbol, PERIOD_M1, cnti))%3600)/60-1;
+            barrm = ((temptime - iTime(symbol, PERIOD_M1, cnti))%86400)/60-1;
+            //Print("barrm= ", barrm);
             while(cnt<=barrm){
                 Vec_rawdata.datadate[i] = temptime-60*cnt;
                 Vec_rawdata.rawprices[i]= tempprice;
@@ -84,9 +89,10 @@ datetime Fetcher::Getdateinfo(int idx){
 double Fetcher::Getpriceinfo(int idx){
    return Vec_rawdata.rawprices[idx];
 }
-Rawdatagroup Fetcher::GetRaw(){
+RawCandles Fetcher::GetRaw(){
    return Vec_rawdata;
 } 
+
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful //
 #endif
 

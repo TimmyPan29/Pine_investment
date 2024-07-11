@@ -80,7 +80,76 @@ struct Triset{
     uint    comparecode[] ;
     bool    u_inside[]   ;
     bool    d_inside[]    ;
-   
+    void TriCode(BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
+        //-1 == no sbd, -2 == no sbu
+        uint  code      = comparecode[j] ;
+        code = 0 ;
+        int count1      = 0 ;
+        int count2      = 0 ;
+        double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
+        int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
+        Insertalg(arr, index);
+        for (int i = 0; i < 8; ++i) {
+            code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
+        }
+        if((code & __LEVEL1SBDMASK)<<4 > (code & __LEVEL2SBDMASK)){
+            ++count1 ;
+        }
+        if((code & __LEVEL1SBDMASK)<<8 > (code & __LEVEL3SBDMASK)){
+            ++count1 ;
+        }
+        if((code & __LEVEL1SBDMASK)<<12 > (code & __LEVEL4SBDMASK)){
+            ++count1 ;
+        }
+        if((code & __LEVEL1SBUMASK)>>4  < (code & __LEVEL2SBUMASK)){
+            ++count2 ;
+        }
+        if((code & __LEVEL1SBUMASK)>>8  < (code & __LEVEL3SBUMASK)){
+            ++count2 ;
+        }
+        if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)){
+            ++count2 ;
+        }
+        comparecode[j]= code ;
+        d_inside[j]   = count1==3? true : false ;
+        u_inside[j]   = count2==3? true : false ;
+        //Print("bos1.htfint: ", bos1.htfint);
+        
+    }
+};
+struct FVG{
+    int namei               ;
+    int Property            ; //property= 2 green , =1 red, =0 no existence
+    datetime k_2Time        ; // index : starti-2 ~ 0 are targets
+    double LTprice          ;
+    double RBprice          ;
+    FVG():Property(0),k_2Time(0),LTprice(0),RBprice(0){}
+    FVG(int i):Property(0),k_2Time(0),LTprice(0),RBprice(0){
+        namei = i ;
+    }
+    bool FVGupdown(RawCandles& rc, int k, int starti){
+        if (k < starti-2) return false ;
+        if(Bull(rc,k-1)){
+            if(rc.rawlow[k] - rc.rawhigh[k] > 0){
+                Property = 2 ; 
+                return true ;
+            } 
+            else{
+                Property = 0 ;
+                return false ;
+            } 
+        }
+        else{
+            if(rc.rawlow[k] - rc.rawhigh[k] < 0){
+                Property = 1 ; 
+                return true ;
+            } 
+            else{
+                Property = 0 ;
+                return false ;
+            }
+        }
+    }
 };
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
@@ -107,7 +176,7 @@ void Insertalg(double& arr[], int& index[]){
     }
 
 }
-void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
+void BOSJudge(BOS& bosdata, const int size, RawCandles& rd, const int starti){
     int k           = starti      ;                     
     int count       = 1           ;
     int r                         ;
@@ -208,43 +277,22 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
     }//while end
     
 }//func end
-
-Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
-    //-1 == no sbd, -2 == no sbu
-    uint  code      = ts.comparecode[j] ;
-    code = 0 ;
-    int count1      = 0 ;
-    int count2      = 0 ;
-    double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
-    int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
-    Insertalg(arr, index);
-    for (int i = 0; i < 8; ++i) {
-        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
+void Pushfvg(FVG& fvgarr[], FVG& fvg){
+        ArrayResize(fvgarr, ArraySize(fvgarr)+1);
+        fvgarr[ArraySize(fvgarr)-1] = fvg ;
     }
-    if((code & __LEVEL1SBDMASK)<<4 > (code & __LEVEL2SBDMASK)){
-        ++count1 ;
+bool Popfvg(FVG& fvgarr[], FVG& fvgtemp){
+    if (ArraySize(fvgarr) == 0){
+        Print("Stack is empty");
+        return false ;
     }
-    if((code & __LEVEL1SBDMASK)<<8 > (code & __LEVEL3SBDMASK)){
-        ++count1 ;
-    }
-    if((code & __LEVEL1SBDMASK)<<12 > (code & __LEVEL4SBDMASK)){
-        ++count1 ;
-    }
-    if((code & __LEVEL1SBUMASK)>>4  < (code & __LEVEL2SBUMASK)){
-        ++count2 ;
-    }
-    if((code & __LEVEL1SBUMASK)>>8  < (code & __LEVEL3SBUMASK)){
-        ++count2 ;
-    }
-    if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)){
-        ++count2 ;
-    }
-    ts.comparecode[j]= code ;
-    ts.d_inside[j]   = count1==3? true : false ;
-    ts.u_inside[j]   = count2==3? true : false ;
-    //Print("bos1.htfint: ", bos1.htfint);
-    return ts;
+    fvgtemp = fvgarr[ArraySize(fvgarr) - 1];
+    ArrayResize(fvgarr, ArraySize(fvgarr) - 1);
+    return true;
 }
+
+
+
 
 #endif
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful
