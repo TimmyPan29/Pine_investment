@@ -42,7 +42,7 @@ void Fetcher::GetRawData(string symbol, int size){
             tempprice= iOpen(symbol, PERIOD_M1, cnti-1) ;
             barrm = ((temptime - iTime(symbol, PERIOD_M1, cnti))%86400)/60-1;
             //Print("barrm= ", barrm);
-            while(cnt<=barrm){
+            while(cnt<=barrm && i<size-1){
                 Vec_rawdata.datadate[i] = temptime-60*cnt;
                 Vec_rawdata.rawprices[i]= tempprice;
                 ++i  ;
