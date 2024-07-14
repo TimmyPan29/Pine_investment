@@ -15,6 +15,9 @@ private:
 public:
     void Setarrsize(int count);
     void Getprice(string symbol, int count);
+    void Getopen(string symbol, int count);
+    void Gethigh(string symbol, int count);
+    void Getlow(string symbol, int count);
     void Getdate (string symbol, int count);
     //void GetRawData(string symbol, int size);
     // int  Searchdateidx(int tint, int starti);
@@ -28,13 +31,33 @@ public:
 void Fetcher::Setarrsize(int count){
     ArrayResize(Vec_rawdata.rawprices, count);
     ArrayResize(Vec_rawdata.datadate, count);
-    ArrayResize(Vec_rawdata.datadate, count);
+    ArrayResize(Vec_rawdata.rawopen, count);
+    ArrayResize(Vec_rawdata.rawhigh, count);
+    ArrayResize(Vec_rawdata.rawlow, count);
 }
 
 void Fetcher::Getprice(string symbol, int count){
     int copiedPrices = CopyClose(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawprices);
         if (copiedPrices < count) {
             Print("Error fetching prices, only fetched ", copiedPrices, " prices.");
+        }
+}
+void Fetcher::Gethigh(string symbol, int count){
+    int copiedHigh = CopyHigh(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawhigh);
+        if (copiedHigh < count) {
+            Print("Error fetching High, only fetched ", copiedHigh, " High.");
+        }
+}
+void Fetcher::Getlow(string symbol, int count){
+    int copiedLow = CopyLow(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawlow);
+        if (copiedLow < count) {
+            Print("Error fetching Low, only fetched ", copiedLow, " Low.");
+        }
+}
+void Fetcher::Getopen(string symbol, int count){
+    int copiedOpen = CopyOpen(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawopen);
+        if (copiedOpen < count) {
+            Print("Error fetching Open, only fetched ", copiedOpen, " Open.");
         }
 }
 void Fetcher::Getdate(string symbol, int count){
@@ -59,9 +82,15 @@ double Fetcher::Getpriceinfo(int idx){
 RawCandles Fetcher::GetRaw(){
    return Vec_rawdata;
 } 
+void Fetcher::RenewQuo_Rm(int htfint, Helper& helper){
+    for (int i=0; i<__DAYMIN; ++i){
+        Vec_rawdata.dataQuo[i] = helper.GetQuo(i+1, htfint);
+        Vec_rawdata.dataRm[i]  = helper.GetRm(i+1, htfint);
+    }
+}
 
-//TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful //
 #endif
+//TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful //
 
 // void Fetcher::GetRawData(string symbol, int size){
 //     int cnt  = 1;

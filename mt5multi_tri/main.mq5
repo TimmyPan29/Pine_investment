@@ -3,23 +3,23 @@
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
-input Timebase tb           = __TIME00_00;
 input Exchange ex           = OANDA ; 
 input int      period       = 359; 
 input int      datasize     = 100000;
-SymbolSet Symbolset                 ;
-FVG       fvgtemp;
+
 int OnInit() {
     EventSetTimer(300);
     //+----------initiation---------+//
+    SymbolSet Symbolset    ;
+    FVG       fvgtemp      ;
+    FVG       fvgarr[]     ;
     Symbolset.InitSymbol(ex,Symbolset);
-    Helper helper;
-    int      tint ;
-    int      starti ;
-    tint                   = helper.Inputtimebase(tb); //
-    string symboltemp ;
-    string sectornametemp ;
-    Fetcher fc ;
+    Helper helper          ;
+    int      starti        ;
+    string symboltemp      ;
+    string sectornametemp  ;
+    Fetcher fc             ;
+    RawCandles rd          ;
     BOS Bosarr[1436] ;//設一天會卡死 base最多到359 超過360要再想辦法
     Triset Tri[359] ;
     symboltemp = Symbolset.Commodities[0] ;
@@ -27,13 +27,16 @@ int OnInit() {
     //+----------initiation end---------+//
     //+----------Put Data---------+//
     fc.Setarrsize(datasize);
-    fc.GetRawData(symboltemp, datasize);
-    RawCandles rd   = fc.GetRaw();
-    starti          = fc.Searchdateidx(tint, datasize);
-    Print("Exchange Time initiation: ",tint,"min","\nyou choose: ",helper.Inputtimetostring(tb));
+    fc.Getprice(string symbol, int count);
+    fc.Getopen (string symbol, int count);
+    fc.Gethigh(string symbol, int count);
+    fc.Getlow(string symbol, int count);
+    fc.Getdate (string symbol, int count);
+    
+    Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symboltemp);
     Print("EA has been initialized.");
-    Print("Starti: ", starti);
-    Print("price: ",fc.Getpriceinfo(starti)," date: ",fc.Getdateinfo(starti));
+    //Print("Starti: ", starti);
+    //Print("price: ",fc.Getpriceinfo(starti)," date: ",fc.Getdateinfo(starti));
     //fc.Printdata();
     //+----------Put Data end---------+//
     
@@ -41,8 +44,12 @@ int OnInit() {
     // cuz u s still have not initialize the BOS type;
     
     for (int i=0; i<(period<<2); ++i){
+        if (i+1<91) starti = datasize-1000*(i+1);
+        else starti = 0 ;
+        fc.RenewQuo_Rm(i+1, helper);
         Bosarr[i] = BOS(i+1);
-        BOSJudge(Bosarr[i], datasize, rd, starti);
+        rd   = fc.GetRaw();
+        BOSJudge(Bosarr[i], datasize, rd, starti, helper);
     }
  
     for (int i=0; i<(period); ++i){

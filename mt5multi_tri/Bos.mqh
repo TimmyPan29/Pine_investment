@@ -108,7 +108,24 @@ struct Triset{
         d_inside[j]   = count1==3? true : false ;
         u_inside[j]   = count2==3? true : false ;
         //Print("bos1.htfint: ", bos1.htfint);
-        
+    }
+    void Boolcheck(const double& arr[], int signsbd, int signsbu){
+        if(arr[3] == arr[2]) signsbd = 2 ;
+        else if(arr[3] == arr[1]) signsbd = 3 ;
+        else if(arr[3] == arr[0]) signsbd = 4 ;
+        else if((arr[3] == arr[2]) && (arr[3] == arr[1])) signsbd = 5 ; 
+        else if((arr[3] == arr[2]) && (arr[3] == arr[0])) signsbd = 6 ; 
+        else if((arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 7 ;
+        else if((arr[3] == arr[2]) && (arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 9 ;  
+        else signsbd = 0 ;
+        if(arr[4] == arr[5]) signsbd = 2 ;
+        else if(arr[4] == arr[6]) signsbd = 3 ;
+        else if(arr[4] == arr[7]) signsbd = 4 ;
+        else if((arr[4] == arr[5]) && (arr[4] == arr[6])) signsbd = 5 ; 
+        else if((arr[4] == arr[5]) && (arr[4] == arr[7])) signsbd = 6 ; 
+        else if((arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 7 ;
+        else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 9 ;  
+        else signsbu = 0 ;
     }
 };
 struct FVG{
@@ -170,13 +187,13 @@ void Insertalg(double& arr[], int& index[]){
     }
 
 }
-void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, Helper& helper){
+void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, Helper& helper, FVG& fvgarr[]){
     int k                         ;                     
     int qidxnow                   ;
     int qidxpt                    ;
     double tempprice              ;
     datetime temptime             ;
-    k               = starti+1    ;
+    k               = starti+1    ;d
     while(k < size){//last one can not be considered cuz it's not closed
         qidxnow = helper.TurnMin(rd.datadate[k])==0? 1439 : helper.TurnMin(rd.datadate[k])-1;
         qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;        

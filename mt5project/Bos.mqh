@@ -99,7 +99,24 @@ void Insertalg(double& arr[], int& index[]){
         arr[j + 1] = key; //swap
         index[j + 1] = keyIndex;
     }
-
+}
+void Boolcheck(const double& arr[], int signsbd, int signsbu){
+    if(arr[3] == arr[2]) signsbd = 2 ;
+    else if(arr[3] == arr[1]) signsbd = 3 ;
+    else if(arr[3] == arr[0]) signsbd = 4 ;
+    else if((arr[3] == arr[2]) && (arr[3] == arr[1])) signsbd = 5 ; 
+    else if((arr[3] == arr[2]) && (arr[3] == arr[0])) signsbd = 6 ; 
+    else if((arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 7 ;
+    else if((arr[3] == arr[2]) && (arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 9 ;  
+    else signsbd = 0 ;
+    if(arr[4] == arr[5]) signsbd = 2 ;
+    else if(arr[4] == arr[6]) signsbd = 3 ;
+    else if(arr[4] == arr[7]) signsbd = 4 ;
+    else if((arr[4] == arr[5]) && (arr[4] == arr[6])) signsbd = 5 ; 
+    else if((arr[4] == arr[5]) && (arr[4] == arr[7])) signsbd = 6 ; 
+    else if((arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 7 ;
+    else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 9 ;  
+    else signsbu = 0 ;
 }
 void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, Helper& helper){
     int k                         ;                     
@@ -108,7 +125,7 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, 
     double tempprice              ;
     datetime temptime             ;
     k               = starti+1    ;
-    while(k < size){//last one can not be considered cuz it's not closed
+    while(k < size){
         qidxnow = helper.TurnMin(rd.datadate[k])==0? 1439 : helper.TurnMin(rd.datadate[k])-1;
         qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;        
         if(rd.dataQuo[qidxnow] != rd.dataQuo[qidxpt]){
@@ -203,6 +220,9 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
     int count2      = 0 ;
     double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
     int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
+    int    signsbd ;
+    int    signsbu ;
+    Boolcheck(arr, signsbd, signsbu);
     Insertalg(arr, index);
     for (int i = 0; i < 8; ++i) {
         code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
@@ -226,8 +246,8 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
         ++count2 ;
     }
     ts.comparecode[j]= code ;
-    ts.d_inside[j]   = count1==3? true : false ;
-    ts.u_inside[j]   = count2==3? true : false ;
+    ts.d_inside[j]   = (count1==3 && signsbd==0)? true : false ;
+    ts.u_inside[j]   = (count2==3 && signsbu==0)? true : false ;
     //Print("bos1.htfint: ", bos1.htfint);
     return ts;
 }
