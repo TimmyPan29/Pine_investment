@@ -4,8 +4,6 @@
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 input Timebase tb           = __TIME00_00;
-input Timebase tboffset     = __TIME00_00;
-input Timebase tbtimeoffset = __TIME00_00;
 input int      period   =359; 
 input int      datasize =100000;
 
@@ -15,29 +13,24 @@ int OnInit() {
     //+----------initiation---------+//
     Helper helper;
     int      tint ;
-    int      offset;
     int      starti ;
-    int      timeoffset;
     tint                   = helper.Inputtimebase(tb); //
-    offset                 = helper.Inputoffset(tboffset);
-    timeoffset             = helper.Inputtimeoffset(tbtimeoffset); 
     Fetcher fc ;
-    BOS Bosarr[1436] ;//設一天會卡死 base最多到359 超過360要再想辦法
+    BOS Bosarr[1440] ;//設一天會卡死 base最多到359 超過360要再想辦法
     Triset Tri[359] ;
     
     //+----------initiation end---------+//
     //+----------Put Data---------+//
     
     fc.Setarrsize(datasize);
-    // fc.Getprice(_Symbol, datasize);
-    // fc.Getdate(_Symbol, datasize);
-    fc.GetRawData(_Symbol, datasize, offset, timeoffset);
-    Rawdatagroup rd = fc.GetRaw();
-    starti          = fc.Searchdateidx(tint, datasize);
+    //fc.GetRawData(_Symbol, datasize);
+    fc.Getprice(_Symbol, datasize);
+    fc.Getdate (_Symbol, datasize);
+    RawCandles rd ;
     Print("Exchange Time initiation: ",tint,"min","\nyou choose: ",helper.Inputtimetostring(tb));
     Print("EA has been initialized.");
-    Print("Starti: ", starti);
-    Print("price: ",fc.Getpriceinfo(starti)," date: ",fc.Getdateinfo(starti));
+    //Print("Starti: ", starti);
+    //Print("price: ",fc.Getpriceinfo(starti)," date: ",fc.Getdateinfo(starti));
     fc.Printdata();
     //+----------Put Data end---------+//
     
@@ -45,10 +38,13 @@ int OnInit() {
     // cuz u s still have not initialize the BOS type;
     
     for (int i=0; i<(period<<2); ++i){
+        if (i+1<91) starti = datasize-1000*(i+1);
+        else starti = 0 ;
+        fc.RenewQuo_Rm(i+1, helper);
         Bosarr[i] = BOS(i+1);
-        BOSJudge(Bosarr[i], datasize, rd, starti);
+        rd = fc.GetRaw();
+        BOSJudge(Bosarr[i], datasize, rd, starti, helper);
     }
- 
     for (int i=0; i<(period); ++i){
         ArrayResize(Tri[i].comparecode,i+1,i+1);
         ArrayResize(Tri[i].u_inside,i+1,i+1);

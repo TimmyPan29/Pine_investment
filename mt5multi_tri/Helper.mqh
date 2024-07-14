@@ -44,6 +44,7 @@ enum Exchange{
 struct SymbolSet{
     string Exname;
     string Sectorname[8];
+    int    Sectorsize[8];
     string Bullion[];
     string Commodities[];
     string Forex[];
@@ -63,7 +64,9 @@ struct Helper{
     int ServerExtime();
     int Inputoffset(Timebase tb);
     int Inputtimeoffset(Timebase tb);
-    
+    int TurnMin(datetime dt);
+    int GetQuo(int minute, int htfint);
+    int GetRm(int minute, int htfint);
 };
 
 
@@ -203,6 +206,7 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
     for (int i=0; i<ArraySize(ss.Sectorname); ++i){
         ss.Sectorname[i] = sname[i] ;
     }
+
     switch(ex){
     case OANDA:
         Exname = "OANDA" ;
@@ -365,6 +369,15 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         ss.Reval[1] = "EURDKK";
         ss.Reval[2] = "GBPGBX";
         ss.Reval[3] = "GBXUSD";
+        //                {"Bullion", "Commodities", "Forex", "Indices", "Crypto", "ShareCFDs", "Reval", "Custom"} ;
+        ss.Sectorsize[0] = 2;
+        ss.Sectorsize[1] = 8;
+        ss.Sectorsize[2] = 46;
+        ss.Sectorsize[3] = 17;
+        ss.Sectorsize[4] = 18;
+        ss.Sectorsize[5] = 57;
+        ss.Sectorsize[6] = 4;
+        ss.Sectorsize[7] = 0;
         return true ;
 
     case MetaQuotes:
@@ -509,6 +522,15 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         ss.Indices[7] = "SPN35";
         ss.Indices[8] = "STOX50";
         ss.Indices[9] = "UK100";
+        //                {"Bullion", "Commodities", "Forex", "Indices", "Crypto", "ShareCFDs", "Reval", "Custom"} ;
+        ss.Sectorsize[0] = 7;
+        ss.Sectorsize[1] = 0;
+        ss.Sectorsize[2] = 119;
+        ss.Sectorsize[3] = 10;
+        ss.Sectorsize[4] = 0;
+        ss.Sectorsize[5] = 0;
+        ss.Sectorsize[6] = 0;
+        ss.Sectorsize[7] = 0;
         return true ;
 
     case EIGHTCAP:
@@ -737,7 +759,7 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         ss.Crypto[123] = "ZILUSD";
         ss.Crypto[124] = "ZRXUSD";
 
-        ArrayResize(ss.ShareCFDs, 232);
+        ArrayResize(ss.ShareCFDs, 606);
         ss.ShareCFDs[0] = "AGL";
         ss.ShareCFDs[1] = "ALL";
         ss.ShareCFDs[2] = "ALQ";
@@ -1344,6 +1366,15 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         ss.ShareCFDs[603] = "VNA";
         ss.ShareCFDs[604] = "VOW3";
         ss.ShareCFDs[605] = "ZAL";
+        //                {"Bullion", "Commodities", "Forex", "Indices", "Crypto", "ShareCFDs", "Reval", "Custom"} ;
+        ss.Sectorsize[0] = 0;
+        ss.Sectorsize[1] = 16;
+        ss.Sectorsize[2] = 59;
+        ss.Sectorsize[3] = 16;
+        ss.Sectorsize[4] = 125;
+        ss.Sectorsize[5] = 606;
+        ss.Sectorsize[6] = 0;
+        ss.Sectorsize[7] = 0;
         return true ;
     default:
         Exname = "NONE" ;
@@ -1356,6 +1387,19 @@ bool Bull(RawCandles& c, int k){
     b = c.rawclose[k] - c.rawopen[k] > 0? true : false ;
     return b ;
     }
-
+int Helper::TurnMin(datetime dt){
+    name = "TurnMin" ;
+    return (dt%86400)/60;
+}
+int Helper::GetQuo(int minute, int htfint){
+    name = "GetQuo" ;
+    float m =float(minute);
+    float h =float(htfint);
+    return MathFloor(m/h) ;
+}
+int Helper::GetRm(int minute, int htfint){
+    name = "GetRm" ;
+    return (minute%htfint) ;
+}
 
 #endif

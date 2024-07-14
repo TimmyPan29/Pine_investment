@@ -5,8 +5,6 @@
 #include "Helper.mqh"
 struct BOS{
     double          htfint      ;//=i
-    double          baraday     ;//= MathCeil(__DAYMIN/htfint);
-    int             baradayrm   ;// __DAYMIN%i;
     string          htfname     ;//IntegerToString(i)
     double          sbu         ;
     double          sbd         ;
@@ -36,8 +34,6 @@ struct BOS{
 
     BOS():sbu_lb(""),sbu_ln(""),sbd_lb(""),sbd_ln(""){
         htfint = 0;
-        baraday = 0;
-        baradayrm = 0;
         htfname = "";
         sbu = 0.0;
         sbd = 0.0;
@@ -57,8 +53,6 @@ struct BOS{
     // 带参数的构造函数
     BOS(int i):sbu_lb("sbu_lb" + IntegerToString(i)),sbu_ln("sbu_line" + IntegerToString(i)),sbd_lb("sbd_lb" + IntegerToString(i)),sbd_ln("sbd_line" + IntegerToString(i)) {
         htfint = i;
-        baraday = MathCeil(__DAYMIN / htfint);
-        baradayrm = __DAYMIN % i;
         htfname = IntegerToString(i);
         sbu = 0;
         sbd = 0;
@@ -107,106 +101,98 @@ void Insertalg(double& arr[], int& index[]){
     }
 
 }
-void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
-    int k           = starti      ;                     
-    int count       = 1           ;
-    int r                         ;
-    if (bosdata.htfint<91){
-      r = MathFloor((starti-1000*bosdata.htfint)/__DAYMIN);
-      k = starti - __DAYMIN * r;
-    }
-    while(k > 0){//last one can not be considered cuz it's not closed
-        if(bosdata.state == 1){
-            bosdata.regclose1 = bosdata.regclose2;
-            bosdata.regclose2 = bosdata.regclose3;
-            bosdata.regclose3 = rd.rawprices[k];
-            bosdata.regclose1_t = bosdata.regclose2_t;
-            bosdata.regclose2_t = bosdata.regclose3_t;
-            bosdata.regclose3_t = rd.datadate[k];
-            bosdata.slope1 = bosdata.regclose2 - bosdata.regclose1>0? 1 : -1;
-            bosdata.slope2 = bosdata.regclose3 - bosdata.regclose2>0? 1 : -1;
-            if(bosdata.sbd != -1 && bosdata.sbu != -2){
-                bosdata.state = 2 ;
+void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, Helper& helper){
+    int k                         ;                     
+    int qidxnow                   ;
+    int qidxpt                    ;
+    double tempprice              ;
+    datetime temptime             ;
+    k               = starti+1    ;
+    while(k < size){//last one can not be considered cuz it's not closed
+        qidxnow = helper.TurnMin(rd.datadate[k])==0? 1439 : helper.TurnMin(rd.datadate[k])-1;
+        qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;        
+        if(rd.dataQuo[qidxnow] != rd.dataQuo[qidxpt]){
+            //Print("qidxnow= ", qidxnow, "qidxpt", qidxpt, "bosdata.htfint", bosdata.htfint);
+            tempprice = rd.rawprices[k-1] ;
+            temptime  = rd.datadate[k-1]  ;
+            //if(bosdata.htfint==4)printf("k= %d \t tempprice@k-1= %.5f \t date@k-1= %s\n htfint= %.1f", k, tempprice,TimeToString(temptime,TIME_DATE|TIME_MINUTES),bosdata.htfint);
+            if(bosdata.state == 1){
+                bosdata.regclose1 = bosdata.regclose2;
+                bosdata.regclose2 = bosdata.regclose3;
+                bosdata.regclose3 = tempprice;
+                bosdata.regclose1_t = bosdata.regclose2_t;
+                bosdata.regclose2_t = bosdata.regclose3_t;
+                bosdata.regclose3_t = temptime;
+                bosdata.slope1 = bosdata.regclose2 - bosdata.regclose1>0? 1 : -1;
+                bosdata.slope2 = bosdata.regclose3 - bosdata.regclose2>0? 1 : -1;
+                if(bosdata.sbd != -1 && bosdata.sbu != -2){
+                    bosdata.state = 2 ;
+                }
+                else if(bosdata.sbd !=-1 && bosdata.sbu==-2){
+                    bosdata.state = 3 ;
+                }
+                else if(bosdata.sbd ==-1 && bosdata.sbu != -2){
+                    bosdata.state = 4 ;
+                }
+                else{
+                    label lb("templb");
+                    lb.Create(lb.name1);
+                }
             }
-            else if(bosdata.sbd !=-1 && bosdata.sbu==-2){
-                bosdata.state = 3 ;
+            //Print("k: ", k, " state: ", bosdata.state, " bosdata.htfint: ", bosdata.htfint, "tempprice", tempprice);
+            if(bosdata.state == 2){
+                if(bosdata.slope1 != bosdata.slope2){
+                    bosdata.reg1key     = bosdata.regclose2;
+                    bosdata.reg1key_t   = bosdata.regclose2_t ;
+                }
+                //else //Buff_key1維持原樣
+                if(bosdata.regclose3>bosdata.sbu){
+                    bosdata.sbu     = -2;
+                    bosdata.sbu_t   = -2;
+                    bosdata.sbd     = bosdata.reg1key;
+                    bosdata.sbd_t   = bosdata.reg1key_t;
+                }
+                if(bosdata.regclose3<bosdata.sbd){
+                    bosdata.sbd     = -1 ;
+                    bosdata.sbd_t   = -1 ;
+                    bosdata.sbu     = bosdata.reg1key;
+                    bosdata.sbu_t   = bosdata.reg1key_t;
+                }
+                bosdata.state = 1;
             }
-            else if(bosdata.sbd ==-1 && bosdata.sbu != -2){
-                bosdata.state = 4 ;
+            if(bosdata.state == 3){//no sky
+                if(bosdata.slope1 != bosdata.slope2){ // build sky
+                    bosdata.reg2key     = bosdata.regclose2;
+                    bosdata.reg2key_t   = bosdata.regclose2_t;
+                    bosdata.sbu         = bosdata.reg2key;
+                    bosdata.sbu_t       = bosdata.reg2key_t;
+                    bosdata.reg1key     = bosdata.reg2key;
+                    bosdata.reg1key_t   = bosdata.reg2key_t;
+                }
+                if(bosdata.regclose3<bosdata.sbd){
+                    bosdata.sbd         = -1;
+                    bosdata.sbd_t       = -1;
+                }
+                bosdata.state = 1;
             }
-            else{
-                label lb("templb");
-                lb.Create(lb.name1);
+            if(bosdata.state == 4){
+                if(bosdata.slope1 != bosdata.slope2){
+                    bosdata.reg2key     = bosdata.regclose2;
+                    bosdata.reg2key_t   = bosdata.regclose2_t;
+                    bosdata.sbd         = bosdata.reg2key;
+                    bosdata.sbd_t       = bosdata.reg2key_t;
+                    bosdata.reg1key     = bosdata.reg2key;
+                    bosdata.reg1key_t   = bosdata.reg2key_t;
+                }
+                if(bosdata.regclose3>bosdata.sbu){
+                    bosdata.sbu         = -2;
+                    bosdata.sbu_t       = -2;
+                }
+                bosdata.state = 1;
             }
         }
-        if(bosdata.state == 2){
-            if(bosdata.slope1 != bosdata.slope2){
-                bosdata.reg1key     = bosdata.regclose2;
-                bosdata.reg1key_t   = bosdata.regclose2_t ;
-            }
-            //else //Buff_key1維持原樣
-            if(bosdata.regclose3>bosdata.sbu){
-                bosdata.sbu     = -2;
-                bosdata.sbu_t   = -2;
-                bosdata.sbd     = bosdata.reg1key;
-                bosdata.sbd_t   = bosdata.reg1key_t;
-            }
-            if(bosdata.regclose3<bosdata.sbd){
-                bosdata.sbd     = -1 ;
-                bosdata.sbd_t   = -1 ;
-                bosdata.sbu     = bosdata.reg1key;
-                bosdata.sbu_t   = bosdata.reg1key_t;
-            }
-            bosdata.state = 1;
-        }
-        if(bosdata.state == 3){//no sky
-            if(bosdata.slope1 != bosdata.slope2){ // build sky
-                bosdata.reg2key     = bosdata.regclose2;
-                bosdata.reg2key_t   = bosdata.regclose2_t;
-                bosdata.sbu         = bosdata.reg2key;
-                bosdata.sbu_t       = bosdata.reg2key_t;
-                bosdata.reg1key     = bosdata.reg2key;
-                bosdata.reg1key_t   = bosdata.reg2key_t;
-            }
-            if(bosdata.regclose3<bosdata.sbd){
-                bosdata.sbd         = -1;
-                bosdata.sbd_t       = -1;
-            }
-            bosdata.state = 1;
-        }
-        if(bosdata.state == 4){
-            if(bosdata.slope1 != bosdata.slope2){
-                bosdata.reg2key     = bosdata.regclose2;
-                bosdata.reg2key_t   = bosdata.regclose2_t;
-                bosdata.sbd         = bosdata.reg2key;
-                bosdata.sbd_t       = bosdata.reg2key_t;
-                bosdata.reg1key     = bosdata.reg2key;
-                bosdata.reg1key_t   = bosdata.reg2key_t;
-            }
-            if(bosdata.regclose3>bosdata.sbu){
-                bosdata.sbu         = -2;
-                bosdata.sbu_t       = -2;
-            }
-            bosdata.state = 1;
-        }
-        if (count == bosdata.baraday && bosdata.baradayrm!=0){
-            k     -= bosdata.baradayrm;
-            count  = 1; 
-
-        }
-        else{
-            if((k == starti || k == starti - __DAYMIN * r)&& bosdata.htfint != 1){
-                k -= (bosdata.htfint-1);
-            }
-            else{
-                k -= bosdata.htfint;
-            }
-            ++count ;  
-        }
-        
-        //Print("k: ", k, "count: ", count, " state: ", bosdata.state, " bosdata.baraday: ", bosdata.baraday, " bosdata.baradayrm: ", bosdata.baradayrm, " bosdata.htfint: ", bosdata.htfint);
+        ++k; 
     }//while end
-    
 }//func end
 
 Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
@@ -248,3 +234,18 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
 
 #endif
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful
+
+//         if (count == bosdata.baraday && bosdata.baradayrm!=0){
+//             k     -= bosdata.baradayrm;
+//             count  = 1; 
+
+//         }
+//         else{
+//             if((k == starti || k == starti - __DAYMIN * r)&& bosdata.htfint != 1){
+//                 k -= (bosdata.htfint-1);
+//             }
+//             else{
+//                 k -= bosdata.htfint;
+//             }
+//             ++count ;  
+//         }

@@ -98,7 +98,7 @@ void Insertalg(double& arr[], int& index[]){
 }
 void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti){
     int k = 0 ;  
-    while(k < starti){//last one can not be considered cuz it's not closed //last one is not considered
+    while(k <= starti){//last one can not be considered cuz it's not closed //last one is not considered
         
         if(bosdata.state == 1){
             bosdata.regclose1 = bosdata.regclose2;

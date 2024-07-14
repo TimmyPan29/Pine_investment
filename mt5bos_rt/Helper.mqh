@@ -45,9 +45,6 @@ struct Helper{
     int ServerExtime();
     int Inputoffset(Timebase tb);
     int Inputtimeoffset(Timebase tb);
-    int TurnMin(datetime dt);
-    int GetQuo(int minute, int htfint);
-    int GetRm(int minute, int htfint);
 };
 
 
@@ -180,18 +177,5 @@ int Helper::Inputtimeoffset(Timebase tb){
             return 5 ;
     }
 }
-int Helper::TurnMin(datetime dt){
-    name = "TurnMin" ;
-    return (dt%86400)/60;
-}
-int Helper::GetQuo(int minute, int htfint){
-    name = "GetQuo" ;
-    float m =float(minute);
-    float h =float(htfint);
-    return MathFloor(m/h) ;
-}
-int Helper::GetRm(int minute, int htfint){
-    name = "GetRm" ;
-    return (minute%htfint) ;
-}
+
 #endif
