@@ -26,7 +26,7 @@ int OnInit() {
     //fc.GetRawData(_Symbol, datasize);
     fc.Getprice(_Symbol, datasize);
     fc.Getdate (_Symbol, datasize);
-    RawCandles rd ;
+    Rawdatagroup rd ;
     Print("Exchange Time initiation: ",tint,"min","\nyou choose: ",helper.Inputtimetostring(tb));
     Print("EA has been initialized.");
     //Print("Starti: ", starti);
@@ -45,28 +45,32 @@ int OnInit() {
         rd = fc.GetRaw();
         BOSJudge(Bosarr[i], datasize, rd, starti, helper);
     }
+    double tempd ;
+    double tempu ;
     for (int i=0; i<(period); ++i){
         ArrayResize(Tri[i].comparecode,i+1,i+1);
         ArrayResize(Tri[i].u_inside,i+1,i+1);
         ArrayResize(Tri[i].d_inside,i+1,i+1);
         for(int j=0; j<=i; ++j){
             if(i==0 && j==0){
-                Tri[0]=TriCode(Tri[0], Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j);
+                Tri[0]=TriCode(Tri[0], Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j, tempd, tempu);
             }
             else if(i!=0 && j==0){
-                Tri[i]=TriCode(Tri[i], Bosarr[i], Bosarr[i+1], Bosarr[i+2], Bosarr[i+3], j);
+                Tri[i]=TriCode(Tri[i], Bosarr[i], Bosarr[i+1], Bosarr[i+2], Bosarr[i+3], j, tempd, tempu);
             }
             else{
-                Tri[i]=TriCode(Tri[i], Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j);
+                Tri[i]=TriCode(Tri[i], Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j, tempd, tempu);
             }
         }
+        tempd = 0;
+        tempu = 0;
     }
-    int z = 685 ;
-    TimeToString(Bosarr[0].sbu_t,TIME_DATE|TIME_MINUTES); 
-    string teststr   = TimeToString(rd.datadate[0],TIME_DATE|TIME_MINUTES); 
-    string s_sbudate = TimeToString(Bosarr[z-1].sbu_t,TIME_DATE|TIME_MINUTES); 
-    string s_sbddate = TimeToString(Bosarr[z-1].sbd_t,TIME_DATE|TIME_MINUTES); 
-    Print("rd.datadate[0] ", teststr);
+    int z = 22 ; //period
+    //TimeToString(Bosarr[0].sbu_t,TIME_DATE|TIME_MINUTES); 
+    //string teststr   = TimeToString(rd.datadate[0],TIME_DATE|TIME_MINUTES); 
+    //string s_sbudate = TimeToString(Bosarr[z-1].sbu_t,TIME_DATE|TIME_MINUTES); 
+    //string s_sbddate = TimeToString(Bosarr[z-1].sbd_t,TIME_DATE|TIME_MINUTES); 
+    printf("period %d.wide2itv_d: %d \t period %d.wide2itv_u: %d", z,Tri[z-1].wide2itv_d+1, z, Tri[z-1].wide2itv_u+1);
     //Print("BOS[1440].htfint= ", Bosarr[0].htfint);
     //Print("rd.rawprices[37]= ", rd.rawprices[37]);
     printf("Period 1.sbu= %.6f\t Period 1.sbd= %.6f\n Period 1.sbu_t= %s\t Period 1.sbd_t= %s", Bosarr[0].sbu, Bosarr[0].sbd, TimeToString(Bosarr[0].sbu_t,TIME_DATE|TIME_MINUTES) , TimeToString(Bosarr[0].sbd_t,TIME_DATE|TIME_MINUTES) );
@@ -74,8 +78,8 @@ int OnInit() {
     printf("Period 3.sbu= %.6f\t Period 3.sbd= %.6f\n Period 3.sbu_t= %s\t Period 3.sbd_t= %s", Bosarr[2].sbu, Bosarr[2].sbd, TimeToString(Bosarr[2].sbu_t,TIME_DATE|TIME_MINUTES) , TimeToString(Bosarr[2].sbd_t,TIME_DATE|TIME_MINUTES) );
     printf("Period 4.sbu= %.6f\t Period 4.sbd= %.6f\n Period 4.sbu_t= %s\t Period 4.sbd_t= %s", Bosarr[3].sbu, Bosarr[3].sbd, TimeToString(Bosarr[3].sbu_t,TIME_DATE|TIME_MINUTES) , TimeToString(Bosarr[3].sbd_t,TIME_DATE|TIME_MINUTES) );
     printf("Period 5.sbu= %.6f\t Period 5.sbd= %.6f\n Period 5.sbu_t= %s\t Period 5.sbd_t= %s", Bosarr[4].sbu, Bosarr[4].sbd, TimeToString(Bosarr[4].sbu_t,TIME_DATE|TIME_MINUTES) , TimeToString(Bosarr[4].sbd_t,TIME_DATE|TIME_MINUTES) );
-    printf("Period %d.sbu= %.6f\t Period %d.sbd= %.6f", z, Bosarr[z-1].sbu, z, Bosarr[z-1].sbd);
-    printf("Period %d.sbu_t= %s\t Period %d.sbd_t= %s", z, s_sbudate, z, s_sbddate);
+    //printf("Period %d.sbu= %.6f\t Period %d.sbd= %.6f", z, Bosarr[z-1].sbu, z, Bosarr[z-1].sbd);
+    //printf("Period %d.sbu_t= %s\t Period %d.sbd_t= %s", z, s_sbudate, z, s_sbddate);
     Print("diff zone  ", helper.Extime());
     PrintFormat("Period 1.comparecode= 0x%08X", Tri[0].comparecode[0]);
 
@@ -128,6 +132,8 @@ int OnInit() {
                     line  += StringFormat("%d %d        ", Tri[i].d_inside[j],Tri[i].u_inside[j]);
                 }
             }
+            line2 += "widespace";
+            line += StringFormat("%d %d", Tri[i].wide2itv_d+1,Tri[i].wide2itv_u+1);
             FileWrite(filehandle2, line2);
             FileWrite(filehandle2, line);
         }

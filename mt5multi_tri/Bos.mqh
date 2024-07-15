@@ -109,7 +109,7 @@ struct Triset{
         u_inside[j]   = count2==3? true : false ;
         //Print("bos1.htfint: ", bos1.htfint);
     }
-    void Boolcheck(const double& arr[], int signsbd, int signsbu){
+    void Boolcheck(const double& arr[], int& signsbd, int& signsbu){
         if(arr[3] == arr[2]) signsbd = 2 ;
         else if(arr[3] == arr[1]) signsbd = 3 ;
         else if(arr[3] == arr[0]) signsbd = 4 ;
@@ -124,40 +124,40 @@ struct Triset{
         else if((arr[4] == arr[5]) && (arr[4] == arr[6])) signsbd = 5 ; 
         else if((arr[4] == arr[5]) && (arr[4] == arr[7])) signsbd = 6 ; 
         else if((arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 7 ;
-        else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 9 ;  
+        else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbu = 9 ;  
         else signsbu = 0 ;
     }
 };
 struct FVG{
-    int namei               ;
-    int Property            ; //property= 2 green , =1 red, =0 no existence
-    datetime kTime        ; // index : 0 ~ datasize-2 are targets
-    double LTprice          ;
-    double RBprice          ;
+    int namei                 ;
+    int Property[]            ; //property= 2 green , =1 red, =0 no existence
+    datetime kTime[]          ; // index : 0 ~ datasize-2 are targets
+    double LTprice[]          ;
+    double RBprice[]          ;
     FVG():Property(0),kTime(0),LTprice(0),RBprice(0){}
     FVG(int i):Property(0),kTime(0),LTprice(0),RBprice(0){
         namei = i ;
     }
-    bool FVGupdown(RawCandles& rc, int k, int datasize){
-        if (k > datasize - 2) return false ;
+    int FVGupdown(RawCandles& rc, int k, int datasize){
+        if (k > datasize - 2) return -1 ;
         if(Bull(rc,k+1)){
             if(rc.rawlow[k+2] - rc.rawhigh[k] > 0){
                 Property = 2 ; 
-                return true ;
+                return 2 ;
             } 
             else{
                 Property = 0 ;
-                return false ;
+                return 0 ;
             } 
         }
         else{
             if(rc.rawlow[k+2] - rc.rawhigh[k] < 0){
                 Property = 1 ; 
-                return true ;
+                return 1 ;
             } 
             else{
                 Property = 0 ;
-                return false ;
+                return 0 ;
             }
         }
     }
@@ -193,7 +193,7 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, 
     int qidxpt                    ;
     double tempprice              ;
     datetime temptime             ;
-    k               = starti+1    ;d
+    k               = starti+1    ;
     while(k < size){//last one can not be considered cuz it's not closed
         qidxnow = helper.TurnMin(rd.datadate[k])==0? 1439 : helper.TurnMin(rd.datadate[k])-1;
         qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;        

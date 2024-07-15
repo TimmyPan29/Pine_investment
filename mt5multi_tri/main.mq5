@@ -11,17 +11,19 @@ int OnInit() {
     EventSetTimer(300);
     //+----------initiation---------+//
     SymbolSet Symbolset    ;
+    Fetcher fc             ;
+    RawCandles rd          ;
     FVG       fvgtemp      ;
     FVG       fvgarr[]     ;
     Symbolset.InitSymbol(ex,Symbolset);
     Helper helper          ;
+    BOS Bosarr[1436] ;//設一天會卡死 base最多到359 超過360要再想辦法
+    Triset Tri[359] ;
     int      starti        ;
     string symboltemp      ;
     string sectornametemp  ;
-    Fetcher fc             ;
-    RawCandles rd          ;
-    BOS Bosarr[1436] ;//設一天會卡死 base最多到359 超過360要再想辦法
-    Triset Tri[359] ;
+    
+    
     symboltemp = Symbolset.Commodities[0] ;
     sectornametemp = Symbolset.Sectorname[1];
     //+----------initiation end---------+//

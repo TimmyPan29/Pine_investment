@@ -1,7 +1,7 @@
 #ifndef __GETDATA_MQH__
 #define __GETDATA_MQH__
 #include "Helper.mqh"
-struct RawCandles{
+struct Rawdatagroup{
    double      rawprices[];
    datetime    datadate[];
    int         dataQuo     [__DAYMIN];
@@ -9,7 +9,7 @@ struct RawCandles{
 };
 class Fetcher{
 private:
-    RawCandles Vec_rawdata;
+    Rawdatagroup Vec_rawdata;
 public:
     void Setarrsize(int count);
     void Getprice(string symbol, int count);
@@ -19,7 +19,7 @@ public:
     void Printdata() const;
     datetime Getdateinfo(int idx);
     double Getpriceinfo(int idx);
-    RawCandles GetRaw();
+    Rawdatagroup GetRaw();
     void RenewQuo_Rm(int htfint, Helper& helper);
 };
 
@@ -86,7 +86,7 @@ datetime Fetcher::Getdateinfo(int idx){
 double Fetcher::Getpriceinfo(int idx){
    return Vec_rawdata.rawprices[idx];
 }
-RawCandles Fetcher::GetRaw(){
+Rawdatagroup Fetcher::GetRaw(){
    return Vec_rawdata;
 } 
 void Fetcher::RenewQuo_Rm(int htfint, Helper& helper){

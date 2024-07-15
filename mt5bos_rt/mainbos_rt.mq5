@@ -43,10 +43,10 @@ void OnTimer() {
     Rawdatagroup rd = fc.GetRaw();
     BOSJudge(bosdata, datasize, rd, starti);
     if(firstflag){
-        bosdata.sbu_lb.Create(bosdata.sbu_lb.name1, bosdata.sbu_t, bosdata.sbu, DoubleToString(bosdata.sbu, 6), clrBlack, 12, ALIGN_CENTER, "Arial", false, clrGray);
-        bosdata.sbd_lb.Create(bosdata.sbd_lb.name1, bosdata.sbd_t, bosdata.sbd, DoubleToString(bosdata.sbd, 6), clrBlack, 12, ALIGN_CENTER, "Arial", false, clrGray);
-        bosdata.sbu_ln.Create(bosdata.sbu_ln.name1, bosdata.sbu_t, bosdata.sbu, bosdata.sbu_t+(TimeCurrent()-bosdata.sbu_t), bosdata.sbu, clrMediumVioletRed);
-        bosdata.sbd_ln.Create(bosdata.sbd_ln.name1, bosdata.sbd_t, bosdata.sbd, bosdata.sbd_t+(TimeCurrent()-bosdata.sbd_t), bosdata.sbd, clrMediumVioletRed);
+        bosdata.sbu_lb.Create(0, bosdata.sbu_lb.name1, bosdata.sbu_t, bosdata.sbu, "sbu:"+DoubleToString(bosdata.sbu, 5), clrMagenta, 12, ANCHOR_RIGHT_LOWER, ALIGN_CENTER, "Arial", false, clrGray);
+        bosdata.sbd_lb.Create(0, bosdata.sbd_lb.name1, bosdata.sbd_t, bosdata.sbd, "sbd:"+DoubleToString(bosdata.sbd, 5), clrMagenta, 12, ANCHOR_RIGHT_LOWER, ALIGN_CENTER, "Arial", false, clrGray);
+        bosdata.sbu_ln.Create(0, bosdata.sbu_ln.name1, bosdata.sbu_t, bosdata.sbu, bosdata.sbu_t+(TimeCurrent()-bosdata.sbu_t), bosdata.sbu, clrMediumVioletRed);
+        bosdata.sbd_ln.Create(0, bosdata.sbd_ln.name1, bosdata.sbd_t, bosdata.sbd, bosdata.sbd_t+(TimeCurrent()-bosdata.sbd_t), bosdata.sbd, clrMediumVioletRed);
         firstflag = false ;
     }
     else{
@@ -56,7 +56,8 @@ void OnTimer() {
         if(ObjectFind(0, bosdata.sbd_ln.name1) == -1) firstflag = true ;
         bosdata.sbu_lb.set_xy(0, bosdata.sbu_lb.name1, 0, bosdata.sbu_t, bosdata.sbu);
         bosdata.sbd_lb.set_xy(0, bosdata.sbd_lb.name1, 0, bosdata.sbd_t, bosdata.sbd);
-
+        bosdata.sbu_lb.set_text(0, bosdata.sbu_lb.name1, "sbu:"+DoubleToString(bosdata.sbu,5), clrMagenta, 12);
+        bosdata.sbd_lb.set_text(0, bosdata.sbd_lb.name1, "sbd:"+DoubleToString(bosdata.sbd,5), clrMagenta, 12);
         bosdata.sbu_ln.set_xy(0, bosdata.sbu_ln.name1, 0, bosdata.sbu_t, bosdata.sbu);
         bosdata.sbu_ln.set_xy(0, bosdata.sbu_ln.name1, 1, bosdata.sbu_t+(TimeCurrent()-bosdata.sbu_t), bosdata.sbu);
 
@@ -65,9 +66,9 @@ void OnTimer() {
     }
 
     ChartRedraw();
-    printf("sbu= %.6f\t sbd= %.6f\n sbu_t= %s\t sbd_t= %s", bosdata.sbu, bosdata.sbd, TimeToString(bosdata.sbu_t,TIME_DATE|TIME_MINUTES) , TimeToString(bosdata.sbd_t,TIME_DATE|TIME_MINUTES) );
-    printf("rd.rawprices[%d]=  %.6f", starti, rd.rawprices[starti]);
-    printf("rd.datadate[%d]=  %s", starti, TimeToString(rd.datadate[starti],TIME_DATE|TIME_MINUTES));
+    //printf("sbu= %.6f\t sbd= %.6f\n sbu_t= %s\t sbd_t= %s", bosdata.sbu, bosdata.sbd, TimeToString(bosdata.sbu_t,TIME_DATE|TIME_MINUTES) , TimeToString(bosdata.sbd_t,TIME_DATE|TIME_MINUTES) );
+    //printf("rd.rawprices[%d]=  %.6f", starti, rd.rawprices[starti]);
+    //printf("rd.datadate[%d]=  %s", starti, TimeToString(rd.datadate[starti],TIME_DATE|TIME_MINUTES));
     bosdata = BOS(PeriodSeconds(_Period)/60);
 }
 //+------------------------------------------------------------------+

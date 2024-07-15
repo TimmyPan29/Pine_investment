@@ -50,6 +50,7 @@ struct Helper{
     int GetRm(int minute, int htfint);
 };
 
+
 int Helper::BarTimeCal(datetime dt) {
     name        = "BarTimeCal";
     dt          =  (dt%86400);

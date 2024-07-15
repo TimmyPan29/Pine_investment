@@ -71,11 +71,65 @@ struct BOS{
 };
 
 struct Triset{
-    uint    comparecode[] ;
-    bool    u_inside[]   ;
-    bool    d_inside[]    ;
-   
+    uint    comparecode[]  ;
+    bool    u_inside[]     ;
+    bool    d_inside[]     ;
+    int     wide2itv_u      ;
+    int     wide2itv_d      ;
+    Triset():wide2itv_u(-1),wide2itv_d(-1){}
+    double maxbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4);
+    double minbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4);
+    double TriItvCompare_d (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempd, const int& j);
+    double TriItvCompare_u (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempu, const int& j);
 };
+double Triset::maxbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4){
+    double temp ;
+    temp = (bos2.sbd>bos3.sbd)? bos2.sbd : bos3.sbd ;
+    temp = (temp>bos4.sbd)? temp : bos4.sbd ;
+    if(temp<0) temp = bos1.sbd ;
+    return temp ;
+}
+double Triset::minbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4){
+    double temp ;
+    temp = (bos2.sbu<bos3.sbu)? bos2.sbu : bos3.sbu ;
+    temp = (temp<bos4.sbu)? temp : bos4.sbu ;
+    if(temp<0) temp = bos1.sbu ;
+    return temp ;
+}
+double Triset::TriItvCompare_d (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempd, const int& j){
+    double temp = tempd ;
+    if(d_inside[j]!=0){
+        if(wide2itv_d==-1){
+            wide2itv_d = j ;
+            temp = maxbos(bos1,bos2,bos3,bos4);
+        }
+        else{
+            if(maxbos(bos1,bos2,bos3,bos4)<=temp){
+                wide2itv_d = j ;
+                temp = maxbos(bos1,bos2,bos3,bos4);
+            }
+        }
+        return temp ;
+    }
+    else return tempd ;
+}
+double Triset::TriItvCompare_u (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempu, const int& j){
+    double temp = tempu ;
+    if(u_inside[j]!=0){
+        if(wide2itv_u==-1){
+            wide2itv_u = j ;
+            temp = minbos(bos1,bos2,bos3,bos4);
+        }
+        else{
+            if(minbos(bos1,bos2,bos3,bos4)>=temp){
+                wide2itv_u = j ;
+                temp = minbos(bos1,bos2,bos3,bos4);
+            }
+        }
+        return temp ;
+    }
+    else return tempu ;
+}
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
     shift = shift % bits; // 处理移位大于位数的情况
@@ -100,7 +154,8 @@ void Insertalg(double& arr[], int& index[]){
         index[j + 1] = keyIndex;
     }
 }
-void Boolcheck(const double& arr[], int signsbd, int signsbu){
+
+void Boolcheck(const double& arr[], int& signsbd, int& signsbu){
     if(arr[3] == arr[2]) signsbd = 2 ;
     else if(arr[3] == arr[1]) signsbd = 3 ;
     else if(arr[3] == arr[0]) signsbd = 4 ;
@@ -109,13 +164,13 @@ void Boolcheck(const double& arr[], int signsbd, int signsbu){
     else if((arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 7 ;
     else if((arr[3] == arr[2]) && (arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 9 ;  
     else signsbd = 0 ;
-    if(arr[4] == arr[5]) signsbd = 2 ;
-    else if(arr[4] == arr[6]) signsbd = 3 ;
-    else if(arr[4] == arr[7]) signsbd = 4 ;
-    else if((arr[4] == arr[5]) && (arr[4] == arr[6])) signsbd = 5 ; 
-    else if((arr[4] == arr[5]) && (arr[4] == arr[7])) signsbd = 6 ; 
-    else if((arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 7 ;
-    else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 9 ;  
+    if(arr[4] == arr[5]) signsbu = 2 ;
+    else if(arr[4] == arr[6]) signsbu = 3 ;
+    else if(arr[4] == arr[7]) signsbu = 4 ;
+    else if((arr[4] == arr[5]) && (arr[4] == arr[6])) signsbu = 5 ; 
+    else if((arr[4] == arr[5]) && (arr[4] == arr[7])) signsbu = 6 ; 
+    else if((arr[4] == arr[6]) && (arr[4] == arr[7])) signsbu = 7 ;
+    else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbu = 9 ;  
     else signsbu = 0 ;
 }
 void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, Helper& helper){
@@ -212,7 +267,7 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, 
     }//while end
 }//func end
 
-Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
+Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j, double& tempd, double& tempu){
     //-1 == no sbd, -2 == no sbu
     uint  code      = ts.comparecode[j] ;
     code = 0 ;
@@ -248,11 +303,16 @@ Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
     ts.comparecode[j]= code ;
     ts.d_inside[j]   = (count1==3 && signsbd==0)? true : false ;
     ts.u_inside[j]   = (count2==3 && signsbu==0)? true : false ;
+
+    tempd = ts.TriItvCompare_d(bos1, bos2, bos3, bos4, tempd, j);
+    tempu = ts.TriItvCompare_u(bos1, bos2, bos3, bos4, tempu, j);
     //Print("bos1.htfint: ", bos1.htfint);
     return ts;
 }
 
 #endif
+
+
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful
 
 //         if (count == bosdata.baraday && bosdata.baradayrm!=0){

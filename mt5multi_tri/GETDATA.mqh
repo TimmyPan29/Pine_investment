@@ -22,6 +22,7 @@ public:
     //void GetRawData(string symbol, int size);
     // int  Searchdateidx(int tint, int starti);
     void Printdata() const;
+    bool Upcheck(int k)const ;
     datetime Getdateinfo(int idx);
     double Getpriceinfo(int idx);
     RawCandles GetRaw();
@@ -71,6 +72,10 @@ void Fetcher::Printdata()const{
         string timeStr = TimeToString(Vec_rawdata.datadate[i], TIME_DATE | TIME_MINUTES);
         //Print("date in idx: ", i, ":", timeStr, "\n", "prices in idx ", i, ":", Vec_rawdata.rawprices[i]);
     }
+}
+bool Fetcher::Upcheck(int k)const{
+    if (Vec_rawdata.rawprices[k] - Vec_rawdata.rawopen[k] >= 0) return true ;
+    else return false ;
 }
 
 datetime Fetcher::Getdateinfo(int idx){
