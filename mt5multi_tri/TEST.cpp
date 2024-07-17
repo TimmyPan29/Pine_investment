@@ -26,7 +26,7 @@ public:
     std::vector<double> GetContents() {
         std::vector<double> contents;
         for (int i = 0; i < count; i++) {
-            contents.push_back(buffer[(index + i) % BUFFER_SIZE]);
+            contents.push_back(buffer[(index + i) % BUFFER_SIZE]); //(index + i)最舊的資料所存在的idx
         }
         return contents;
     }

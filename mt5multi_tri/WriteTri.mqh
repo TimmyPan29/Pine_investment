@@ -51,6 +51,8 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
                     line  += StringFormat("%d %d        ", Tri[i].d_inside[j],Tri[i].u_inside[j]);
                 }
             }
+            line2 += "widespace";
+            line += StringFormat("%d %d", Tri[i].wide2itv_d+1,Tri[i].wide2itv_u+1);
             FileWrite(filehandle2, line2);
             FileWrite(filehandle2, line);
         }
@@ -61,5 +63,20 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
     ResetLastError();
 
 } 
-
+void FvgWrite(string symbolname, const FVG& fvg, string sectorname){
+    string filename  =StringFormat("%s"+"\\%s"+"\\FVGproperty"+"\\FVG_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
+    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
+    if(filehandle!=INVALID_HANDLE){
+        FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
+        string line = "" ;
+        for (int i=0; fvg.Property[i]!=-1; i++){
+            line= StringFormat("idx%d %d %d LT%.5f RB%.5f", i, fvg.Property[i], fvg.effkbar[i], fvg.LTprice[i], fvg.RBprice[i]);
+            FileWrite(filehandle, line);
+        }
+        FileClose(filehandle);
+        Print("FileOpen OK");
+    }
+    else Print("Operation FileOpen failed, error ",GetLastError());
+    ResetLastError();
+}
 #endif

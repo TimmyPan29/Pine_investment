@@ -1,19 +1,18 @@
 #ifndef __GETDATA_MQH__
 #define __GETDATA_MQH__
-
+#include "Helper.mqh"
 struct RawCandles{
    double      rawprices[];
    double      rawopen[];
    double      rawhigh[];
    double      rawlow[];
    datetime    datadate[];
-   int         dataQuo     [__DAYMIN];
+   int         dataQuo[__DAYMIN];
 };
 class Fetcher{
 private:
     RawCandles Vec_rawdata;
 public:
-    void Setarrsize(int count);
     void Getprice(string symbol, int count);
     void Getopen(string symbol, int count);
     void Gethigh(string symbol, int count);
@@ -27,15 +26,15 @@ public:
     double Getpriceinfo(int idx);
     RawCandles GetRaw();
     void RenewQuo_Rm(int htfint, Helper& helper);
+    Fetcher(int count){
+        ArrayResize(Vec_rawdata.rawprices, count);
+        ArrayResize(Vec_rawdata.datadate, count);
+        ArrayResize(Vec_rawdata.rawopen, count);
+        ArrayResize(Vec_rawdata.rawhigh, count);
+        ArrayResize(Vec_rawdata.rawlow, count);
+    }
 };
 
-void Fetcher::Setarrsize(int count){
-    ArrayResize(Vec_rawdata.rawprices, count);
-    ArrayResize(Vec_rawdata.datadate, count);
-    ArrayResize(Vec_rawdata.rawopen, count);
-    ArrayResize(Vec_rawdata.rawhigh, count);
-    ArrayResize(Vec_rawdata.rawlow, count);
-}
 
 void Fetcher::Getprice(string symbol, int count){
     int copiedPrices = CopyClose(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawprices);
@@ -90,10 +89,13 @@ RawCandles Fetcher::GetRaw(){
 void Fetcher::RenewQuo_Rm(int htfint, Helper& helper){
     for (int i=0; i<__DAYMIN; ++i){
         Vec_rawdata.dataQuo[i] = helper.GetQuo(i+1, htfint);
-        Vec_rawdata.dataRm[i]  = helper.GetRm(i+1, htfint);
     }
 }
-
+bool Bull(const RawCandles& candle, int k){
+    bool b;
+    b = (candle.rawprices[k] - candle.rawopen[k] > 0)? true : false ;
+    return b ;
+}
 #endif
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful //
 

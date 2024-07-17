@@ -11,10 +11,9 @@ int OnInit() {
     EventSetTimer(300);
     //+----------initiation---------+//
     SymbolSet Symbolset    ;
-    Fetcher fc             ;
+    Fetcher fc(datasize)           ;
     RawCandles rd          ;
-    FVG       fvgtemp      ;
-    FVG       fvgarr[]     ;
+    FVG       fvgarr[1436]     ;
     Symbolset.InitSymbol(ex,Symbolset);
     Helper helper          ;
     BOS Bosarr[1436] ;//設一天會卡死 base最多到359 超過360要再想辦法
@@ -28,12 +27,11 @@ int OnInit() {
     sectornametemp = Symbolset.Sectorname[1];
     //+----------initiation end---------+//
     //+----------Put Data---------+//
-    fc.Setarrsize(datasize);
-    fc.Getprice(string symbol, int count);
-    fc.Getopen (string symbol, int count);
-    fc.Gethigh(string symbol, int count);
-    fc.Getlow(string symbol, int count);
-    fc.Getdate (string symbol, int count);
+    fc.Getprice(symboltemp, datasize);
+    fc.Getopen (symboltemp, datasize);
+    fc.Gethigh(symboltemp, datasize);
+    fc.Getlow(symboltemp, datasize);
+    fc.Getdate (symboltemp, datasize);
     
     Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symboltemp);
     Print("EA has been initialized.");
@@ -44,29 +42,34 @@ int OnInit() {
     
     // u cannot write this way: ArrayResize(Bosarr,staticarraysize, staticarraysize);
     // cuz u s still have not initialize the BOS type;
-    
+    int gain ;
     for (int i=0; i<(period<<2); ++i){
         if (i+1<91) starti = datasize-1000*(i+1);
         else starti = 0 ;
         fc.RenewQuo_Rm(i+1, helper);
         Bosarr[i] = BOS(i+1);
+        fvgarr[i] = FVG(i+1);
         rd   = fc.GetRaw();
-        BOSJudge(Bosarr[i], datasize, rd, starti, helper);
+        gain = BOSJudge(Bosarr[i], datasize, rd, starti, helper, fvgarr[i]);
     }
- 
+    for (int i=0; i<(period<<2); ++i){
+        fvgarr[i].Putefffvg(rd) ;
+    }
+    double tempd ;
+    double tempu ;
     for (int i=0; i<(period); ++i){
         ArrayResize(Tri[i].comparecode,i+1,i+1);
         ArrayResize(Tri[i].u_inside,i+1,i+1);
         ArrayResize(Tri[i].d_inside,i+1,i+1);
         for(int j=0; j<=i; ++j){
             if(i==0 && j==0){
-                Tri[0].TriCode(Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j);
+                Tri[0]=TriCode(Tri[0], Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j, tempd, tempu);
             }
             else if(i!=0 && j==0){
-                Tri[i].TriCode(Bosarr[i], Bosarr[i+1], Bosarr[i+2], Bosarr[i+3], j);
+                Tri[i]=TriCode(Tri[i], Bosarr[i], Bosarr[i+1], Bosarr[i+2], Bosarr[i+3], j, tempd, tempu);
             }
             else{
-                Tri[i].TriCode(Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j);
+                Tri[i]=TriCode(Tri[i], Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j, tempd, tempu);
             }
         }
     }
@@ -77,7 +80,7 @@ int OnInit() {
     printf("Period %d.sbu_t= %s\t Period %d.sbd_t= %s", z, s_sbudate, z, s_sbddate);
     Print("diff zone  ", helper.Extime());
     TriWrite(symboltemp, Tri, sectornametemp);
-
+    FvgWrite(symboltemp, fvgarr[0], sectornametemp);
 
 
     return(INIT_SUCCEEDED);

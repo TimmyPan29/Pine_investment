@@ -71,96 +71,206 @@ struct BOS{
 };
 
 struct Triset{
-    uint    comparecode[] ;
-    bool    u_inside[]   ;
-    bool    d_inside[]    ;
-    void TriCode(BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j){
-        //-1 == no sbd, -2 == no sbu
-        uint  code      = comparecode[j] ;
-        code = 0 ;
-        int count1      = 0 ;
-        int count2      = 0 ;
-        double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
-        int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
-        Insertalg(arr, index);
-        for (int i = 0; i < 8; ++i) {
-            code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
-        }
-        if((code & __LEVEL1SBDMASK)<<4 > (code & __LEVEL2SBDMASK)){
-            ++count1 ;
-        }
-        if((code & __LEVEL1SBDMASK)<<8 > (code & __LEVEL3SBDMASK)){
-            ++count1 ;
-        }
-        if((code & __LEVEL1SBDMASK)<<12 > (code & __LEVEL4SBDMASK)){
-            ++count1 ;
-        }
-        if((code & __LEVEL1SBUMASK)>>4  < (code & __LEVEL2SBUMASK)){
-            ++count2 ;
-        }
-        if((code & __LEVEL1SBUMASK)>>8  < (code & __LEVEL3SBUMASK)){
-            ++count2 ;
-        }
-        if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)){
-            ++count2 ;
-        }
-        comparecode[j]= code ;
-        d_inside[j]   = count1==3? true : false ;
-        u_inside[j]   = count2==3? true : false ;
-        //Print("bos1.htfint: ", bos1.htfint);
-    }
-    void Boolcheck(const double& arr[], int& signsbd, int& signsbu){
-        if(arr[3] == arr[2]) signsbd = 2 ;
-        else if(arr[3] == arr[1]) signsbd = 3 ;
-        else if(arr[3] == arr[0]) signsbd = 4 ;
-        else if((arr[3] == arr[2]) && (arr[3] == arr[1])) signsbd = 5 ; 
-        else if((arr[3] == arr[2]) && (arr[3] == arr[0])) signsbd = 6 ; 
-        else if((arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 7 ;
-        else if((arr[3] == arr[2]) && (arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 9 ;  
-        else signsbd = 0 ;
-        if(arr[4] == arr[5]) signsbd = 2 ;
-        else if(arr[4] == arr[6]) signsbd = 3 ;
-        else if(arr[4] == arr[7]) signsbd = 4 ;
-        else if((arr[4] == arr[5]) && (arr[4] == arr[6])) signsbd = 5 ; 
-        else if((arr[4] == arr[5]) && (arr[4] == arr[7])) signsbd = 6 ; 
-        else if((arr[4] == arr[6]) && (arr[4] == arr[7])) signsbd = 7 ;
-        else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbu = 9 ;  
-        else signsbu = 0 ;
-    }
+    uint    comparecode[]  ;
+    bool    u_inside[]     ;
+    bool    d_inside[]     ;
+    int     wide2itv_u      ;
+    int     wide2itv_d      ;
+    Triset():wide2itv_u(-1),wide2itv_d(-1){}
+    double maxbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4);
+    double minbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4);
+    double TriItvCompare_d (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempd, const int& j);
+    double TriItvCompare_u (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempu, const int& j);
 };
+double Triset::maxbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4){
+    double temp ;
+    temp = (bos2.sbd>bos3.sbd)? bos2.sbd : bos3.sbd ;
+    temp = (temp>bos4.sbd)? temp : bos4.sbd ;
+    if(temp<0) temp = bos1.sbd ;
+    return temp ;
+}
+double Triset::minbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4){
+    double temp ;
+    temp = (bos2.sbu<bos3.sbu)? bos2.sbu : bos3.sbu ;
+    temp = (temp<bos4.sbu)? temp : bos4.sbu ;
+    if(temp<0) temp = bos1.sbu ;
+    return temp ;
+}
+double Triset::TriItvCompare_d (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempd, const int& j){
+    double temp = tempd ;
+    if(d_inside[j]!=0){
+        if(wide2itv_d==-1){
+            wide2itv_d = j ;
+            temp = maxbos(bos1,bos2,bos3,bos4);
+        }
+        else{
+            if(maxbos(bos1,bos2,bos3,bos4)<=temp){
+                wide2itv_d = j ;
+                temp = maxbos(bos1,bos2,bos3,bos4);
+            }
+        }
+        return temp ;
+    }
+    else return tempd ;
+}
+double Triset::TriItvCompare_u (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempu, const int& j){
+    double temp = tempu ;
+    if(u_inside[j]!=0){
+        if(wide2itv_u==-1){
+            wide2itv_u = j ;
+            temp = minbos(bos1,bos2,bos3,bos4);
+        }
+        else{
+            if(minbos(bos1,bos2,bos3,bos4)>=temp){
+                wide2itv_u = j ;
+                temp = minbos(bos1,bos2,bos3,bos4);
+            }
+        }
+        return temp ;
+    }
+    else return tempu ;
+}
 struct FVG{
     int namei                 ;
     int Property[]            ; //property= 2 green , =1 red, =0 no existence
-    datetime kTime[]          ; // index : 0 ~ datasize-2 are targets
+    int kbar[]          ; // index : 0 ~ datasize-2 are targets
     double LTprice[]          ;
     double RBprice[]          ;
-    FVG():Property(0),kTime(0),LTprice(0),RBprice(0){}
-    FVG(int i):Property(0),kTime(0),LTprice(0),RBprice(0){
+    int effkbar[];
+    FVG(){}
+    FVG(int i){
         namei = i ;
+        ArrayResize(kbar,2000,2000);
+        ArrayResize(Property,300,300);
+        ArrayResize(LTprice,300,300);
+        ArrayResize(RBprice,300,300);
+        ArrayResize(effkbar,300,300);
+        ArrayInitialize(Property,-1);
+        ArrayInitialize(kbar,-1);
+        ArrayInitialize(LTprice,-1);
+        ArrayInitialize(RBprice,-1);
+        ArrayInitialize(effkbar,-1);
+        
     }
-    int FVGupdown(RawCandles& rc, int k, int datasize){
-        if (k > datasize - 2) return -1 ;
-        if(Bull(rc,k+1)){
-            if(rc.rawlow[k+2] - rc.rawhigh[k] > 0){
-                Property = 2 ; 
+    int FVGupdown(const RawCandles& rc, int idx, int kbarsize){
+    
+        if (idx > kbarsize - 3) return -1 ;
+        if(Bull(rc,kbar[idx+1])){
+            if(rc.rawlow[kbar[idx+2]] - rc.rawhigh[kbar[idx]] > 0){
                 return 2 ;
             } 
             else{
-                Property = 0 ;
                 return 0 ;
             } 
         }
         else{
-            if(rc.rawlow[k+2] - rc.rawhigh[k] < 0){
-                Property = 1 ; 
+            if(rc.rawhigh[kbar[idx+2]] - rc.rawlow[kbar[idx]] < 0){
                 return 1 ;
             } 
             else{
-                Property = 0 ;
                 return 0 ;
             }
         }
     }
+    double Findmaxcloseaftk(const RawCandles& rc, int idx, int kbarsize){//find max in bull candle //idx+3 cuz +0~+2is box position
+        int i = idx;
+        double tempclose;
+        double temp ;
+        if (i+3==kbarsize) temp = rc.rawprices[kbar[kbarsize-1]]; 
+        else temp = rc.rawprices[kbar[i+3]]; 
+        while(i+3<kbarsize){
+            if(Bull(rc,kbar[i+3])){
+                tempclose = rc.rawprices[kbar[i+3]];
+                if(tempclose>temp) temp = tempclose;
+            }
+            ++i ;
+        }
+        //printf("i= %d, kbarsize= %d", i, kbarsize);
+        return temp ;
+    }
+    double Findmincloseaftk(const RawCandles& rc, int idx, int kbarsize){//find min in bear candle //idx+3 cuz +0~+2is box position
+        int i = idx;
+        double tempclose;
+        double temp ;
+        if (i+3==kbarsize) temp = rc.rawprices[kbar[kbarsize-1]]; 
+        else temp = rc.rawprices[kbar[i+2]]; 
+        while(i+3<kbarsize){
+            if(!Bull(rc,kbar[i+3])){
+                tempclose = rc.rawprices[kbar[i+3]];
+                if(tempclose<temp) temp = tempclose;
+            }
+            ++i ;
+        }
+        return temp ;
+    }
+    int Getfvgkbarsize(){
+        int i=0 ;
+        while(kbar[i]!=-1){
+            ++i ;
+        }
+        return i ;
+    }
+    void Putefffvg(const RawCandles& rc){
+        int kbarsize = Getfvgkbarsize() ;
+        double maxpt;
+        double minpt;
+        double boxLT;
+        double boxRB;
+        int    cnt=0;
+        for(int putidx=0; putidx<kbarsize-2; ++putidx){
+            maxpt = Findmaxcloseaftk(rc, putidx, kbarsize);
+            minpt = Findmincloseaftk(rc, putidx, kbarsize);
+            if(FVGupdown(rc, putidx, kbarsize) == 2){ //green
+                boxLT = rc.rawhigh[kbar[putidx]];
+                boxRB = rc.rawlow[kbar[putidx+2]] ;
+                if (minpt>boxRB){ //fvg exist
+                    Property[cnt] = 2 ;
+                    LTprice[cnt]  = boxLT ;
+                    RBprice[cnt]  = boxRB ;
+                    effkbar[cnt]  = kbar[putidx];
+                    ++cnt;
+                }
+                else if (minpt<=boxLT){//fvg not exist
+                    
+                } 
+                else{ //fvg exist but is shorten
+                    Property[cnt] = 4 ;
+                    LTprice[cnt]  = boxLT ;
+                    RBprice[cnt]  = minpt ;
+                    effkbar[cnt]  = kbar[putidx];
+                    ++cnt;
+                }
+
+
+            }
+            else if(FVGupdown(rc, putidx, kbarsize) == 1){ //red
+                boxLT = rc.rawlow[kbar[putidx]];
+                boxRB = rc.rawhigh[kbar[putidx+2]] ;
+                if (maxpt<boxRB){ //fvg exist
+                    Property[cnt] = 1 ;
+                    LTprice[cnt]  = boxLT ;
+                    RBprice[cnt]  = boxRB ;
+                    effkbar[cnt]  = kbar[putidx];
+                    ++cnt;
+                }
+                else if (maxpt>=boxLT){//fvg not exist
+                    
+                } 
+                else{ //fvg exist but is shorten
+                    Property[cnt] = 3 ;
+                    LTprice[cnt]  = boxLT ;
+                    RBprice[cnt]  = maxpt ;
+                    effkbar[cnt]  = kbar[putidx];
+                    ++cnt;
+                }
+            }
+
+            else{
+                if(FVGupdown(rc, putidx, kbarsize) == -1) printf("overpass the size");
+            }
+        }//for end
+        printf("cnt= %d, namei= %d", cnt, namei);
+    }//fun end
 };
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
@@ -171,6 +281,24 @@ uint RightRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
     shift = shift % bits; // 处理移位大于位数的情况
     return (value >> shift) | (value << (bits - shift));
+}
+void Boolcheck(const double& arr[], int& signsbd, int& signsbu){
+    if(arr[3] == arr[2]) signsbd = 2 ;
+    else if(arr[3] == arr[1]) signsbd = 3 ;
+    else if(arr[3] == arr[0]) signsbd = 4 ;
+    else if((arr[3] == arr[2]) && (arr[3] == arr[1])) signsbd = 5 ; 
+    else if((arr[3] == arr[2]) && (arr[3] == arr[0])) signsbd = 6 ; 
+    else if((arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 7 ;
+    else if((arr[3] == arr[2]) && (arr[3] == arr[1]) && (arr[3] == arr[0])) signsbd = 9 ;  
+    else signsbd = 0 ;
+    if(arr[4] == arr[5]) signsbu = 2 ;
+    else if(arr[4] == arr[6]) signsbu = 3 ;
+    else if(arr[4] == arr[7]) signsbu = 4 ;
+    else if((arr[4] == arr[5]) && (arr[4] == arr[6])) signsbu = 5 ; 
+    else if((arr[4] == arr[5]) && (arr[4] == arr[7])) signsbu = 6 ; 
+    else if((arr[4] == arr[6]) && (arr[4] == arr[7])) signsbu = 7 ;
+    else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbu = 9 ;  
+    else signsbu = 0 ;
 }
 void Insertalg(double& arr[], int& index[]){
     for (int i = 1; i < 8; ++i) {
@@ -185,22 +313,26 @@ void Insertalg(double& arr[], int& index[]){
         arr[j + 1] = key; //swap
         index[j + 1] = keyIndex;
     }
-
 }
-void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, Helper& helper, FVG& fvgarr[]){
-    int k                         ;                     
+
+int BOSJudge(BOS& bosdata, const int size, RawCandles& rd, const int starti, Helper& helper, FVG& fvgarr){
+    int k     = starti+1          ;                     
     int qidxnow                   ;
     int qidxpt                    ;
     double tempprice              ;
     datetime temptime             ;
-    k               = starti+1    ;
+    int cnt = 0                   ;
     while(k < size){//last one can not be considered cuz it's not closed
         qidxnow = helper.TurnMin(rd.datadate[k])==0? 1439 : helper.TurnMin(rd.datadate[k])-1;
-        qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;        
+        qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;
+
         if(rd.dataQuo[qidxnow] != rd.dataQuo[qidxpt]){
             //Print("qidxnow= ", qidxnow, "qidxpt", qidxpt, "bosdata.htfint", bosdata.htfint);
-            tempprice = rd.rawprices[k-1] ;
-            temptime  = rd.datadate[k-1]  ;
+            tempprice      = rd.rawprices[k-1] ;
+            temptime       = rd.datadate[k-1]  ;
+            fvgarr.kbar[cnt]  = k-1 ;
+            
+            ++cnt;
             //if(bosdata.htfint==4)printf("k= %d \t tempprice@k-1= %.5f \t date@k-1= %s\n htfint= %.1f", k, tempprice,TimeToString(temptime,TIME_DATE|TIME_MINUTES),bosdata.htfint);
             if(bosdata.state == 1){
                 bosdata.regclose1 = bosdata.regclose2;
@@ -279,19 +411,51 @@ void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, 
         }
         ++k; 
     }//while end
+    //printf("cnt= %d\tk= %d", cnt,k);
+    return cnt ;
 }//func end
-void Pushfvg(FVG& fvgarr[], FVG& fvg){
-        ArrayResize(fvgarr, ArraySize(fvgarr)+1);
-        fvgarr[ArraySize(fvgarr)-1] = fvg ;
+
+Triset TriCode(Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j, double& tempd, double& tempu){
+    //-1 == no sbd, -2 == no sbu
+    uint  code      = ts.comparecode[j] ;
+    code = 0 ;
+    int count1      = 0 ;
+    int count2      = 0 ;
+    double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
+    int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
+    int    signsbd ;
+    int    signsbu ;
+    Boolcheck(arr, signsbd, signsbu);
+    Insertalg(arr, index);
+    for (int i = 0; i < 8; ++i) {
+        code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
     }
-bool Popfvg(FVG& fvgarr[], FVG& fvgtemp){
-    if (ArraySize(fvgarr) == 0){
-        Print("Stack is empty");
-        return false ;
+    if((code & __LEVEL1SBDMASK)<<4 > (code & __LEVEL2SBDMASK)){
+        ++count1 ;
     }
-    fvgtemp = fvgarr[ArraySize(fvgarr) - 1];
-    ArrayResize(fvgarr, ArraySize(fvgarr) - 1);
-    return true;
+    if((code & __LEVEL1SBDMASK)<<8 > (code & __LEVEL3SBDMASK)){
+        ++count1 ;
+    }
+    if((code & __LEVEL1SBDMASK)<<12 > (code & __LEVEL4SBDMASK)){
+        ++count1 ;
+    }
+    if((code & __LEVEL1SBUMASK)>>4  < (code & __LEVEL2SBUMASK)){
+        ++count2 ;
+    }
+    if((code & __LEVEL1SBUMASK)>>8  < (code & __LEVEL3SBUMASK)){
+        ++count2 ;
+    }
+    if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)){
+        ++count2 ;
+    }
+    ts.comparecode[j]= code ;
+    ts.d_inside[j]   = (count1==3 && signsbd==0)? true : false ;
+    ts.u_inside[j]   = (count2==3 && signsbu==0)? true : false ;
+
+    tempd = ts.TriItvCompare_d(bos1, bos2, bos3, bos4, tempd, j);
+    tempu = ts.TriItvCompare_u(bos1, bos2, bos3, bos4, tempu, j);
+    //Print("bos1.htfint: ", bos1.htfint);
+    return ts;
 }
 
 
