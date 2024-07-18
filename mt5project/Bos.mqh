@@ -74,9 +74,9 @@ struct Triset{
     uint    comparecode[]  ;
     bool    u_inside[]     ;
     bool    d_inside[]     ;
-    int     wide2itv_u      ;
     int     wide2itv_d      ;
-    Triset():wide2itv_u(-1),wide2itv_d(-1){}
+    int     wide2itv_u     ;
+    Triset():wide2itv_d(-1),wide2itv_u(-1){}
     double maxbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4);
     double minbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4);
     double TriItvCompare_d (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempd, const int& j);
@@ -92,7 +92,9 @@ double Triset::maxbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const B
 double Triset::minbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4){
     double temp ;
     temp = (bos2.sbu<bos3.sbu)? bos2.sbu : bos3.sbu ;
+    if(bos2.sbu== -2) temp = bos3.sbu ;
     temp = (temp<bos4.sbu)? temp : bos4.sbu ;
+    if(bos3.sbu== -2) temp = bos4.sbu ;
     if(temp<0) temp = bos1.sbu ;
     return temp ;
 }

@@ -4,8 +4,8 @@
 #ifndef __WRITETRI_MQH__
 #define __WRITETRI_MQH__
 
-void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
-   string filename  =StringFormat("%s"+"\\%s"+"\\Tricode"+"\\Tri_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
+void TriWrite(string symbolname, const Triset& Tri[]){
+   string filename  =StringFormat("%s"+"\\Tricode"+"\\Tri_%s.txt", AccountInfoString(ACCOUNT_COMPANY), symbolname);
     int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
     if(filehandle!=INVALID_HANDLE){
         FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
@@ -32,11 +32,42 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
     }
     else Print("Operation FileOpen failed, error ",GetLastError());
     ResetLastError();
-    
-    string filename2 =StringFormat("%s"+"\\%s"+"\\Tribool"+"\\Tri_flt%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
+//+------------------------------//
+    string filename2  =StringFormat("%s"+"\\Tricode0F"+"\\Tri_%s.txt", AccountInfoString(ACCOUNT_COMPANY), symbolname);
     int filehandle2=FileOpen(filename2,FILE_WRITE|FILE_TXT);
     if(filehandle2!=INVALID_HANDLE){
         FileWrite(filehandle2, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
+        for(int i=0; i<period; ++i){
+            string line2 = "";
+            string line  = "";
+            if (((i+1)/10)<1) line2= "         ";
+            else if (((i+1)/10)<10) line2= "          ";
+            else if (((i+1)/10)<100) line2= "           ";
+            else line2= "         ";
+            line += StringFormat("Period %d ", i+1);
+            for(int j=0; j<=i; ++j){
+                if (((j+1)/10)<1) line2 += StringFormat("Itv %d      ", j+1);
+                else if (((j+1)/10)<10) line2 += StringFormat("Itv %d     ", j+1);
+                else if (((j+1)/10)<100) line2 += StringFormat("Itv %d    ", j+1);
+                else line2 += StringFormat("Itv %d      ", j+1);
+                if(Tri[i].comparecode0F[j]==0) line  += "           ";
+                else line  += StringFormat("0x%08X ", Tri[i].comparecode0F[j]);
+            }
+            line2 += "widespace";
+            line += StringFormat("%d %d", Tri[i].wide2itv0X+1,Tri[i].wide2itvXF+1);
+            FileWrite(filehandle2, line2);
+            FileWrite(filehandle2, line);
+        }
+    FileClose(filehandle2);
+    Print("FileOpen OK");
+    }
+    else Print("Operation FileOpen failed, error ",GetLastError());
+    ResetLastError();
+//+------------------------------//
+    string filename3 =StringFormat("%s"+"\\Tribool"+"\\Tri_flt%s.txt", AccountInfoString(ACCOUNT_COMPANY), symbolname);
+    int filehandle3=FileOpen(filename3,FILE_WRITE|FILE_TXT);
+    if(filehandle3!=INVALID_HANDLE){
+        FileWrite(filehandle3, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
         for(int i=0; i<period; ++i){
             string line2 = "";
             string line  = "";
@@ -56,32 +87,17 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
             }
             line2 += "widespace";
             line += StringFormat("%d %d", Tri[i].wide2itv_d+1,Tri[i].wide2itv_u+1);
-            FileWrite(filehandle2, line2);
-            FileWrite(filehandle2, line);
+            FileWrite(filehandle3, line2);
+            FileWrite(filehandle3, line);
         }
-    FileClose(filehandle2);
+    FileClose(filehandle3);
     Print("FileOpen OK");
     }
     else Print("Operation FileOpen failed, error ",GetLastError());
     ResetLastError();
 
 } 
-void FvgWrite(string symbolname, const FVG& fvg, string sectorname){
-    string filename  =StringFormat("%s"+"\\%s"+"\\FVGproperty"+"\\FVG_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
-    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
-    if(filehandle!=INVALID_HANDLE){
-        FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
-        string line = "" ;
-        for (int i=0; fvg.Property[i]!=-1; i++){
-            line= StringFormat("idx%d %d %d %d LT%.5f RB%.5f", i, fvg.Property[i], fvg.effkbar[i], fvg.effkbarend[i], fvg.LTprice[i], fvg.RBprice[i]);
-            FileWrite(filehandle, line);
-        }
-        FileClose(filehandle);
-        Print("FileOpen OK");
-    }
-    else Print("Operation FileOpen failed, error ",GetLastError());
-    ResetLastError();
-}
+
 #endif
 
 

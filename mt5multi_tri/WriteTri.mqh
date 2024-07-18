@@ -70,7 +70,7 @@ void FvgWrite(string symbolname, const FVG& fvg, string sectorname){
         FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
         string line = "" ;
         for (int i=0; fvg.Property[i]!=-1; i++){
-            line= StringFormat("idx%d %d %d LT%.5f RB%.5f", i, fvg.Property[i], fvg.effkbar[i], fvg.LTprice[i], fvg.RBprice[i]);
+            line= StringFormat("idx%d %d %d %d LT%.5f RB%.5f", i, fvg.Property[i], fvg.effkbar[i], fvg.effkbarend[i], fvg.LTprice[i], fvg.RBprice[i]);
             FileWrite(filehandle, line);
         }
         FileClose(filehandle);
