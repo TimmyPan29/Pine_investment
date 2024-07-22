@@ -1,6 +1,5 @@
 #ifndef __HELPER_MQH__
 #define __HELPER_MQH__
-#include "GETDATA.mqh"
 
 #define __DAYMIN              1440
 #define __LEVEL4SBDMASK       0xf0000000
@@ -13,13 +12,37 @@
 #define __LEVEL4SBUMASK       0x0000000f
 #define __7f10fMASK           0xfffffff0
 #define __701ffMASK           0x0000000f
+#define PERIOD    360
+#define PERIODX4  1440
+#define PERIODX8  2880
+#define PERIODX12 4320
+#define PERIODX16 5760
+#define BASESEC   86400
+
 enum Exchange{
     OANDA,
     EIGHTCAP,
     MetaQuotes
 };
+enum Treasure{
+    Bullion,
+    Commodities,
+    Forex,
+    Indices,
+    Crypto,
+    ShareCFDs,
+    Reval,
+    Custom
+};
+enum Barchoice{
+     Bar100,
+     Bar300,
+     Bar500,
+     Bar1000
+};
 struct SymbolSet{
     string Exname;
+    int    Sectornameint;
     string Sectorname[8];
     int    Sectorsize[8];
     string Bullion[];
@@ -37,11 +60,86 @@ struct Helper{
     int BarTimeCal(datetime dt);
     int Extime();
     int ServerExtime();
+    int Bartoint(Barchoice bar);
     int TurnMin(datetime dt);
+    int TurnMinX2(datetime dt);
+    int TurnMinX3(datetime dt);
+    int TurnMinX4(datetime dt);
+    string Sectorchooser(Treasure tr, SymbolSet& ss);
+    string Symbolchooser(Treasure tr, SymbolSet& ss, int n);
     int GetQuo(int minute, int htfint);
+    //int GetRm(int minute, int htfint);
 };
-
-
+int Helper::Bartoint(Barchoice bar){
+   switch(bar){
+   case Bar100: return 7;
+   case Bar300: return 8;
+   case Bar500: return 9;
+   case Bar1000:return 10;
+   default: return 10 ;
+   }
+}
+string Helper::Sectorchooser(Treasure tr, SymbolSet& ss){
+    switch(tr){
+    case Bullion:
+        ss.Sectornameint =   0 ;
+        return ss.Sectorname[0];
+    case Commodities:
+        ss.Sectornameint =   1 ;
+        return ss.Sectorname[1];
+    case Forex:
+        ss.Sectornameint =   2 ;
+        return ss.Sectorname[2];
+    case Indices:
+        ss.Sectornameint =   3 ;
+        return ss.Sectorname[3];
+    case Crypto:
+        ss.Sectornameint =   4 ;
+        return ss.Sectorname[4];
+    case ShareCFDs:
+        ss.Sectornameint =   5 ;
+        return ss.Sectorname[5];
+    case Reval:
+        ss.Sectornameint =   6 ;
+        return ss.Sectorname[6];
+    case Custom:
+        ss.Sectornameint =   7 ;
+        return ss.Sectorname[7];
+    default:
+        printf("YOU MUST CHOOSE ONE SECTOR");
+        return ss.Sectorname[0];
+    }
+}
+string Helper::Symbolchooser(Treasure tr, SymbolSet& ss, int n){
+    int size = ss.Sectorsize[ss.Sectornameint] ;
+    if((n+1) > size){
+        printf("out of size limit");
+        return "WRONG" ;
+    }
+    else{
+        switch(ss.Sectornameint){
+        case 0:
+            return ss.Bullion[n]     ;
+        case 1:
+            return ss.Commodities[n] ;
+        case 2:
+            return ss.Forex[n]       ;
+        case 3:
+            return ss.Indices[n]     ;
+        case 4:
+            return ss.Crypto[n]      ;
+        case 5:
+            return ss.ShareCFDs[n]   ;
+        case 6:
+            return ss.Reval[n]       ;
+        case 7:
+            return ss.Custom[n]      ;
+        default:
+            printf("YOU MUST CHOOSE ONE SYMNOL");
+            return ss.Bullion[n] ;
+        }
+    }
+}
 int Helper::BarTimeCal(datetime dt) {
     name        = "BarTimeCal";
     dt          =  (dt%86400);
@@ -63,14 +161,22 @@ int Helper::ServerExtime(){
     int         shift=int(time1-time2)/3600;
     return shift ;
 }
-bool Bull(const RawCandles& candle, int k){
-    bool b;
-    b = (candle.rawprices[k] - candle.rawopen[k] > 0)? true : false ;
-    return b ;
-}
+
 int Helper::TurnMin(datetime dt){
     name = "TurnMin" ;
-    return (dt%86400)/60;
+    return (dt%(BASESEC))/60; //one day
+}
+int Helper::TurnMinX2(datetime dt){ //two days
+    name = "TurnMin" ;
+    return (dt%(BASESEC<<1))/60;
+}
+int Helper::TurnMinX3(datetime dt){ //three days
+    name = "TurnMin" ;
+    return (dt%(BASESEC*3))/60;
+}
+int Helper::TurnMinX4(datetime dt){ //four days
+    name = "TurnMin" ;
+    return (dt%(BASESEC<<2))/60;
 }
 int Helper::GetQuo(int minute, int htfint){
     name = "GetQuo" ;
@@ -78,6 +184,10 @@ int Helper::GetQuo(int minute, int htfint){
     float h =float(htfint);
     return MathFloor(m/h) ;
 }
+// int Helper::GetRm(int minute, int htfint){
+//     name = "GetRm" ;
+//     return (minute%htfint) ;
+// }
 
 bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
     ss.Exname = "InitSymbol" ;
@@ -88,7 +198,8 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
 
     switch(ex){
     case OANDA:
-        Exname = "OANDA" ;
+        Exname = "OANDA Corporation" ;
+        if (Exname != AccountInfoString(ACCOUNT_COMPANY)) return false;
         ArrayResize(ss.Bullion,2);
         ss.Bullion[0] ="XAGUSD" ;
         ss.Bullion[1] ="XAUUSD.sml" ;
@@ -260,7 +371,8 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         return true ;
 
     case MetaQuotes:
-        Exname = "MetaQuotes" ;
+        Exname = "MetaQuotes Ltd." ;
+        if (Exname != AccountInfoString(ACCOUNT_COMPANY)) return false;
         ArrayResize(ss.Bullion, 7);
         ss.Bullion[0] = "XAUEUR";
         ss.Bullion[1] = "XAUUSD";
@@ -413,7 +525,8 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         return true ;
 
     case EIGHTCAP:
-        Exname = "EIGHTCAP" ;
+        Exname = "Eightcap Pty Ltd" ;
+        if (Exname != AccountInfoString(ACCOUNT_COMPANY)) return false;
         ArrayResize(ss.Forex, 59);
         ss.Forex[0] = "AUDCAD";
         ss.Forex[1] = "AUDCHF";

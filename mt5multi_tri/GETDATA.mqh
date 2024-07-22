@@ -7,7 +7,7 @@ struct RawCandles{
    double      rawhigh[];
    double      rawlow[];
    datetime    datadate[];
-   int         dataQuo[__DAYMIN];
+   int         dataQuo[PERIODX16];
 };
 class Fetcher{
 private:
@@ -21,7 +21,6 @@ public:
     //void GetRawData(string symbol, int size);
     // int  Searchdateidx(int tint, int starti);
     void Printdata() const;
-    bool Upcheck(int k)const ;
     datetime Getdateinfo(int idx);
     double Getpriceinfo(int idx);
     RawCandles GetRaw();
@@ -34,8 +33,6 @@ public:
         ArrayResize(Vec_rawdata.rawlow, count);
     }
 };
-
-
 void Fetcher::Getprice(string symbol, int count){
     int copiedPrices = CopyClose(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawprices);
         if (copiedPrices < count) {
@@ -72,11 +69,6 @@ void Fetcher::Printdata()const{
         //Print("date in idx: ", i, ":", timeStr, "\n", "prices in idx ", i, ":", Vec_rawdata.rawprices[i]);
     }
 }
-bool Fetcher::Upcheck(int k)const{
-    if (Vec_rawdata.rawprices[k] - Vec_rawdata.rawopen[k] >= 0) return true ;
-    else return false ;
-}
-
 datetime Fetcher::Getdateinfo(int idx){
    return Vec_rawdata.datadate[idx];
 }
@@ -87,8 +79,9 @@ RawCandles Fetcher::GetRaw(){
    return Vec_rawdata;
 } 
 void Fetcher::RenewQuo_Rm(int htfint, Helper& helper){
-    for (int i=0; i<__DAYMIN; ++i){
+    for (int i=0; i<PERIODX16; ++i){
         Vec_rawdata.dataQuo[i] = helper.GetQuo(i+1, htfint);
+        //Vec_rawdata.dataRm[i]  = helper.GetRm(i+1, htfint);
     }
 }
 bool Bull(const RawCandles& candle, int k){

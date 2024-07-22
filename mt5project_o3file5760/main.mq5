@@ -4,8 +4,7 @@
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 
-input int      period   = 359; 
-input int      datasize = 1500000;
+input int      datasize =1500000;
 input Barchoice bar     = Bar1000;
 
 int OnInit() {
@@ -14,8 +13,8 @@ int OnInit() {
     Helper helper;
     int      starti ;
     Fetcher fc ;
-    BOS Bosarr[1440] ;//設一天會卡死 base最多到359 超過360要再想辦法
-    Triset Tri[359] ;
+    BOS Bosarr[PERIODX16] ;//設一天會卡死 base最多到359 超過360要再想辦法
+    Triset Tri[PERIODX4] ;
     
     //+----------initiation end---------+//
     //+----------Put Data---------+//
@@ -24,7 +23,8 @@ int OnInit() {
     //fc.GetRawData(_Symbol, datasize);
     fc.Getprice(_Symbol, datasize);
     fc.Getdate (_Symbol, datasize);
-    Rawdatagroup rd ;
+    RawCandles rd ;
+    Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER));
     Print("EA has been initialized.");
     //Print("Starti: ", starti);
     //Print("price: ",fc.Getpriceinfo(starti)," date: ",fc.Getdateinfo(starti));
@@ -34,19 +34,19 @@ int OnInit() {
     // u cannot write this way: ArrayResize(Bosarr,staticarraysize, staticarraysize);
     // cuz u s still have not initialize the BOS type;
     int barshift = helper.Bartoint(bar) ;
-    for (int i=0; i<(period<<2); ++i){
+    for (int i=0; i<(PERIODX16); ++i){
         if ((i+1)<<barshift <datasize) starti = datasize-((i+1)<<barshift);
         else starti = 0 ;
         fc.RenewQuo_Rm(i+1, helper);
         Bosarr[i] = BOS(i+1);
         rd = fc.GetRaw();
-        BOSJudge(Bosarr[i], datasize, rd, starti, helper);
+        BOSJudge(Bosarr[i], datasize, rd, starti, helper, i);
     }
     double tempd  ;
     double tempu  ;
     double temp0X ;
     double tempXF ;
-    for (int i=0; i<(period); ++i){
+    for (int i=0; i<(PERIODX4); ++i){
         ArrayResize(Tri[i].comparecode,i+1,i+1);
         ArrayResize(Tri[i].comparecode0F,i+1,i+1);
         ArrayResize(Tri[i].u_inside,i+1,i+1);
@@ -67,7 +67,7 @@ int OnInit() {
     }
     string symbolname = _Symbol ;
     TriWrite(symbolname, Tri);
-    EventSetTimer(60);
+    EventSetTimer(120);
     return(INIT_SUCCEEDED);
 
 }
@@ -100,15 +100,15 @@ void OnTimer(){
     Helper helper;
     int      starti ;
     Fetcher fc ;
-    BOS Bosarr[1440] ;//設一天會卡死 base最多到359 超過360要再想辦法
-    Triset Tri[359] ;
+    BOS Bosarr[PERIODX16] ;//設一天會卡死 base最多到359 超過360要再想辦法
+    Triset Tri[PERIODX4] ;
     //+----------initiation end---------+//
     //+----------Put Data---------+//
     fc.Setarrsize(datasize);
     //fc.GetRawData(_Symbol, datasize);
     fc.Getprice(_Symbol, datasize);
     fc.Getdate (_Symbol, datasize);
-    Rawdatagroup rd ;
+    RawCandles rd ;
     Print("EA has been initialized.");
     //Print("Starti: ", starti);
     //Print("price: ",fc.Getpriceinfo(starti)," date: ",fc.Getdateinfo(starti));
@@ -118,19 +118,19 @@ void OnTimer(){
     // u cannot write this way: ArrayResize(Bosarr,staticarraysize, staticarraysize);
     // cuz u s still have not initialize the BOS type;
     int barshift = helper.Bartoint(bar) ;
-    for (int i=0; i<(period<<2); ++i){
+    for (int i=0; i<(PERIODX16); ++i){
         if ((i+1)<<barshift <datasize) starti = datasize-((i+1)<<barshift);
         else starti = 0 ;
         fc.RenewQuo_Rm(i+1, helper);
         Bosarr[i] = BOS(i+1);
         rd = fc.GetRaw();
-        BOSJudge(Bosarr[i], datasize, rd, starti, helper);
+        BOSJudge(Bosarr[i], datasize, rd, starti, helper, i);
     }
     double tempd  ;
     double tempu  ;
     double temp0X ;
     double tempXF ;
-    for (int i=0; i<(period); ++i){
+    for (int i=0; i<(PERIODX4); ++i){
         ArrayResize(Tri[i].comparecode,i+1,i+1);
         ArrayResize(Tri[i].comparecode0F,i+1,i+1);
         ArrayResize(Tri[i].u_inside,i+1,i+1);

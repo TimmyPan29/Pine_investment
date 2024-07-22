@@ -128,7 +128,7 @@ double Triset::TriItvCompare_u (const BOS& bos1, const BOS& bos2, const BOS& bos
             temp = minbos(bos1,bos2,bos3,bos4);
         }
         else{
-            if(minbos(bos1,bos2,bos3,bos4)>=temp){
+            if(minbos(bos1,bos2,bos3,bos4)>=temp){ 
                 wide2itv_u = j ;
                 temp = minbos(bos1,bos2,bos3,bos4);
             }
@@ -219,15 +219,30 @@ void Boolcheck(const double& arr[], int& signsbd, int& signsbu){
     else if((arr[4] == arr[5]) && (arr[4] == arr[6]) && (arr[4] == arr[7])) signsbu = 9 ;  
     else signsbu = 0 ;
 }
-void BOSJudge(BOS& bosdata, const int size, Rawdatagroup& rd, const int starti, Helper& helper){
-    int k           = starti+1    ;                 
+void BOSJudge(BOS& bosdata, const int size, RawCandles& rd, const int starti, Helper& helper, const int& i){
+    int k     = starti+1          ;                    
     int qidxnow                   ;
     int qidxpt                    ;
     double tempprice              ;
     datetime temptime             ;
     while(k < size){
-        qidxnow = helper.TurnMin(rd.datadate[k])==0? 1439 : helper.TurnMin(rd.datadate[k])-1;
-        qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;        
+        if(i<PERIODX4){
+            qidxnow = helper.TurnMin(rd.datadate[k])==0? 1439 : helper.TurnMin(rd.datadate[k])-1;
+            qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;   
+        }
+        else if(i<PERIODX8){
+            qidxnow = helper.TurnMinX2(rd.datadate[k])==0? 2879 : helper.TurnMinX2(rd.datadate[k])-1;
+            qidxpt  = helper.TurnMinX2(rd.datadate[k-1])==0? 2879 : helper.TurnMinX2(rd.datadate[k-1])-1 ;  
+        }
+        else if(i<PERIODX12){
+            qidxnow = helper.TurnMinX3(rd.datadate[k])==0? 4319 : helper.TurnMinX3(rd.datadate[k])-1;
+            qidxpt  = helper.TurnMinX3(rd.datadate[k-1])==0? 4319 : helper.TurnMinX3(rd.datadate[k-1])-1 ;  
+        }
+        else{
+            qidxnow = helper.TurnMinX4(rd.datadate[k])==0? 5759 : helper.TurnMinX4(rd.datadate[k])-1;
+            qidxpt  = helper.TurnMinX4(rd.datadate[k-1])==0? 5759 : helper.TurnMinX4(rd.datadate[k-1])-1 ;  
+        }
+         
         if(rd.dataQuo[qidxnow] != rd.dataQuo[qidxpt]){
             //Print("qidxnow= ", qidxnow, "qidxpt", qidxpt, "bosdata.htfint", bosdata.htfint);
             tempprice = rd.rawprices[k-1] ;

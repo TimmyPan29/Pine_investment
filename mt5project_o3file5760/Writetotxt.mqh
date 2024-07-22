@@ -9,18 +9,20 @@ void TriWrite(string symbolname, const Triset& Tri[]){
     int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
     if(filehandle!=INVALID_HANDLE){
         FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
-        for(int i=0; i<period; ++i){
+        for(int i=0; i<PERIODX4; ++i){
             string line2 = "";
             string line  = "";
             if (((i+1)/10)<1) line2= "         ";
             else if (((i+1)/10)<10) line2= "          ";
             else if (((i+1)/10)<100) line2= "           ";
+            else if (((i+1)/10)<1000) line2= "            ";
             else line2= "         ";
             line += StringFormat("Period %d ", i+1);
             for(int j=0; j<=i; ++j){
                 if (((j+1)/10)<1) line2 += StringFormat("Itv %d      ", j+1);
                 else if (((j+1)/10)<10) line2 += StringFormat("Itv %d     ", j+1);
                 else if (((j+1)/10)<100) line2 += StringFormat("Itv %d    ", j+1);
+                else if (((j+1)/10)<1000) line2 += StringFormat("Itv %d   ", j+1);
                 else line2 += StringFormat("Itv %d      ", j+1);
                 line  += StringFormat("0x%08X ", Tri[i].comparecode[j]);
             }
@@ -37,18 +39,20 @@ void TriWrite(string symbolname, const Triset& Tri[]){
     int filehandle2=FileOpen(filename2,FILE_WRITE|FILE_TXT);
     if(filehandle2!=INVALID_HANDLE){
         FileWrite(filehandle2, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
-        for(int i=0; i<period; ++i){
+        for(int i=0; i<PERIODX4; ++i){
             string line2 = "";
             string line  = "";
             if (((i+1)/10)<1) line2= "         ";
             else if (((i+1)/10)<10) line2= "          ";
             else if (((i+1)/10)<100) line2= "           ";
+            else if (((i+1)/10)<1000) line2= "            ";
             else line2= "         ";
             line += StringFormat("Period %d ", i+1);
             for(int j=0; j<=i; ++j){
                 if (((j+1)/10)<1) line2 += StringFormat("Itv %d      ", j+1);
                 else if (((j+1)/10)<10) line2 += StringFormat("Itv %d     ", j+1);
                 else if (((j+1)/10)<100) line2 += StringFormat("Itv %d    ", j+1);
+                else if (((j+1)/10)<1000) line2 += StringFormat("Itv %d   ", j+1);
                 else line2 += StringFormat("Itv %d      ", j+1);
                 if(Tri[i].comparecode0F[j]==0) line  += "           ";
                 else line  += StringFormat("0x%08X ", Tri[i].comparecode0F[j]);
@@ -68,12 +72,13 @@ void TriWrite(string symbolname, const Triset& Tri[]){
     int filehandle3=FileOpen(filename3,FILE_WRITE|FILE_TXT);
     if(filehandle3!=INVALID_HANDLE){
         FileWrite(filehandle3, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
-        for(int i=0; i<period; ++i){
+        for(int i=0; i<PERIODX4; ++i){
             string line2 = "";
             string line  = "";
             if (((i+1)/10)<1) line2= "         ";
             else if (((i+1)/10)<10) line2= "          ";
             else if (((i+1)/10)<100) line2= "           ";
+            else if (((i+1)/10)<1000) line2= "            ";
             else line2= "         ";
             line += StringFormat("Period %d ", i+1);
             for(int j=0; j<=i; ++j){
@@ -81,6 +86,7 @@ void TriWrite(string symbolname, const Triset& Tri[]){
                     if (((j+1)/10)<1) line2 += StringFormat("Itv %d      ", j+1);
                     else if (((j+1)/10)<10) line2 += StringFormat("Itv %d     ", j+1);
                     else if (((j+1)/10)<100) line2 += StringFormat("Itv %d    ", j+1);
+                    else if (((j+1)/10)<1000) line2 += StringFormat("Itv %d   ", j+1);
                     else line2 += StringFormat("Itv %d      ", j+1);
                     line  += StringFormat("%d %d        ", Tri[i].d_inside[j],Tri[i].u_inside[j]);
                 }

@@ -23,6 +23,12 @@
 #define __LEVEL4SBUMASK       0x0000000f
 #define __7f10fMASK           0xfffffff0
 #define __701ffMASK           0x0000000f
+#define PERIOD    360
+#define PERIODX4  1440
+#define PERIODX8  2880
+#define PERIODX12 4320
+#define PERIODX16 5760
+#define BASESEC   86400
 enum Barchoice{
      Bar100,
      Bar300,
@@ -36,8 +42,11 @@ struct Helper{
     int ServerExtime();
     int Bartoint(Barchoice bar);
     int TurnMin(datetime dt);
+    int TurnMinX2(datetime dt);
+    int TurnMinX3(datetime dt);
+    int TurnMinX4(datetime dt);
     int GetQuo(int minute, int htfint);
-    int GetRm(int minute, int htfint);
+    //int GetRm(int minute, int htfint);
 };
 int Helper::Bartoint(Barchoice bar){
    switch(bar){
@@ -71,7 +80,19 @@ int Helper::ServerExtime(){
 }
 int Helper::TurnMin(datetime dt){
     name = "TurnMin" ;
-    return (dt%86400)/60;
+    return (dt%(BASESEC))/60; //one day
+}
+int Helper::TurnMinX2(datetime dt){ //two days
+    name = "TurnMin" ;
+    return (dt%(BASESEC<<1))/60;
+}
+int Helper::TurnMinX3(datetime dt){ //three days
+    name = "TurnMin" ;
+    return (dt%(BASESEC*3))/60;
+}
+int Helper::TurnMinX4(datetime dt){ //four days
+    name = "TurnMin" ;
+    return (dt%(BASESEC<<2))/60;
 }
 int Helper::GetQuo(int minute, int htfint){
     name = "GetQuo" ;
@@ -79,8 +100,8 @@ int Helper::GetQuo(int minute, int htfint){
     float h =float(htfint);
     return MathFloor(m/h) ;
 }
-int Helper::GetRm(int minute, int htfint){
-    name = "GetRm" ;
-    return (minute%htfint) ;
-}
+// int Helper::GetRm(int minute, int htfint){
+//     name = "GetRm" ;
+//     return (minute%htfint) ;
+// }
 #endif
