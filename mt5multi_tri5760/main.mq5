@@ -71,9 +71,10 @@ int OnInit() {
     }
     for(int k=0; k<10; ++k){
         Fetcher fc(datasize)       ;
-        FVG       fvgarr[PERIODX4] ;
-        BOS Bosarr[PERIODX4]       ;//設一天會卡死 base最多到359 超過360要再想辦法
-        Triset Tri[PERIOD]         ;
+        FVG       fvgarr[]         ;
+        ArrayResize(fvgarr, PERIODX16, PERIODX16) ;
+        BOS Bosarr[PERIODX16]       ;//設一天會卡死 base最多到359 超過360要再想辦法
+        Triset Tri[PERIODX4]         ;
         if(sectornametemp[k]==NULL) continue ;
         fc.Getprice(symboltemp[k], datasize);
         fc.Getopen (symboltemp[k], datasize);
@@ -81,12 +82,12 @@ int OnInit() {
         fc.Getlow(symboltemp[k], datasize);
         fc.Getdate (symboltemp[k], datasize);
         printf("You choose %s: %s",sectornametemp[k], symboltemp[k]);
-        Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", Period= ", PERIOD);
+        Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", Period= ", PERIODX4);
         //+----------Put Data end---------+//
         // u cannot write this way: ArrayResize(Bosarr,staticarraysize, staticarraysize);
         // cuz u s still have not initialize the BOS type;
         int barx = helper.Bartoint(bar) ;
-        for (int i=0; i<(PERIODX4); ++i){
+        for (int i=0; i<(PERIODX16); ++i){
             if ((i+1)*barx <datasize) starti = (datasize-(i+1)*barx) ;
             else starti = 0 ;
             fc.RenewQuo_Rm(i+1, helper);
@@ -95,7 +96,7 @@ int OnInit() {
             rd   = fc.GetRaw();
             BOSJudge(Bosarr[i], datasize, rd, starti, helper, fvgarr[i], i);
         }
-        for (int i=0; i<(PERIODX4); ++i){  
+        for (int i=0; i<(PERIODX16); ++i){  
             int barsize = fvgarr[i].Getfvgkbarsize() ;
             for(int j=0; j<barsize; ++j){
                 fvgarr[i].Putfvg_chlo(rd, j,i+1) ;
@@ -106,7 +107,7 @@ int OnInit() {
         double tempu  ;
         double temp0X ;
         double tempXF ;
-        for (int i=0; i<(PERIOD); ++i){
+        for (int i=0; i<(PERIODX4); ++i){
             ArrayResize(Tri[i].comparecode,i+1,i+1);
             ArrayResize(Tri[i].comparecode0F,i+1,i+1);
             ArrayResize(Tri[i].u_inside,i+1,i+1);
@@ -192,9 +193,10 @@ void OnTimer(){
     symboltemp[9] = helper.Symbolchooser(tr10, Symbolset, symbol_n10);
     for(int k=0; k<10; ++k){
         Fetcher fc(datasize)       ;
-        FVG       fvgarr[PERIODX4] ;
-        BOS Bosarr[PERIODX4]       ;//設一天會卡死 base最多到359 超過360要再想辦法
-        Triset Tri[PERIOD]         ;
+        FVG       fvgarr[]         ;
+        ArrayResize(fvgarr, PERIODX16, PERIODX16) ;
+        BOS Bosarr[PERIODX16]      ;//設一天會卡死 base最多到359 超過360要再想辦法
+        Triset Tri[PERIODX4]       ;
         if(sectornametemp[k]==NULL) continue ;
         fc.Getprice(symboltemp[k], datasize);
         fc.Getopen (symboltemp[k], datasize);
@@ -202,11 +204,11 @@ void OnTimer(){
         fc.Getlow(symboltemp[k], datasize);
         fc.Getdate (symboltemp[k], datasize);
         printf("You choose %s: %s",sectornametemp[k], symboltemp[k]);
-        Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", Period= ", PERIOD);
+        Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", Period= ", PERIODX4);
         Print("In timer");
     //+----------Put Data end---------+//
         int barx = helper.Bartoint(bar) ;
-        for (int i=0; i<(PERIODX4); ++i){
+        for (int i=0; i<(PERIODX16); ++i){
             if ((i+1)*barx <datasize) starti = (datasize-(i+1)*barx) ;
             else starti = 0 ;
             fc.RenewQuo_Rm(i+1, helper);
@@ -215,7 +217,7 @@ void OnTimer(){
             rd   = fc.GetRaw();
             BOSJudge(Bosarr[i], datasize, rd, starti, helper, fvgarr[i], i);
         }
-        for (int i=0; i<(PERIODX4); ++i){  
+        for (int i=0; i<(PERIODX16); ++i){  
             int barsize = fvgarr[i].Getfvgkbarsize() ;
             for(int j=0; j<barsize; ++j){
                 fvgarr[i].Putfvg_chlo(rd, j, i+1) ;
@@ -226,7 +228,7 @@ void OnTimer(){
         double tempu  ;
         double temp0X ;
         double tempXF ;
-        for (int i=0; i<(PERIOD); ++i){
+        for (int i=0; i<(PERIODX4); ++i){
             ArrayResize(Tri[i].comparecode,i+1,i+1);
             ArrayResize(Tri[i].comparecode0F,i+1,i+1);
             ArrayResize(Tri[i].u_inside,i+1,i+1);
