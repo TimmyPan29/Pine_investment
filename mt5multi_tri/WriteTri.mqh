@@ -37,6 +37,7 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
     if(filehandle2!=INVALID_HANDLE){
         FileWrite(filehandle2, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
         for(int i=0; i<PERIOD; ++i){
+            if(Tri[i].wide2itv0X==-1 && Tri[i].wide2itvXF==-1) continue ;
             string line2 = "";
             string line  = "";
             if (((i+1)/10)<1) line2= "         ";
@@ -46,13 +47,17 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
             else line2= "         ";
             line += StringFormat("Period %d ", i+1);
             for(int j=0; j<=i; ++j){
-                if (((j+1)/10)<1) line2 += StringFormat("Itv %d       ", j+1);
-                else if (((j+1)/10)<10) line2 += StringFormat("Itv %d      ", j+1);
-                else if (((j+1)/10)<100) line2 += StringFormat("Itv %d     ", j+1);
-                else if (((j+1)/10)<1000) line2 += StringFormat("Itv %d    ", j+1);
-                else line2 += StringFormat("Itv %d       ", j+1);
-                if(Tri[i].comparecode0F[j]==0) line  += "            ";
-                else line  += StringFormat("0x%08X%01X ", Tri[i].comparecode0F[j], Tri[i].fvgtype0F[j]);
+                if(Tri[i].comparecode0F[j]==0) continue ;
+                else{
+                    if (((j+1)/10)<1) line2 += StringFormat("Itv %d       ", j+1);
+                    else if (((j+1)/10)<10) line2 += StringFormat("Itv %d      ", j+1);
+                    else if (((j+1)/10)<100) line2 += StringFormat("Itv %d     ", j+1);
+                    else if (((j+1)/10)<1000) line2 += StringFormat("Itv %d    ", j+1);
+                    else line2 += StringFormat("Itv %d       ", j+1);
+                    //if(Tri[i].comparecode0F[j]==0) line  += "            ";
+                    //else line  += StringFormat("0x%08X%01X ", Tri[i].comparecode0F[j], Tri[i].fvgtype0F[j]);
+                    line  += StringFormat("0x%08X%01X ", Tri[i].comparecode0F[j], Tri[i].fvgtype0F[j]);
+                }
             }
             line2 += "widespace";
             line += StringFormat("%d %d", Tri[i].wide2itv0X+1,Tri[i].wide2itvXF+1);
@@ -64,11 +69,48 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
     }
     else Print("Operation FileOpen failed, error ",GetLastError());
     ResetLastError();
+//+------------------------------// 
+    string filename3 =StringFormat("%s"+"\\%s"+"\\TricodeOut"+"\\TriOut_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
+    int fIlehandle3=FileOpen(filename3,FILE_WRITE|FILE_TXT);
+    if(fIlehandle3!=INVALID_HANDLE){
+        FileWrite(fIlehandle3, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
+        for(int i=0; i<PERIOD; ++i){
+            if(!Tri[i].comparecodeOut[0]) continue ;
+            string line2 = "";
+            string line  = "";
+            if (((i+1)/10)<1) line2= "         ";
+            else if (((i+1)/10)<10) line2= "          ";
+            else if (((i+1)/10)<100) line2= "           ";
+            else if (((i+1)/10)<1000) line2= "            ";
+            else line2= "         ";
+            line += StringFormat("Period %d ", i+1);
+            for(int j=0; j<=i; ++j){
+                if(i!=j) continue ;
+                else{
+                    if (((j+1)/10)<1) line2 += StringFormat("Itv %d       ", j+1);
+                    else if (((j+1)/10)<10) line2 += StringFormat("Itv %d      ", j+1);
+                    else if (((j+1)/10)<100) line2 += StringFormat("Itv %d     ", j+1);
+                    else if (((j+1)/10)<1000) line2 += StringFormat("Itv %d    ", j+1);
+                    else line2 += StringFormat("Itv %d       ", j+1);
+                    //if(Tri[i].comparecode0F[j]==0) line  += "            ";
+                    //else line  += StringFormat("0x%08X%01X ", Tri[i].comparecode0F[j], Tri[i].fvgtype0F[j]);
+                    line  += StringFormat("0x%08X ", Tri[i].comparecodeOut[0]);
+                }
+            }
+            FileWrite(fIlehandle3, line2);
+            FileWrite(fIlehandle3, line);
+        }
+    FileClose(fIlehandle3);
+    Print("FileOpen OK");
+    }
+    else Print("Operation FileOpen failed, error ",GetLastError());
+    ResetLastError();
 //+------------------------------//
-    string filename3 =StringFormat("%s"+"\\%s"+"\\Tribool"+"\\Tri_flt%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
-    int filehandle3=FileOpen(filename3,FILE_WRITE|FILE_TXT);
-    if(filehandle3!=INVALID_HANDLE){
-        FileWrite(filehandle3, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
+//+------------------------------//
+    string filename4 =StringFormat("%s"+"\\%s"+"\\Tribool"+"\\Tri_flt%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
+    int fIlehandle4=FileOpen(filename4,FILE_WRITE|FILE_TXT);
+    if(fIlehandle4!=INVALID_HANDLE){
+        FileWrite(fIlehandle4, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
         for(int i=0; i<PERIOD; ++i){
             string line2 = "";
             string line  = "";
@@ -90,10 +132,10 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
             }
             line2 += "widespace";
             line += StringFormat("%d %d", Tri[i].wide2itv_d+1,Tri[i].wide2itv_u+1);
-            FileWrite(filehandle3, line2);
-            FileWrite(filehandle3, line);
+            FileWrite(fIlehandle4, line2);
+            FileWrite(fIlehandle4, line);
         }
-    FileClose(filehandle3);
+    FileClose(fIlehandle4);
     Print("FileOpen OK");
     }
     else Print("Operation FileOpen failed, error ",GetLastError());

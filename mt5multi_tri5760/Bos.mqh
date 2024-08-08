@@ -284,6 +284,7 @@ struct FVG{
 struct Triset{
     uint    comparecode[]   ;
     uint    comparecode0F[] ;
+    uint    comparecodeOut[];
     bool    u_inside[]      ;
     bool    d_inside[]      ;
     int     wide2itv_d      ;
@@ -403,17 +404,22 @@ double Triset::TriItvCompareXF (FVG& fvg, const BOS& bos1, const BOS& bos2, cons
 }
 void Triset::TriFVGcheck0F(FVG& fvg, const double& u, const double& d, const int& j){
     int effkbarsize = fvg.Getfvgeffkbarsize();
+    bool flag ;
+    fvgtype0F[j] = 0 ;
+    int  reg     = fvgtype0F[j]  ;
     for (int i=0; i<effkbarsize; ++i){
-        if(fvg.Property[i]%2==0 || fvgtype0F[j]==1){
-            if (fvgtype0F[j] == 0x0000000F) fvgtype0F[j] = 0x0000000F ;
-            else fvgtype0F[j] = ((fvg.LTprice[i]<u && fvg.LTprice[i]>d) || (fvg.RBprice[i]<u && fvg.RBprice[i]>d))? 2 : fvgtype0F[j]==1?   0x0000000F : 0 ;
+        flag = ((fvg.LTprice[i]<u && fvg.LTprice[i]>d) || (fvg.RBprice[i]<u && fvg.RBprice[i]>d))? true : false ;
+        if(fvgtype0F[j]!=0xF){
+            if(flag){
+                reg          = fvgtype0F[j] ;
+                fvgtype0F[j] = (fvg.Property[i]%2==0)? 2 : 1 ;
+            }
+            if(reg+fvgtype0F[j]==3){
+                fvgtype0F[j] = 0xF ;
+            }
         }
-        else{
-            if (fvgtype0F[j] == 0x0000000F) fvgtype0F[j] = 0x0000000F ;
-            else fvgtype0F[j] = ((fvg.LTprice[i]<u && fvg.LTprice[i]>d) || (fvg.RBprice[i]<u && fvg.RBprice[i]>d))? 1 : fvgtype0F[j]==2?   0x0000000F : 0 ;
-        }
-    }
-    //printf("fvgtype0F[j]= %d", fvgtype0F[j]);
+        else break ;
+    } 
 }
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
@@ -580,6 +586,7 @@ Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4,
     int count1      = 0 ;
     int count2      = 0 ;
     int count3      = 0 ;
+    int count4      = 0 ;
     double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
     int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
     int    signsbd ;
@@ -596,7 +603,6 @@ Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4,
     if((code & __LEVEL1SBUMASK)>>4  < (code & __LEVEL2SBUMASK)) ++count2 ;
     if((code & __LEVEL1SBUMASK)>>8  < (code & __LEVEL3SBUMASK)) ++count2 ;
     if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)) ++count2 ;
-   
 //code filtered
     if(( code & __LEVEL2SBDMASK  )  > 0) ++count3 ;
     if(( code & __LEVEL3SBDMASK  )  > 0) ++count3 ;
@@ -606,12 +612,17 @@ Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4,
     if(( code & __LEVEL3SBUMASK  )  < (__LEVEL3SBUMASK)) ++count3 ;
     if(( code & __LEVEL4SBUMASK  )  < (__LEVEL4SBUMASK)) ++count3 ;
     if(( code & __LEVEL1SBUMASK  ) == (__LEVEL1SBUMASK)) count3=count3+5 ;
-
-    if(count3==7 || count3==11) ts.comparecode0F[j] = code; //7 belong case 0xXXX0XXXX, 11 belong 0xXXXXFXXX
-    else ts.comparecode0F[j] = 0;
-    ts.comparecode[j]   = code ;
-    ts.d_inside[j]      = (count1==3 && signsbd==0)? true : false ;
-    ts.u_inside[j]      = (count2==3 && signsbu==0)? true : false ;
+//code out
+    if(( code & __LEVEL1SBDMASK  ) == 0) ++count4 ;
+    if(( code & __LEVEL1SBUMASK  ) == (__LEVEL1SBUMASK)) count4=count4+5 ;
+//----------//
+    if(count3==7 || count3==11) ts.comparecode0F[j]  = code; //7 belong case 0xXXX0XXXX, 11 belong 0xXXXXFXXX, X non 0 and F
+    else ts.comparecode0F[j]  = 0;
+    if(count4==1 || count4==5) ts.comparecodeOut[0]  = code; //1 belong case 0xZZZ0ZZZZ, 5 belong  0xZZZZFZZZ, Z any char
+    else ts.comparecodeOut[0] = 0;
+    ts.comparecode[j]         = code ;
+    ts.d_inside[j]            = (count1==3 && signsbd==0)? true : false ;
+    ts.u_inside[j]            = (count2==3 && signsbu==0)? true : false ;
 
     tempd   = ts.TriItvCompare_d(bos1, bos2, bos3, bos4, tempd, j);
     tempu   = ts.TriItvCompare_u(bos1, bos2, bos3, bos4, tempu, j);

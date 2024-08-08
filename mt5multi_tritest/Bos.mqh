@@ -3,7 +3,8 @@
 #include "Plotpack.mqh"
 #include "GETDATA.mqh"
 #include "Helper.mqh"
-#define FVGarraysize 3000
+#define FVGsize 3000
+#define effFVGize 300
 struct BOS{
     double          htfint      ;//=i
     string          htfname     ;//IntegerToString(i)
@@ -82,19 +83,23 @@ struct FVG{
     double RBprice[]          ;
     int effkbar[];
     int effkbarend[];
+    int fvghead           ;
+    int fvgneck           ;
+    int efffvghead        ;
+    int efffvgneck        ;
     FVG(){}
     FVG(int i){
         namei = i ;
-        ArrayResize(kbar,FVGarraysize,FVGarraysize)     ;
-        ArrayResize(kbarclose,FVGarraysize,FVGarraysize);
-        ArrayResize(kbarhigh,FVGarraysize,FVGarraysize) ;
-        ArrayResize(kbarlow,FVGarraysize,FVGarraysize)  ;
-        ArrayResize(kbaropen,FVGarraysize,FVGarraysize) ;
-        ArrayResize(Property,300,300)   ;
-        ArrayResize(LTprice,300,300)    ;
-        ArrayResize(RBprice,300,300)    ;
-        ArrayResize(effkbar,300,300)    ;
-        ArrayResize(effkbarend,300,300) ;
+        ArrayResize(kbar,FVGsize,FVGsize)     ;
+        ArrayResize(kbarclose,FVGsize,FVGsize);
+        ArrayResize(kbarhigh,FVGsize,FVGsize) ;
+        ArrayResize(kbarlow,FVGsize,FVGsize)  ;
+        ArrayResize(kbaropen,FVGsize,FVGsize) ;
+        ArrayResize(Property,effFVGsize,effFVGsize)   ;
+        ArrayResize(LTprice,effFVGsize,effFVGsize)    ;
+        ArrayResize(RBprice,effFVGsize,effFVGsize)    ;
+        ArrayResize(effkbar,effFVGsize,effFVGsize)    ;
+        ArrayResize(effkbarend,effFVGsize,effFVGsize) ;
         ArrayInitialize(kbar,-1)        ;
         ArrayInitialize(kbarclose,-1)   ;
         ArrayInitialize(kbarhigh,-1)    ;
@@ -104,6 +109,10 @@ struct FVG{
         ArrayInitialize(LTprice,-1)     ;
         ArrayInitialize(RBprice,-1)     ;
         ArrayInitialize(effkbar,-1)     ;
+        ArrayInitialize(fvghead,-1)     ;
+        ArrayInitialize(fvgneck,-1)     ;
+        ArrayInitialize(efffvghead,-1)  ;
+        ArrayInitialize(efffvgneck,-1)  ;
     }
     
     bool FVGkbarBull(int k){
@@ -129,7 +138,7 @@ struct FVG{
             else{
                 int start       = kbar[cnt-1]+1   ;
                 int end         = kbar[cnt]  ;
-                kbarclose[cnt]  = rc.rawprices[kbar[cnt]] ;
+                kbarclose[cnt]  = rc.rawprices[end] ;
                 kbaropen[cnt]   = rc.rawopen[start] ;
                 kbarhigh[cnt]   = rc.rawhigh[start] ;
                 kbarlow[cnt]    = rc.rawlow[start] ;
@@ -140,6 +149,40 @@ struct FVG{
                 }
             }
         }     
+    }
+    void Putfvg_Monitor(const RawCandles& rc, int& cnt , int htfint, int rcsize){
+        int tail = Getfvgkbarsize();
+        bool full;
+        full = tail==FVGsize-1 ;
+        if(full){
+            fvgneck = fvghead;
+            fvghead = (fvghead+1)%FVGsize;
+        }
+        else{
+            fvgneck = tail-1;
+            fvghead = tail;
+            ++tail;
+        }
+        int start       = (kbar[fvgneck-1]+1)%rcsize   ;
+        int start1       = (kbar[fvgneck-1]+2)%rcsize   ;
+        int end         = kbar[fvgneck]  ;
+        if(htfint == 1){
+            kbarclose[fvghead]  = rc.rawprices[cnt] ;
+            kbaropen[fvghead]   = rc.rawopen[cnt] ;
+            kbarhigh[fvghead]   = rc.rawhigh[cnt] ;
+            kbarlow[fvghead]    = rc.rawlow[cnt] ;
+        }
+        else{
+            kbarclose[fvghead]  = rc.rawprices[end] ;
+            kbaropen[fvghead]   = rc.rawopen[start] ;
+            kbarhigh[fvghead]   = rc.rawhigh[start] ;
+            kbarlow[fvghead]    = rc.rawlow[start] ;
+            while (start < end){
+                kbarhigh[fvghead] = kbarhigh[fvghead]>rc.rawhigh[start1]? kbarhigh[fvghead] : rc.rawhigh[start1] ;
+                kbarlow[fvghead]  = kbarlow[fvghead]<rc.rawlow[start1]? kbarlow[fvghead] : rc.rawlow[start1] ;
+                ++start ;
+            }
+        }
     }
     int FVGupdown(int idx, int kbarsize){
         if (idx > kbarsize - 3) return -1 ;
@@ -201,6 +244,7 @@ struct FVG{
         int i=0 ;
         while(kbar[i]!=-1){
             ++i ;
+            if(i==FVGsize) break;
         }
         return i ;
     }
@@ -208,6 +252,7 @@ struct FVG{
         int i=0 ;
         while(effkbar[i]!=-1){
             ++i ;
+            if(i==effFVGsize) break;
         }
         return i ;
     }
@@ -579,7 +624,86 @@ void BOSJudge(BOS& bosdata, const int size, RawCandles& rd, const int starti, He
     }//while end
     //printf("cnt= %d\tk= %d", cnt,k);
 }//func end
+void BOSMonitor(BOS& bosdata, RawCandles& rd, Helper& helper, FVG& fvgarr, const int& i){                  
+    int qidxnow                   ;
+    int qidxpt                    ;
+    double tempprice              ;
+    datetime temptime             ;
+        if(i<PERIODX4){
+            qidxnow = helper.TurnMin(rd.datadate[rd.head])==0? 1439 : helper.TurnMin(rd.datadate[rd.head])-1;
+            qidxpt  = helper.TurnMin(rd.datadate[rd.neck])==0? 1439 : helper.TurnMin(rd.datadate[rd.neck])-1 ;   
+        }
+        else if(i<PERIODX8){
+            qidxnow = helper.TurnMinX2(rd.datadate[rd.head])==0? 2879 : helper.TurnMinX2(rd.datadate[rd.head])-1;
+            qidxpt  = helper.TurnMinX2(rd.datadate[rd.neck])==0? 2879 : helper.TurnMinX2(rd.datadate[rd.neck])-1 ;  
+        }
+        else if(i<PERIODX12){
+            qidxnow = helper.TurnMinX3(rd.datadate[rd.head])==0? 4319 : helper.TurnMinX3(rd.datadate[rd.head])-1;
+            qidxpt  = helper.TurnMinX3(rd.datadate[rd.neck])==0? 4319 : helper.TurnMinX3(rd.datadate[rd.neck])-1 ;  
+        }
+        else{
+            qidxnow = helper.TurnMinX4(rd.datadate[rd.head])==0? 5759 : helper.TurnMinX4(rd.datadate[rd.head])-1;
+            qidxpt  = helper.TurnMinX4(rd.datadate[rd.neck])==0? 5759 : helper.TurnMinX4(rd.datadate[rd.neck])-1 ;  
+        }
 
+        if(rd.dataQuo[qidxnow] != rd.dataQuo[qidxpt]){
+            //Print("qidxnow= ", qidxnow, "qidxpt", qidxpt, "bosdata.htfint", bosdata.htfint);
+            tempprice         = rd.rawprices[rd.neck] ;
+            temptime          = rd.datadate[rd.neck]  ;
+            fvgarr.kbar[fvgarr.fvghead]  = rd.neck ;
+            if(bosdata.state == 2){
+                if(bosdata.slope1 != bosdata.slope2){
+                    bosdata.reg1key     = bosdata.regclose2;
+                    bosdata.reg1key_t   = bosdata.regclose2_t ;
+                }
+                //else //Buff_key1維持原樣
+                if(bosdata.regclose3>bosdata.sbu){
+                    bosdata.sbu     = -2;
+                    bosdata.sbu_t   = -2;
+                    bosdata.sbd     = bosdata.reg1key;
+                    bosdata.sbd_t   = bosdata.reg1key_t;
+                }
+                if(bosdata.regclose3<bosdata.sbd){
+                    bosdata.sbd     = -1 ;
+                    bosdata.sbd_t   = -1 ;
+                    bosdata.sbu     = bosdata.reg1key;
+                    bosdata.sbu_t   = bosdata.reg1key_t;
+                }
+                bosdata.state = 1;
+            }
+            if(bosdata.state == 3){//no sky
+                if(bosdata.slope1 != bosdata.slope2){ // build sky
+                    bosdata.reg2key     = bosdata.regclose2;
+                    bosdata.reg2key_t   = bosdata.regclose2_t;
+                    bosdata.sbu         = bosdata.reg2key;
+                    bosdata.sbu_t       = bosdata.reg2key_t;
+                    bosdata.reg1key     = bosdata.reg2key;
+                    bosdata.reg1key_t   = bosdata.reg2key_t;
+                }
+                if(bosdata.regclose3<bosdata.sbd){
+                    bosdata.sbd         = -1;
+                    bosdata.sbd_t       = -1;
+                }
+                bosdata.state = 1;
+            }
+            if(bosdata.state == 4){
+                if(bosdata.slope1 != bosdata.slope2){
+                    bosdata.reg2key     = bosdata.regclose2;
+                    bosdata.reg2key_t   = bosdata.regclose2_t;
+                    bosdata.sbd         = bosdata.reg2key;
+                    bosdata.sbd_t       = bosdata.reg2key_t;
+                    bosdata.reg1key     = bosdata.reg2key;
+                    bosdata.reg1key_t   = bosdata.reg2key_t;
+                }
+                if(bosdata.regclose3>bosdata.sbu){
+                    bosdata.sbu         = -2;
+                    bosdata.sbu_t       = -2;
+                }
+                bosdata.state = 1;
+            }
+        }
+    }
+}//func end
 Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j, double& tempd, double& tempu, double& delta0X, double& deltaXF){
     //-1 == no sbd, -2 == no sbu
     uint code       = 0 ;

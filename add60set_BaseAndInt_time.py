@@ -226,6 +226,7 @@ type ValueDecisionReg
     float           valueat
     int             vidxat
     string          vdateat
+    int             vdateati
     string          vnameat
     string          vtextat
     string          vremntimeat
@@ -241,8 +242,8 @@ Settings settings = Settings.new()
 //+---------------ValueDeicsion------------------+//
 var ValueDecisionReg highestsbd = ValueDecisionReg.new(value=0)
 var ValueDecisionReg lowestsbu  = ValueDecisionReg.new(value=99999999)
-var ValueDecisionReg estmaxsbd  = ValueDecisionReg.new(vdecisionname="estmaxsbd", value=0,valueat=0, vtext="exd: ", vtextat="exd_aft ")
-var ValueDecisionReg estminsbu  = ValueDecisionReg.new(vdecisionname="estminsbu", value=99999999,valueat=99999999, vtext="enu: ",vtextat="enu_aft ")
+var ValueDecisionReg estmaxsbd  = ValueDecisionReg.new(vdecisionname="estmaxsbd", value=0,valueat=0, vtext="exd", vtextat="exdaf")
+var ValueDecisionReg estminsbu  = ValueDecisionReg.new(vdecisionname="estminsbu", value=99999999,valueat=99999999, vtext="enu",vtextat="enuaf")
 
 
 //+---------------ValueDeicsionEND------------------+//
@@ -312,7 +313,14 @@ method RemainingTime(Helper helper, string HTF) =>
         r
     else
         "n/a"
-
+method RemainingTimeint(Helper helper, string HTF) =>
+    helper.name     := HTF
+    if barstate.isrealtime
+        timeRemaining   = (time_close(HTF) - timenow)
+        r               = timeRemaining
+        r
+    else
+        na
 method formattedtime(Helper helper, int i_HTF) =>
     helper.name := "THE DATE OF BAR"
     r = str.format("{0,date,yyyy-MM-dd HH:mm}", i_HTF)
@@ -457,7 +465,7 @@ method HighestsbdSet(ValueDecisionReg highestsbd, CandleSet candleSet) =>
     if cs.settings.htfint <= Bound
         if fg
             m1.value            := 0
-            m1.vtext            := "highestsbd: "
+            m1.vtext            := "Hsbd"
             m1.vdecisionname    := "HighestsbdSet"
             fg                  := false
         if cs.bosdata.sbd > m1.value
@@ -474,7 +482,7 @@ method LowestsbuSet (ValueDecisionReg lowestsbu, CandleSet candleSet) =>
     if cs.settings.htfint <= Bound
         if fg
             m1.value            := 99999999
-            m1.vtext            := "lowestsbu: "
+            m1.vtext            := "Lsbu"
             m1.vdecisionname    := "LowestsbuSet"
             fg                  := false
         if cs.bosdata.sbu < m1.value
@@ -501,6 +509,7 @@ method Predictor (CandleSet candleSet, ValueDecisionReg predictor) =>
                 pt.vidxat  := cs.bosdata.sbd_idx
                 pt.vnameat := cs.settings.htf
                 pt.vdateat := cs.bosdata.s_dated    
+                pt.vdateati:= cs.bosdata.i_dated
         if pt.vdecisionname == "estminsbu"
             if pt.value > cs.bosdata.sbu  
                 pt.value := cs.bosdata.sbu
@@ -512,6 +521,7 @@ method Predictor (CandleSet candleSet, ValueDecisionReg predictor) =>
                 pt.vidxat  := cs.bosdata.sbu_idx
                 pt.vnameat := cs.settings.htf
                 pt.vdateat := cs.bosdata.s_dateu
+                pt.vdateati:= cs.bosdata.i_dateu
     predictor
 
 method addplot (ValueDecisionReg decision, int offset) =>
@@ -521,9 +531,9 @@ method addplot (ValueDecisionReg decision, int offset) =>
     if m1.vdecisionname == "LowestsbuSet"
         if not na(m1.vlb)
             label.set_xy(m1.vlb, offset-5, m1.value)
-            label.set_text(m1.vlb,m1.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime)
+            label.set_text(m1.vlb,m1.vtext + str.tostring(m1.value) + "@" + m1.vname +"\n" + m1.vdate + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new( offset-5,m1.value,text= m1.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min" + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new( offset-5,m1.value,text= m1.vtext + str.tostring(m1.value) + "@" + m1.vname +"\n" + m1.vdate + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -532,10 +542,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
         m1.value   := 99999999
     if m1.vdecisionname == "HighestsbdSet"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset-2, m1.value)
-            label.set_text(m1.vlb,m1.vtext + str.tostring(m1.value) + "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min"+ "\n" + m1.vremntime)
+            label.set_xy(m1.vlb, offset-1, m1.value)
+            label.set_text(m1.vlb,m1.vtext + str.tostring(m1.value) + "@" + m1.vname +"\n" + m1.vdate + "\n" + m1.vremntime)
         else
-            m1.vlb := label.new(offset-2,m1.value,text= m1.vtext + str.tostring(m1.value)+ "\n" + "@" + m1.vdate + "\n" + "HTF= " + m1.vname +"min"+ "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset-1,m1.value,text= m1.vtext + str.tostring(m1.value) + "@" + m1.vname +"\n" + m1.vdate + "\n" + m1.vremntime,style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -544,10 +554,10 @@ method addplot (ValueDecisionReg decision, int offset) =>
         m1.value   := 0
     if m1.vdecisionname == "estmaxsbd"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset+3, m1.value)
-            label.set_text(m1.vlb,m1.vtext+str.tostring(m1.value) + "\n" +m1.vname+ "@" + m1.vdate)
+            label.set_xy(m1.vlb, offset+8, m1.value)
+            label.set_text(m1.vlb,m1.vtext+str.tostring(m1.value) + "@" + m1.vname + "\n" + m1.vdate)
         else
-            m1.vlb := label.new(offset+3,m1.value,text= m1.vtext+str.tostring(m1.value) + "\n" +m1.vname+ "@" + m1.vdate,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset+8,m1.value,text= m1.vtext+str.tostring(m1.value) + "@" + m1.vname + "\n"  + m1.vdate,style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -555,31 +565,33 @@ method addplot (ValueDecisionReg decision, int offset) =>
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
         if settings.afterdateadd_show
             if not na(m1.vlbat)
-                label.set_xy(m1.vlbat, offset+9, m1.valueat)
-                label.set_text(m1.vlbat,m1.vtextat+str.tostring(m1.valueat) + "\n" +m1.vnameat+ "@" + m1.vdateat+ "~"+m1.vremntimeat)
+                label.set_xy(m1.vlbat, offset+17, m1.valueat)
+                label.set_text(m1.vlbat,m1.vtextat+str.tostring(m1.valueat) + "@" +m1.vnameat + "\n"  + m1.vdateat + "\n..." +m1.vremntimeat)
                 var float tempvalued = m1.valueat
                 var string tempdated = m1.vdateat
                 var int countat      = 4
                 if (m1.valueat>tempvalued)
-                    label.new(offset+9+countat,m1.valueat, text= m1.vtextat+str.tostring(m1.valueat) + "\n" +m1.vnameat+ "@" + m1.vdateat,style = label.style_label_up, color = color_transparent)
+                    //int temp   = m1.vdateati - int(str.tonumber(m1.vnameat)*60*1000) + helper.RemainingTimeint(m1.vnameat)+1000
+                    //m1.vdateat := helper.formattedtime(temp) 
+                    label.new(offset-6-countat,m1.valueat, text= m1.vtextat+str.tostring(m1.valueat) + "@" +m1.vnameat + "\n"  + m1.vdateat,style = label.style_label_up, color = color_transparent)
                     tempvalued := m1.valueat
                     tempdated  := m1.vdateat
                     countat+=4
             else
-                m1.vlbat := label.new(offset+12,m1.valueat, text= m1.vtextat+str.tostring(m1.valueat) + "\n" +m1.vnameat+ "@" + m1.vdateat+ "~"+m1.vremntimeat,style = label.style_label_up, color = color_transparent)
+                m1.vlbat := label.new(offset+17,m1.valueat, text= m1.vtextat+str.tostring(m1.valueat) + "@" + m1.vnameat + "\n" +  m1.vdateat+ "\n..." + m1.vremntimeat,style = label.style_label_up, color = color_transparent)
             if not na(m1.vlnat)
                 line.set_xy1(m1.vlnat, bar_index, m1.valueat)
-                line.set_xy2(m1.vlnat, offset+3, m1.valueat)
+                line.set_xy2(m1.vlnat, offset-3, m1.valueat)
             else
                 m1.vlnat := line.new(bar_index, m1.valueat, offset+3, m1.valueat, xloc= xloc.bar_index, color = color.new(color.navy, 10), style = line.style_dotted , width = 2)
         m1.valueat := 0    
         m1.value   := 0
     if m1.vdecisionname == "estminsbu"
         if not na(m1.vlb)
-            label.set_xy(m1.vlb, offset+6, m1.value)
-            label.set_text(m1.vlb,m1.vtext+str.tostring(m1.value) + "\n" +m1.vname+ "@" + m1.vdate)
+            label.set_xy(m1.vlb, offset+25, m1.value)
+            label.set_text(m1.vlb,m1.vtext+str.tostring(m1.value) + "@" + m1.vname + "\n" + m1.vdate)
         else
-            m1.vlb := label.new(offset+6,m1.value,text= m1.vtext+str.tostring(m1.value) + "\n" +m1.vname+ "@" + m1.vdate,style = label.style_label_up, color = color_transparent)
+            m1.vlb := label.new(offset+25,m1.value,text= m1.vtext+str.tostring(m1.value) + "@" + m1.vname + "\n"  + m1.vdate,style = label.style_label_up, color = color_transparent)
         if not na(m1.vln)
             line.set_xy1(m1.vln, bar_index, m1.value)
             line.set_xy2(m1.vln, offset, m1.value)
@@ -587,18 +599,20 @@ method addplot (ValueDecisionReg decision, int offset) =>
             m1.vln := line.new(bar_index, m1.value, offset, m1.value, xloc= xloc.bar_index, color = color.new(color.black, 10), style = line.style_solid , width = 2)
         if settings.afterdateadd_show
             if not na(m1.vlbat)
-                label.set_xy(m1.vlbat, offset+12, m1.valueat)
-                label.set_text(m1.vlbat,m1.vtextat+str.tostring(m1.valueat) + "\n" +m1.vnameat+ "@" + m1.vdateat+ "~"+m1.vremntimeat)
+                label.set_xy(m1.vlbat, offset+33, m1.valueat)
+                label.set_text(m1.vlbat,m1.vtextat+str.tostring(m1.valueat) + "@" +m1.vnameat + "\n"  + m1.vdateat + "\n..." +m1.vremntimeat)
                 var float tempvalueu = m1.valueat
                 var string tempdateu = m1.vdateat
                 var int countat      = 4
                 if (m1.valueat<tempvalueu)
-                    label.new(offset+9+countat,m1.valueat, text= m1.vtextat+str.tostring(m1.valueat) + "\n" +m1.vnameat+ "@" + m1.vdateat,style = label.style_label_up, color = color_transparent)
+                    //int temp   = m1.vdateati - int(str.tonumber(m1.vnameat)*60*1000) + helper.RemainingTimeint(m1.vnameat)+1000
+                    //m1.vdateat := helper.formattedtime(temp)
+                    label.new(offset+18-countat,m1.valueat, text= m1.vtextat+str.tostring(m1.valueat) + "@" +m1.vnameat + "\n"  + m1.vdateat,style = label.style_label_up, color = color_transparent)
                     tempvalueu := m1.valueat
                     tempdateu  := m1.vdateat
                     countat+=4
             else
-                m1.vlbat := label.new(offset+12,m1.valueat, text= m1.vtextat+str.tostring(m1.valueat) + "\n" +m1.vnameat+ "@" + m1.vdateat+ "~"+m1.vremntimeat,style = label.style_label_up, color = color_transparent)
+                m1.vlbat := label.new(offset+33,m1.valueat, text= m1.vtextat+str.tostring(m1.valueat) + "@" + m1.vnameat + "\n" +  m1.vdateat+ "\n..." + m1.vremntimeat,style = label.style_label_up, color = color_transparent)
             if not na(m1.vlnat)
                 line.set_xy1(m1.vlnat, bar_index, m1.valueat)
                 line.set_xy2(m1.vlnat, offset+3, m1.valueat)

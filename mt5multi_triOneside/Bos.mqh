@@ -284,7 +284,6 @@ struct FVG{
 struct Triset{
     uint    comparecode[]   ;
     uint    comparecode0F[] ;
-    uint    comparecodeOut[];
     bool    u_inside[]      ;
     bool    d_inside[]      ;
     int     wide2itv_d      ;
@@ -586,7 +585,6 @@ Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4,
     int count1      = 0 ;
     int count2      = 0 ;
     int count3      = 0 ;
-    int count4      = 0 ;
     double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
     int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
     int    signsbd ;
@@ -602,27 +600,23 @@ Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4,
     if((code & __LEVEL1SBDMASK)<<12 > (code & __LEVEL4SBDMASK)) ++count1 ;
     if((code & __LEVEL1SBUMASK)>>4  < (code & __LEVEL2SBUMASK)) ++count2 ;
     if((code & __LEVEL1SBUMASK)>>8  < (code & __LEVEL3SBUMASK)) ++count2 ;
-    if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)) ++count2 ; 
+    if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)) ++count2 ;
+   
 //code filtered
-    if(( code & __LEVEL2SBDMASK  )  > 0) ++count3 ;
-    if(( code & __LEVEL3SBDMASK  )  > 0) ++count3 ;
-    if(( code & __LEVEL4SBDMASK  )  > 0) ++count3 ;
+    if(( code & __LEVEL2SBDMASK  ) == 0) ++count3 ;
+    if(( code & __LEVEL3SBDMASK  ) == 0) ++count3 ;
+    if(( code & __LEVEL4SBDMASK  ) == 0) ++count3 ;
     if(( code & __LEVEL1SBDMASK  ) == 0) ++count3 ;
-    if(( code & __LEVEL2SBUMASK  )  < (__LEVEL2SBUMASK)) ++count3 ;
-    if(( code & __LEVEL3SBUMASK  )  < (__LEVEL3SBUMASK)) ++count3 ;
-    if(( code & __LEVEL4SBUMASK  )  < (__LEVEL4SBUMASK)) ++count3 ;
+    if(( code & __LEVEL2SBUMASK  ) == (__LEVEL2SBUMASK)) count3=count3+5 ;
+    if(( code & __LEVEL3SBUMASK  ) == (__LEVEL3SBUMASK)) count3=count3+5 ;
+    if(( code & __LEVEL4SBUMASK  ) == (__LEVEL4SBUMASK)) count3=count3+5 ;
     if(( code & __LEVEL1SBUMASK  ) == (__LEVEL1SBUMASK)) count3=count3+5 ;
-//code out
-    if(( code & __LEVEL1SBDMASK  ) == 0) ++count4 ;
-    if(( code & __LEVEL1SBUMASK  ) == (__LEVEL1SBUMASK)) count4=count4+5 ;
-//----------//
-    if(count3==7 || count3==11) ts.comparecode0F[j]  = code; //7 belong case 0xXXX0XXXX, 11 belong 0xXXXXFXXX, X non 0 and F
-    else ts.comparecode0F[j]  = 0;
-    if(count4==1 || count4==5) ts.comparecodeOut[0]  = code; //1 belong case 0xZZZ0ZZZZ, 5 belong  0xZZZZFZZZ, Z any char
-    else ts.comparecodeOut[0] = 0;
-    ts.comparecode[j]         = code ;
-    ts.d_inside[j]            = (count1==3 && signsbd==0)? true : false ;
-    ts.u_inside[j]            = (count2==3 && signsbu==0)? true : false ;
+
+    if(count3==4 || count3==20) ts.comparecode0F[j] = code; //4 belong case 0x0000XXXX, 20 belong 0xXXXXFFFF
+    else ts.comparecode0F[j] = 0;
+    ts.comparecode[j]   = code ;
+    ts.d_inside[j]      = (count1==3 && signsbd==0)? true : false ;
+    ts.u_inside[j]      = (count2==3 && signsbu==0)? true : false ;
 
     tempd   = ts.TriItvCompare_d(bos1, bos2, bos3, bos4, tempd, j);
     tempu   = ts.TriItvCompare_u(bos1, bos2, bos3, bos4, tempu, j);

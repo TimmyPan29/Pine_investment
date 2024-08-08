@@ -73,7 +73,6 @@ int OnInit() {
     for (int i=0; i<(PERIOD); ++i){
         ArrayResize(Tri[i].comparecode,i+1,i+1);
         ArrayResize(Tri[i].comparecode0F,i+1,i+1);
-        ArrayResize(Tri[i].comparecodeOut,1,1);
         ArrayResize(Tri[i].u_inside,i+1,i+1);
         ArrayResize(Tri[i].d_inside,i+1,i+1);
         ArrayResize(Tri[i].fvgtype0F,i+1,i+1);
@@ -136,7 +135,6 @@ void OnTick() {
         for (int i=0; i<(PERIOD); ++i){  
             ArrayInitialize(Tri[i].comparecode, NULL);
             ArrayInitialize(Tri[i].comparecode0F, NULL);
-            ArrayInitialize(Tri[i].comparecodeOut, NULL);
             ArrayInitialize(Tri[i].u_inside, NULL);
             ArrayInitialize(Tri[i].d_inside, NULL);
             ArrayInitialize(Tri[i].fvgtype0F, NULL);

@@ -73,7 +73,7 @@ struct Helper{
     bool ExchangeTime(int kbartime);
     string Sectorchooser(Treasure tr, SymbolSet& ss);
     string Symbolchooser(Treasure tr, SymbolSet& ss, int n);
-    int GetQuo(int minute, int htfint);
+    int GetQuo(int minute, int htfint, int quooffset);
     //int GetRm(int minute, int htfint);
 };
 int Helper::ChooseEx(Exchange ex){
@@ -201,9 +201,9 @@ int Helper::TurnMinX4(datetime dt){ //four days
     name = "TurnMin" ;
     return (dt%(BASESEC<<2))/60;
 }
-int Helper::GetQuo(int minute, int htfint){
+int Helper::GetQuo(int minute, int htfint, int quooffset){
     name = "GetQuo" ;
-    float m =float(minute);
+    float m =float(minute-quooffset);
     float h =float(htfint);
     return MathFloor(m/h) ;
 }
@@ -245,7 +245,7 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         ss.Forex[6] = "EURAUD";
         ss.Forex[7] = "EURCAD";
         ss.Forex[8] = "EURCHF";
-        ss.Forex[9] = "EURGBP";
+        ss.Forex[9] = "AUDCAD";
         ss.Forex[10] = "EURJPY";
         ss.Forex[11] = "EURNOK";
         ss.Forex[12] = "EURNZD";
