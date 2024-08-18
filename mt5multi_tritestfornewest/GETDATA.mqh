@@ -8,81 +8,58 @@ struct RawCandles{
    double      rawlow[];
    datetime    datadate[];
    int         dataQuo[PERIODX16];
-   int         head;
-   int         neck;
-   int         barrenew;
 };
 class Fetcher{
 private:
     RawCandles Vec_rawdata;
 public:
-    void Getprice(string symbol, int size);
-    void Getopen(string symbol, int size);
-    void Gethigh(string symbol, int size);
-    void Getlow(string symbol, int size);
-    void Getdate (string symbol, int size);
+    void Getprice(string symbol, int count);
+    void Getopen(string symbol, int count);
+    void Gethigh(string symbol, int count);
+    void Getlow(string symbol, int count);
+    void Getdate (string symbol, int count);
     //void GetRawData(string symbol, int size);
     // int  Searchdateidx(int tint, int starti);
     void Printdata() const;
     datetime Getdateinfo(int idx);
     double Getpriceinfo(int idx);
     RawCandles GetRaw();
-    void RenewQuo_Rm(int htfint, Helper& helper);
-    bool RenewRawdata(string symbol, int size);
-    Fetcher(int size){
-        ArrayResize(Vec_rawdata.rawprices, size);
-        ArrayResize(Vec_rawdata.datadate, size);
-        ArrayResize(Vec_rawdata.rawopen, size);
-        ArrayResize(Vec_rawdata.rawhigh, size);
-        ArrayResize(Vec_rawdata.rawlow, size);
-        head = size;
-        neck = size-1;
-        barrenew = 1;
+    void RenewQuo_Rm(int htfint, Helper& helper, int quooffset);
+    Fetcher(int count){
+        ArrayResize(Vec_rawdata.rawprices, count);
+        ArrayResize(Vec_rawdata.datadate, count);
+        ArrayResize(Vec_rawdata.rawopen, count);
+        ArrayResize(Vec_rawdata.rawhigh, count);
+        ArrayResize(Vec_rawdata.rawlow, count);
     }
 };
-bool Fetcher::RenewRawdata(string symbol, int size){   
-    matrix matrix_rates; 
-    matrix_rates.CopyRates(symbol, PERIOD_M1, COPY_RATES_OHLCT, 1, 1);
-    if(matrix_rates[3][0]!=Vec_rawdata.rawprices[head]){
-        head = (size+barrenew)%size ;
-        neck = (size+barrenew-1)%size ;
-        ++barrenew ;
-        Vec_rawdata.rawprices[head] = matrix_rates[3][0];
-        Vec_rawdata.rawhigh[head]   = matrix_rates[1][0];
-        Vec_rawdata.rawlow[head]    = matrix_rates[2][0];
-        Vec_rawdata.rawopen[head]   = matrix_rates[0][0];
-        Vec_rawdata.datadate[head]  = matrix_rates[4][0];
-        return true;
-    }
-    else false;
-}
-void Fetcher::Getprice(string symbol, int size){
-    int copiedPrices = CopyClose(symbol, PERIOD_M1, 0 , size, Vec_rawdata.rawprices);
-        if (copiedPrices < size) {
+void Fetcher::Getprice(string symbol, int count){
+    int copiedPrices = CopyClose(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawprices);
+        if (copiedPrices < count) {
             Print("Error fetching prices, only fetched ", copiedPrices, " prices.");
         }
 }
-void Fetcher::Gethigh(string symbol, int size){
-    int copiedHigh = CopyHigh(symbol, PERIOD_M1, 0 , size, Vec_rawdata.rawhigh);
-        if (copiedHigh < size) {
+void Fetcher::Gethigh(string symbol, int count){
+    int copiedHigh = CopyHigh(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawhigh);
+        if (copiedHigh < count) {
             Print("Error fetching High, only fetched ", copiedHigh, " High.");
         }
 }
-void Fetcher::Getlow(string symbol, int size){
-    int copiedLow = CopyLow(symbol, PERIOD_M1, 0 , size, Vec_rawdata.rawlow);
-        if (copiedLow < size) {
+void Fetcher::Getlow(string symbol, int count){
+    int copiedLow = CopyLow(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawlow);
+        if (copiedLow < count) {
             Print("Error fetching Low, only fetched ", copiedLow, " Low.");
         }
 }
-void Fetcher::Getopen(string symbol, int size){
-    int copiedOpen = CopyOpen(symbol, PERIOD_M1, 0 , size, Vec_rawdata.rawopen);
-        if (copiedOpen < size) {
+void Fetcher::Getopen(string symbol, int count){
+    int copiedOpen = CopyOpen(symbol, PERIOD_M1, 0 , count, Vec_rawdata.rawopen);
+        if (copiedOpen < count) {
             Print("Error fetching Open, only fetched ", copiedOpen, " Open.");
         }
 }
-void Fetcher::Getdate(string symbol, int size){
-    int copiedTimes = CopyTime(symbol, PERIOD_M1, 0 , size, Vec_rawdata.datadate);
-        if (copiedTimes < size) {
+void Fetcher::Getdate(string symbol, int count){
+    int copiedTimes = CopyTime(symbol, PERIOD_M1, 0 , count, Vec_rawdata.datadate);
+        if (copiedTimes < count) {
             Print("Error fetching times, only fetched ", copiedTimes, " times.");
         }
 }
@@ -93,17 +70,17 @@ void Fetcher::Printdata()const{
     }
 }
 datetime Fetcher::Getdateinfo(int idx){
-    return Vec_rawdata.datadate[idx];
+   return Vec_rawdata.datadate[idx];
 }
 double Fetcher::Getpriceinfo(int idx){
-    return Vec_rawdata.rawprices[idx];
+   return Vec_rawdata.rawprices[idx];
 }
 RawCandles Fetcher::GetRaw(){
-    return Vec_rawdata;
-}
-void Fetcher::RenewQuo_Rm(int htfint, Helper& helper){
+   return Vec_rawdata;
+} 
+void Fetcher::RenewQuo_Rm(int htfint, Helper& helper, int quooffset){
     for (int i=0; i<PERIODX4; ++i){
-        Vec_rawdata.dataQuo[i] = helper.GetQuo(i+1, htfint);
+        Vec_rawdata.dataQuo[i] = helper.GetQuo(i+1, htfint, quooffset);
         //Vec_rawdata.dataRm[i]  = helper.GetRm(i+1, htfint);
     }
 }

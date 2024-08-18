@@ -151,26 +151,24 @@ struct FVG{
         }     
     }
     void Putfvg_Monitor(const RawCandles& rc, int& cnt , int htfint, int rcsize){
-        int tail = Getfvgkbarsize();
+        int fvghead = Getfvgkbarsize(); //idx
         bool full;
-        full = tail==FVGsize-1 ;
+        full = fvghead==FVGsize-1 ;
+        fvgneck = fvghead;
         if(full){
-            fvgneck = fvghead;
             fvghead = (fvghead+1)%FVGsize;
         }
         else{
-            fvgneck = tail-1;
-            fvghead = tail;
-            ++tail;
+            fvghead = fvghead+1;
         }
         int start       = (kbar[fvgneck-1]+1)%rcsize   ;
         int start1       = (kbar[fvgneck-1]+2)%rcsize   ;
         int end         = kbar[fvgneck]  ;
         if(htfint == 1){
-            kbarclose[fvghead]  = rc.rawprices[cnt] ;
-            kbaropen[fvghead]   = rc.rawopen[cnt] ;
-            kbarhigh[fvghead]   = rc.rawhigh[cnt] ;
-            kbarlow[fvghead]    = rc.rawlow[cnt] ;
+            kbarclose[fvghead]  = rc.rawprices[kbar[fvgneck]] ;
+            kbaropen[fvghead]   = rc.rawopen[kbar[fvgneck]] ;
+            kbarhigh[fvghead]   = rc.rawhigh[kbar[fvgneck]] ;
+            kbarlow[fvghead]    = rc.rawlow[kbar[fvgneck] ;
         }
         else{
             kbarclose[fvghead]  = rc.rawprices[end] ;

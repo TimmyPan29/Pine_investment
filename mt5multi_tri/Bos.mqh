@@ -297,9 +297,10 @@ struct Triset{
     double minbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4);
     double TriItvCompare_d (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempd, const int& j);
     double TriItvCompare_u (const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& tempu, const int& j);
-    double TriItvCompare0X (FVG& fvg, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3);
-    double TriItvCompareXF (FVG& fvg, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3);
-    void   TriFVGcheck0F   (FVG& fvg, const double& u, const double& d, const int& j);
+    void   TriItvComparefvg(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const int& j);
+    double TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3);
+    double TriItvCompareXF (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3);
+    void   TriFVGcheck0F   (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const double& u, const double& d, const int& j);
 };
 double Triset::maxbos(const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4){
     double temp ;
@@ -351,7 +352,66 @@ double Triset::TriItvCompare_u (const BOS& bos1, const BOS& bos2, const BOS& bos
     }
     else return tempu ;
 }
-double Triset::TriItvCompare0X (FVG& fvg, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3){//7 belong case 0xXXX0XXXX, 11 belong 0xXXXXFXXX
+void Triset::TriItvComparefvg(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const int& j){
+    int effkbarsize  = fvg.Getfvgeffkbarsize();
+    int effkbarsize2 = fvg2.Getfvgeffkbarsize();
+    int effkbarsize3 = fvg3.Getfvgeffkbarsize();
+    int effkbarsize4 = fvg4.Getfvgeffkbarsize();
+    bool flag ;
+    int  reg     = fvgtype0F[j]  ;
+    if(u_inside[j]!=0 && d_inside[j]!=0){
+        for (int i=0; i<effkbarsize; ++i){
+            flag = ((fvg.LTprice[i]<bos1.sbu && fvg.LTprice[i]>bos1.sbd) || (fvg.RBprice[i]<bos1.sbu && fvg.RBprice[i]>bos1.sbd))? true : false ;
+            if(fvgtype0F[j]!=0xF){
+                if(flag){
+                    reg          = fvgtype0F[j] ;
+                    fvgtype0F[j] = (fvg.Property[i]%2==0)? 0xB : 0xA ;
+                }
+                if(reg+fvgtype0F[j]==0x6F){
+                    fvgtype0F[j] = 0xF ;
+                }
+            }
+            else break ;
+        }
+        for (int i=0; i<effkbarsize2; ++i){
+            flag = ((fvg2.LTprice[i]<bos1.sbu && fvg2.LTprice[i]>bos1.sbd) || (fvg2.RBprice[i]<bos1.sbu && fvg2.RBprice[i]>bos1.sbd))? true : false ;
+            if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
+                if(flag){
+                    reg          = fvgtype0F[j] ;
+                    fvgtype0F[j] = (fvg2.Property[i]%2==0)? 0xD : 0xC ;
+                }
+                if(reg+fvgtype0F[j]==0x8F || reg+fvgtype0F[j]==0xAF) fvgtype0F[j] = 0xE ;
+                else fvgtype0F[j] = fvgtype0F[j] == 0xD? 0xB : 0xA;
+            }
+            else break ;
+        } 
+        for (int i=0; i<effkbarsize3; ++i){
+            flag = ((fvg3.LTprice[i]<bos1.sbu && fvg3.LTprice[i]>bos1.sbd) || (fvg3.RBprice[i]<bos1.sbu && fvg3.RBprice[i]>bos1.sbd))? true : false ;
+            if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
+                if(flag){
+                    reg          = fvgtype0F[j] ;
+                    fvgtype0F[j] = (fvg2.Property[i]%2==0)? 0xD : 0xC ;
+                }
+                if(reg+fvgtype0F[j]==0x8F || reg+fvgtype0F[j]==0xAF) fvgtype0F[j] = 0xE ;
+                else fvgtype0F[j] = fvgtype0F[j] == 0xD? 0xB : 0xA;
+            }
+            else break ;
+        } 
+        for (int i=0; i<effkbarsize4; ++i){
+            flag = ((fvg4.LTprice[i]<bos1.sbu && fvg4.LTprice[i]>bos1.sbd) || (fvg4.RBprice[i]<bos1.sbu && fvg4.RBprice[i]>bos1.sbd))? true : false ;
+            if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
+                if(flag){
+                    reg          = fvgtype0F[j] ;
+                    fvgtype0F[j] = (fvg2.Property[i]%2==0)? 0xD : 0xC ;
+                }
+                if(reg+fvgtype0F[j]==0x8F || reg+fvgtype0F[j]==0xAF) fvgtype0F[j] = 0xE ;
+                else fvgtype0F[j] = fvgtype0F[j] == 0xD? 0xB : 0xA;
+            }
+            else break ;
+        } 
+    }
+}
+double Triset::TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3){//7 belong case 0xXXX0XXXX, 11 belong 0xXXXXFXXX
     double deltatemp = delta0X ;
     double minsbu ; //for TriFVGcheck0F
     double tempmin; //for TriFVGcheck0F
@@ -361,7 +421,7 @@ double Triset::TriItvCompare0X (FVG& fvg, const BOS& bos1, const BOS& bos2, cons
         minsbu      = MathMin(bos1.sbu, bos2.sbu);
         tempmin     = MathMin(bos3.sbu, bos4.sbu);
         minsbu      = MathMin(minsbu, tempmin);
-        TriFVGcheck0F(fvg, bos1.sbu, delta0X, j); //fix bos1.sbu from minsbu
+        TriFVGcheck0F(fvg, fvg2, fvg3, fvg4, bos1.sbu, delta0X, j); //fix bos1.sbu from minsbu
         //delta0X = temp1 - temp2 ;//其實不用差來算也可以 把0當成基準來比較就好
         if(wide2itv0X==-1){
             wide2itv0X = j ;
@@ -377,7 +437,7 @@ double Triset::TriItvCompare0X (FVG& fvg, const BOS& bos1, const BOS& bos2, cons
     }
     else return delta0X ;
 }
-double Triset::TriItvCompareXF (FVG& fvg, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3){//7 belong case 0xXXX0XXXX, 11 belong 0xXXXXFXXX
+double Triset::TriItvCompareXF (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3){//7 belong case 0xXXX0XXXX, 11 belong 0xXXXXFXXX
     double deltatemp = deltaXF ;
     double maxsbd ; //for TriFVGcheck0F
     double tempmax; //for TriFVGcheck0F
@@ -387,7 +447,7 @@ double Triset::TriItvCompareXF (FVG& fvg, const BOS& bos1, const BOS& bos2, cons
         maxsbd      = MathMax(bos1.sbd, bos2.sbd);
         tempmax     = MathMax(bos3.sbd, bos4.sbd);
         maxsbd      = MathMax(maxsbd, tempmax); 
-        TriFVGcheck0F(fvg, deltaXF, bos1.sbd, j); //fix bos1.sbd from maxsbd
+        TriFVGcheck0F(fvg, fvg2, fvg3, fvg4, deltaXF, bos1.sbd, j); //fix bos1.sbd from maxsbd
         if(wide2itvXF==-1){
             wide2itvXF = j ;
             deltatemp = deltaXF ;
@@ -402,8 +462,11 @@ double Triset::TriItvCompareXF (FVG& fvg, const BOS& bos1, const BOS& bos2, cons
     }
     else return deltaXF ;
 }
-void Triset::TriFVGcheck0F(FVG& fvg, const double& u, const double& d, const int& j){
-    int effkbarsize = fvg.Getfvgeffkbarsize();
+void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const double& u, const double& d, const int& j){
+    int effkbarsize  = fvg.Getfvgeffkbarsize();
+    int effkbarsize2 = fvg2.Getfvgeffkbarsize();
+    int effkbarsize3 = fvg3.Getfvgeffkbarsize();
+    int effkbarsize4 = fvg4.Getfvgeffkbarsize();
     bool flag ;
     fvgtype0F[j] = 0 ;
     int  reg     = fvgtype0F[j]  ;
@@ -412,11 +475,47 @@ void Triset::TriFVGcheck0F(FVG& fvg, const double& u, const double& d, const int
         if(fvgtype0F[j]!=0xF){
             if(flag){
                 reg          = fvgtype0F[j] ;
-                fvgtype0F[j] = (fvg.Property[i]%2==0)? 2 : 1 ;
+                fvgtype0F[j] = (fvg.Property[i]%2==0)? 2 : 1 ; //fvg.Property only exist {1,2,3,4}, four elements.
             }
             if(reg+fvgtype0F[j]==3){
                 fvgtype0F[j] = 0xF ;
             }
+        }
+        else break ;
+    } 
+    for (int i=0; i<effkbarsize2; ++i){
+        flag = ((fvg2.LTprice[i]<u && fvg2.LTprice[i]>d) || (fvg2.RBprice[i]<u && fvg2.RBprice[i]>d))? true : false ;
+        if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
+            if(flag){
+                reg          = fvgtype0F[j] ;
+                fvgtype0F[j] = (fvg2.Property[i]%2==0)? 0xB : 0xA ;
+            }
+            if(reg+fvgtype0F[j]==12 || reg+fvgtype0F[j]==0x5F) fvgtype0F[j] = 0xE ;
+            else fvgtype0F[j] = fvgtype0F[j] == 0xB? 2 : 1;
+        }
+        else break ;
+    } 
+    for (int i=0; i<effkbarsize3; ++i){
+        flag = ((fvg3.LTprice[i]<u && fvg3.LTprice[i]>d) || (fvg3.RBprice[i]<u && fvg3.RBprice[i]>d))? true : false ;
+        if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
+            if(flag){
+                reg          = fvgtype0F[j] ;
+                fvgtype0F[j] = (fvg3.Property[i]%2==0)? 0xB : 0xA ;
+            }
+            if(reg+fvgtype0F[j]==12 || reg+fvgtype0F[j]==0x5F) fvgtype0F[j] = 0xE ;
+            else fvgtype0F[j] = fvgtype0F[j] == 0xB? 2 : 1;
+        }
+        else break ;
+    } 
+    for (int i=0; i<effkbarsize4; ++i){
+        flag = ((fvg4.LTprice[i]<u && fvg4.LTprice[i]>d) || (fvg4.RBprice[i]<u && fvg4.RBprice[i]>d))? true : false ;
+        if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
+            if(flag){
+                reg          = fvgtype0F[j] ;
+                fvgtype0F[j] = (fvg4.Property[i]%2==0)? 0xB : 0xA ;
+            }
+            if(reg+fvgtype0F[j]==12 || reg+fvgtype0F[j]==0x5F) fvgtype0F[j] = 0xE ;
+            else fvgtype0F[j] = fvgtype0F[j] == 0xB? 2 : 1;
         }
         else break ;
     } 
@@ -580,7 +679,7 @@ void BOSJudge(BOS& bosdata, const int size, RawCandles& rd, const int starti, He
     //printf("cnt= %d\tk= %d", cnt,k);
 }//func end
 
-Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j, double& tempd, double& tempu, double& delta0X, double& deltaXF){
+Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j, double& tempd, double& tempu, double& delta0X, double& deltaXF){
     //-1 == no sbd, -2 == no sbu
     uint code       = 0 ;
     int count1      = 0 ;
@@ -596,14 +695,14 @@ Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4,
     for (int i = 0; i < 8; ++i) {
         code = (arr[i] == -1) ? (code & (LeftRotate(__7f10fMASK, index[i]))) : (arr[i] == -2) ? (code | (LeftRotate(__701ffMASK, index[i]))) :(code | ((i + 1) << index[i]));
     }
-//code non filtered
+//code non filtered bool
     if((code & __LEVEL1SBDMASK)<<4  > (code & __LEVEL2SBDMASK)) ++count1 ;
     if((code & __LEVEL1SBDMASK)<<8  > (code & __LEVEL3SBDMASK)) ++count1 ;
     if((code & __LEVEL1SBDMASK)<<12 > (code & __LEVEL4SBDMASK)) ++count1 ;
     if((code & __LEVEL1SBUMASK)>>4  < (code & __LEVEL2SBUMASK)) ++count2 ;
     if((code & __LEVEL1SBUMASK)>>8  < (code & __LEVEL3SBUMASK)) ++count2 ;
     if((code & __LEVEL1SBUMASK)>>12 < (code & __LEVEL4SBUMASK)) ++count2 ; 
-//code filtered
+//code filtered 0F
     if(( code & __LEVEL2SBDMASK  )  > 0) ++count3 ;
     if(( code & __LEVEL3SBDMASK  )  > 0) ++count3 ;
     if(( code & __LEVEL4SBDMASK  )  > 0) ++count3 ;
@@ -626,8 +725,9 @@ Triset TriCode(FVG& fvg, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4,
 
     tempd   = ts.TriItvCompare_d(bos1, bos2, bos3, bos4, tempd, j);
     tempu   = ts.TriItvCompare_u(bos1, bos2, bos3, bos4, tempu, j);
-    delta0X = ts.TriItvCompare0X(fvg, bos1, bos2, bos3, bos4, delta0X, j, count3);
-    deltaXF = ts.TriItvCompareXF(fvg, bos1, bos2, bos3, bos4, deltaXF, j, count3);
+    ts.TriItvComparefvg(fvg, fvg2, fvg3, fvg4, bos1, j);
+    delta0X = ts.TriItvCompare0X(fvg, fvg2, fvg3, fvg4, bos1, bos2, bos3, bos4, delta0X, j, count3);
+    deltaXF = ts.TriItvCompareXF(fvg, fvg2, fvg3, fvg4, bos1, bos2, bos3, bos4, deltaXF, j, count3);
 
     //Print("bos1.htfint: ", bos1.htfint);
     return ts;

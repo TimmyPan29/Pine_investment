@@ -18,7 +18,6 @@ input Treasure tr6           = Forex ;
 input int      symbol_n6     = 5     ;
 input Treasure tr7           = Forex ;
 input int      symbol_n7     = 6     ;
-input int      symbol7Off    = 0     ;
 input Treasure tr8           = Forex ;
 input int      symbol_n8     = 7     ;
 input Treasure tr9           = Forex ;
@@ -147,13 +146,13 @@ void OnTick() {
             Tri[i].wide2itvXF = -1;
             for(int j=0; j<=i; ++j){
                 if(i==0 && j==0){
-                    Tri[0]=TriCode(fvgarr[i], Tri[0], Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j, tempd, tempu, temp0X, tempXF);
+                    Tri[0]=TriCode(fvgarr[0], fvgarr[1], fvgarr[2], fvgarr[3], Tri[0], Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j, tempd, tempu, temp0X, tempXF);
                 }
                 else if(i!=0 && j==0){
-                    Tri[i]=TriCode(fvgarr[i], Tri[i], Bosarr[i], Bosarr[i+1], Bosarr[i+2], Bosarr[i+3], j, tempd, tempu, temp0X, tempXF);
+                    Tri[i]=TriCode(fvgarr[i], fvgarr[i+1], fvgarr[i+2], fvgarr[i+3], Tri[i], Bosarr[i], Bosarr[i+1], Bosarr[i+2], Bosarr[i+3], j, tempd, tempu, temp0X, tempXF);
                 }
                 else{
-                    Tri[i]=TriCode(fvgarr[i], Tri[i], Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j, tempd, tempu, temp0X, tempXF);
+                    Tri[i]=TriCode(fvgarr[i], fvgarr[i+(j+1)], fvgarr[i+((j+1)<<1)], fvgarr[i+(j+1)*3], Tri[i], Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j, tempd, tempu, temp0X, tempXF);
                 }
             }
             tempd = 0;

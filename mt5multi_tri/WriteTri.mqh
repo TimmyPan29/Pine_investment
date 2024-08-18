@@ -129,6 +129,14 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
                     else line2 += StringFormat("Itv %d      ", j+1);
                     line  += StringFormat("%d %d        ", Tri[i].d_inside[j],Tri[i].u_inside[j]);
                 }
+                // else if(Tri[i].u_inside[j] && Tri[i].d_inside[j]){
+                //     if (((j+1)/10)<1) line2 += StringFormat("Itv %d      ", j+1);
+                //     else if (((j+1)/10)<10) line2 += StringFormat("Itv %d     ", j+1);
+                //     else if (((j+1)/10)<100) line2 += StringFormat("Itv %d    ", j+1);
+                //     else if (((j+1)/10)<1000) line2 += StringFormat("Itv %d   ", j+1);
+                //     else line2 += StringFormat("Itv %d      ", j+1);
+                //     line  += StringFormat("%d%01X%d        ", Tri[i].d_inside[j],Tri[i].fvgtype0F[j],Tri[i].u_inside[j]);
+                // }
             }
             line2 += "widespace";
             line += StringFormat("%d %d", Tri[i].wide2itv_d+1,Tri[i].wide2itv_u+1);

@@ -38,6 +38,7 @@ FVG       fvgarr[PERIODX4] ;
 BOS Bosarr[PERIODX4]       ;//設一天會卡死 base最多到359 超過360要再想辦法
 Triset Tri[PERIOD]         ;
 int quooffset = 0;
+bool timerfg  = true        ;
 //vector quooffset{symbol1Off, symbol2Off, symbol3Off, symbol4Off, symbol5Off, symbol6Off, symbol7Off, symbol8Off, symbol9Off, symbol10Off};
 int OnInit() {
     printf("In initiation");
@@ -72,12 +73,14 @@ int OnInit() {
     for (int i=0; i<(PERIOD); ++i){
         ArrayResize(Tri[i].comparecode,i+1,i+1);
         ArrayResize(Tri[i].comparecode0F,i+1,i+1);
+        ArrayResize(Tri[i].code0FExtreme,i+1,i+1);
         ArrayResize(Tri[i].comparecodeOut,1,1);
         ArrayResize(Tri[i].u_inside,i+1,i+1);
         ArrayResize(Tri[i].d_inside,i+1,i+1);
         ArrayResize(Tri[i].fvgtype0F,i+1,i+1);
     }
     Print("end initiation");
+    EventSetTimer(60);
     return(INIT_SUCCEEDED) ;
 }
 
@@ -88,82 +91,89 @@ void OnDeinit(const int reason) {
     // Print a message to indicate the EA has been deinitialized
     Print("EA has been deinitialized.");
     // Add your deinitialization code here
+    EventKillTimer();
 }
 
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
 void OnTick() {
-    printf("In tick");
-    //+----------initiation---------+//
-    
-    //+----------initiation end---------+//
-    //+----------Put Data---------+//
-    for(int k=0; k<10; ++k){
-        if(sectornametemp[k]==NULL) continue ;
-        fc.Getprice(symboltemp[k], datasize);
-        fc.Getopen (symboltemp[k], datasize);
-        fc.Gethigh(symboltemp[k], datasize);
-        fc.Getlow(symboltemp[k], datasize);
-        fc.Getdate (symboltemp[k], datasize);
-        printf("You choose %s: %s",sectornametemp[k], symboltemp[k]);
-        Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", Period= ", PERIOD);
-        //+----------Put Data end---------+//
-        // u cannot write this way: ArrayResize(Bosarr,staticarraysize, staticarraysize);
-        // cuz u s still have not initialize the BOS type;
-        int barx = helper.Bartoint(bar) ;
-        for (int i=0; i<(PERIODX4); ++i){
-            if ((i+1)*barx <datasize) starti = (datasize-(i+1)*barx) ;
-            else starti = 0 ;
-            fc.RenewQuo_Rm(i+1, helper, quooffset);
-            Bosarr[i] = BOS(i+1);
-            fvgarr[i] = FVG(i+1);
-            rd   = fc.GetRaw();
-            BOSJudge(Bosarr[i], datasize, rd, starti, helper, fvgarr[i], i);
-        }
-        for (int i=0; i<(PERIODX4); ++i){  
-            int barsize = fvgarr[i].Getfvgkbarsize() ;
-            for(int j=0; j<barsize; ++j){
-                fvgarr[i].Putfvg_chlo(rd, j,i+1) ;
+    if(timerfg){
+        printf("In tick");
+        //+----------initiation---------+//
+        
+        //+----------initiation end---------+//
+        //+----------Put Data---------+//
+        for(int k=0; k<10; ++k){
+            if(sectornametemp[k]==NULL) continue ;
+            fc.Getprice(symboltemp[k], datasize);
+            fc.Getopen (symboltemp[k], datasize);
+            fc.Gethigh(symboltemp[k], datasize);
+            fc.Getlow(symboltemp[k], datasize);
+            fc.Getdate (symboltemp[k], datasize);
+            printf("You choose %s: %s",sectornametemp[k], symboltemp[k]);
+            Print(AccountInfoString(ACCOUNT_COMPANY)+", ",AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", Period= ", PERIOD);
+            //+----------Put Data end---------+//
+            // u cannot write this way: ArrayResize(Bosarr,staticarraysize, staticarraysize);
+            // cuz u s still have not initialize the BOS type;
+            int barx = helper.Bartoint(bar) ;
+            for (int i=0; i<(PERIODX4); ++i){
+                if ((i+1)*barx <datasize) starti = (datasize-(i+1)*barx) ;
+                else starti = 0 ;
+                fc.RenewQuo_Rm(i+1, helper, quooffset);
+                Bosarr[i] = BOS(i+1);
+                fvgarr[i] = FVG(i+1);
+                rd   = fc.GetRaw();
+                BOSJudge(Bosarr[i], datasize, rd, starti, helper, fvgarr[i], i);
             }
-            fvgarr[i].Putefffvg() ;
-        }
-        double tempd  ;
-        double tempu  ;
-        double temp0X ;
-        double tempXF ;  
-        for (int i=0; i<(PERIOD); ++i){  
-            ArrayInitialize(Tri[i].comparecode, NULL);
-            ArrayInitialize(Tri[i].comparecode0F, NULL);
-            ArrayInitialize(Tri[i].comparecodeOut, NULL);
-            ArrayInitialize(Tri[i].u_inside, NULL);
-            ArrayInitialize(Tri[i].d_inside, NULL);
-            ArrayInitialize(Tri[i].fvgtype0F, NULL);
-            Tri[i].wide2itv_d = -1;
-            Tri[i].wide2itv_u = -1;
-            Tri[i].wide2itv0X = -1;
-            Tri[i].wide2itvXF = -1;
-            for(int j=0; j<=i; ++j){
-                if(i==0 && j==0){
-                    Tri[0]=TriCode(fvgarr[0], fvgarr[1], fvgarr[2], fvgarr[3], Tri[0], Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j, tempd, tempu, temp0X, tempXF);
+            for (int i=0; i<(PERIODX4); ++i){  
+                int barsize = fvgarr[i].Getfvgkbarsize() ;
+                for(int j=0; j<barsize; ++j){
+                    fvgarr[i].Putfvg_chlo(rd, j,i+1) ;
                 }
-                else if(i!=0 && j==0){
-                    Tri[i]=TriCode(fvgarr[i], fvgarr[i+1], fvgarr[i+2], fvgarr[i+3], Tri[i], Bosarr[i], Bosarr[i+1], Bosarr[i+2], Bosarr[i+3], j, tempd, tempu, temp0X, tempXF);
-                }
-                else{
-                    Tri[i]=TriCode(fvgarr[i], fvgarr[i+(j+1)], fvgarr[i+((j+1)<<1)], fvgarr[i+(j+1)*3], Tri[i], Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j, tempd, tempu, temp0X, tempXF);
-                }
+                fvgarr[i].Putefffvg() ;
             }
-            tempd = 0;
-            tempu = 0;
+            double tempd  ;
+            double tempu  ;
+            double temp0X ;
+            double tempXF ;  
+            for (int i=0; i<(PERIOD); ++i){  
+                ArrayInitialize(Tri[i].comparecode, NULL);
+                ArrayInitialize(Tri[i].comparecode0F, NULL);
+                ArrayInitialize(Tri[i].code0FExtreme, NULL);
+                ArrayInitialize(Tri[i].comparecodeOut, NULL);
+                ArrayInitialize(Tri[i].u_inside, NULL);
+                ArrayInitialize(Tri[i].d_inside, NULL);
+                ArrayInitialize(Tri[i].fvgtype0F, NULL);
+                Tri[i].wide2itv_d = -1;
+                Tri[i].wide2itv_u = -1;
+                Tri[i].wide2itv0X = -1;
+                Tri[i].wide2itvXF = -1;
+                for(int j=0; j<=i; ++j){
+                    if(i==0 && j==0){
+                        Tri[0]=TriCode(fvgarr[0], fvgarr[1], fvgarr[2], fvgarr[3], Tri[0], Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j, tempd, tempu, temp0X, tempXF);
+                    }
+                    else if(i!=0 && j==0){
+                        Tri[i]=TriCode(fvgarr[i], fvgarr[i+1], fvgarr[i+2], fvgarr[i+3], Tri[i], Bosarr[i], Bosarr[i+1], Bosarr[i+2], Bosarr[i+3], j, tempd, tempu, temp0X, tempXF);
+                    }
+                    else{
+                        Tri[i]=TriCode(fvgarr[i], fvgarr[i+(j+1)], fvgarr[i+((j+1)<<1)], fvgarr[i+(j+1)*3], Tri[i], Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j, tempd, tempu, temp0X, tempXF);
+                    }
+                }
+                tempd = 0;
+                tempu = 0;
+            }
+            Print("diff zone  ", helper.Extime());
+            printf("in Outputfile process");
+            TriWrite(symboltemp[k], Tri, sectornametemp[k]);
+            FvgWrite(symboltemp[k], fvgarr, sectornametemp[k]);
         }
-        Print("diff zone  ", helper.Extime());
-        TriWrite(symboltemp[k], Tri, sectornametemp[k]);
-        FvgWrite(symboltemp[k], fvgarr, sectornametemp[k]);
-    }
+        timerfg = false ;
+    } 
 }
 void OnTimer(){
-
+    printf("in timer");
+    timerfg = true ;
 }
 //+------------------------------------------------------------------+
 //| Custom start function                                            |
