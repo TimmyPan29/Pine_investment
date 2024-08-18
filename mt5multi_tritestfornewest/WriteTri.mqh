@@ -48,25 +48,11 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
             line += StringFormat("Period %d ", i+1);
             bool highfg = false ;
             bool lowfg  = false ;
+            bool rfvgfg = false ;
+            bool gfvgfg = false ;
             for(int j=0; j<=i; ++j){
                 if(Tri[i].fvgtype0F[j]==0) continue ;
                 if(Tri[i].comparecode0F[j]==0) continue ;
-                for(int k=0; k<=i; k++){
-                    if((iHigh(symbolname,PERIOD_M1,k)>Tri[i].code0FExtreme[j])){
-                        highfg = true ; 
-                        //if(i==198)printf("Tri[%d].code0FExtreme[%d]= %.4f", i,j,Tri[i].code0FExtreme[j]) ;
-                        //if(i==198)printf("iHigh(symbolname,PERIOD_M1,%d)= %.4f", k, iHigh(symbolname,PERIOD_M1,k)) ;
-                        break; 
-                    } 
-                    else highfg = false ;
-                }
-                for(int k=0; k<=i; k++){
-                    if((iLow(symbolname,PERIOD_M1,k)<Tri[i].code0FExtreme[j])){
-                        lowfg = true ; 
-                        break;    
-                    } 
-                    else lowfg = false ;
-                }
                 if(((Tri[i].comparecode0F[j]&__LEVEL1SBUMASK)==__LEVEL1SBUMASK) && highfg) continue ;
                 else if(((Tri[i].comparecode0F[j]&__LEVEL1SBDMASK)==0) && lowfg) continue ;
                 else{

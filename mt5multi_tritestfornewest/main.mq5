@@ -167,6 +167,27 @@ void OnTick() {
                 tempd = 0;
                 tempu = 0;
             }
+            for (int i=0; i<(PERIOD); ++i){
+                for(int j=0; j<=i; ++j){
+                    for(int k=0; k<=i; k++){
+                        if((iHigh(symbolname,PERIOD_M1,k)>Tri[i].code0FExtreme[j])){
+                            highfg = true ; 
+                            //if(i==198)printf("Tri[%d].code0FExtreme[%d]= %.4f", i,j,Tri[i].code0FExtreme[j]) ;
+                            //if(i==198)printf("iHigh(symbolname,PERIOD_M1,%d)= %.4f", k, iHigh(symbolname,PERIOD_M1,k)) ;
+                            break; 
+                        } 
+                        else highfg = false ;
+                    }
+                    for(int k=0; k<=i; k++){
+                        if((iLow(symbolname,PERIOD_M1,k)<Tri[i].code0FExtreme[j])){
+                            lowfg = true ; 
+                            break;    
+                        } 
+                        else lowfg = false ;
+                    }
+                }
+            }void BoundTouchCheck(Tri, i)
+             void FvgTouchCheck(Tri, i)
             Print("diff zone  ", helper.Extime());
         }
         timerfg = false ;
