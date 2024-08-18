@@ -285,8 +285,12 @@ struct Triset{
     uint    comparecode[]        ;
     uint    comparecode0F[]      ;
     double  code0FExtreme[]      ;
-    double  code0FgFvgfExtreme[] ;
-    double  code0FrFvgfExtreme[] ;
+    double  code0FgFvgExtreme[] ;
+    double  code0FrFvgExtreme[] ;
+    bool    highfg[]             ;
+    bool    lowfg[]              ;
+    bool    gfvgfg[]             ;
+    bool    rfvgfg[]             ; 
     int     comparecodeOut[]     ;
     bool    u_inside[]           ;
     bool    d_inside[]           ;
@@ -482,8 +486,8 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
         if(flag){
             if((fvg.Property[i]%2)==0) gfvgextreme = fvg.RBprice[i]>gfvgextreme? fvg.RBprice[i] : gfvgextreme ;
             else rfvgextreme = fvg.RBprice[i]<rfvgextreme? fvg.RBprice[i] : rfvgextreme ;
-            code0FFvgfExtreme[j] = gfvgextreme ;
-            code0FFvrfExtreme[j] = rfvgextreme ;
+            code0FgFvgExtreme[j] = gfvgextreme ;
+            code0FrFvgExtreme[j] = rfvgextreme ;
         }
         if(fvgtype0F[j]!=0xF){
             if(flag){
@@ -747,6 +751,53 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, BOS& bos1,
 
     //Print("bos1.htfint: ", bos1.htfint);
     return ts;
+}
+void BoundTouchCheck(Triset& ts, const int& htfint, const string& symbolname){
+    for (int j=0; j<=htfint; ++j){
+        for(int k=0; k<=htfint; k++){
+            if((iHigh(symbolname,PERIOD_M1,k)>ts.code0FExtreme[j])){
+                ts.highfg[j] = true ; 
+                //if(i==198)printf("ts.code0FExtreme[%d]= %.4f", i,j,ts.code0FExtreme[j]) ;
+                //if(i==198)printf("iHigh(symbolname,PERIOD_M1,%d)= %.4f", k, iHigh(symbolname,PERIOD_M1,k)) ;
+                break; 
+            } 
+            else ts.highfg[j] = false ;
+        }
+        for(int k=0; k<=htfint; k++){
+            if((iLow(symbolname,PERIOD_M1,k)<ts.code0FExtreme[j])){
+                ts.lowfg[j] = true ; 
+                break;    
+            } 
+            else ts.lowfg[j] = false ;
+        }
+    }
+}
+void FvgTouchCheck(Triset& ts, const int& htfint, const string& symbolname){
+    for (int j=0; j<=htfint; ++j){
+        uint code = ts.comparecode0F[j] ;
+        int  type = ts.fvgtype0F[j]     ;
+        if(!code && type==0xF){
+            if((code & __LEVEL1SBDMASK) == 0){
+                for(int k=0; k<=htfint; k++){
+                    if((iLow(symbolname,PERIOD_M1,k)<=ts.code0FgFvgExtreme[j])){
+                        ts.gfvgfg[j] = true ; 
+                        break; 
+                    } 
+                    else ts.gfvgfg[j] = false ;
+                }
+            }
+            else{
+                for(int k=0; k<=htfint; k++){
+                    if((iHigh(symbolname,PERIOD_M1,k)>=ts.code0FrFvgExtreme[j])){
+                        ts.rfvgfg[j] = true ; 
+                        break;    
+                    } 
+                    else ts.rfvgfg[j] = false ;
+                }
+            }
+        }
+        else continue ;
+    }
 }
 #endif
 //TimeToString(Vec_rawdata.datadate[i], TIME_MINUTES); useful

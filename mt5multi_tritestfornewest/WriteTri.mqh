@@ -53,8 +53,8 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
             for(int j=0; j<=i; ++j){
                 if(Tri[i].fvgtype0F[j]==0) continue ;
                 if(Tri[i].comparecode0F[j]==0) continue ;
-                if(((Tri[i].comparecode0F[j]&__LEVEL1SBUMASK)==__LEVEL1SBUMASK) && highfg) continue ;
-                else if(((Tri[i].comparecode0F[j]&__LEVEL1SBDMASK)==0) && lowfg) continue ;
+                if(((Tri[i].comparecode0F[j]&__LEVEL1SBUMASK)==__LEVEL1SBUMASK) && (Tri[i].highfg[j] || Tri[i].rfvgfg[j])) continue ;
+                else if(((Tri[i].comparecode0F[j]&__LEVEL1SBDMASK)==0) && (Tri[i].lowfg[j] || Tri[i].gfvgfg[j])) continue ;
                 else{
                     if (((j+1)/10)<1) line2 += StringFormat("Itv %d       ", j+1);
                     else if (((j+1)/10)<10) line2 += StringFormat("Itv %d      ", j+1);

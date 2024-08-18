@@ -71,15 +71,19 @@ int OnInit() {
         symboltemp[9] = helper.Symbolchooser(tr10, Symbolset, symbol_n10);
     }
     for (int i=0; i<(PERIOD); ++i){
-        ArrayResize(Tri[i].comparecode,i+1,i+1);
-        ArrayResize(Tri[i].comparecode0F,i+1,i+1);
-        ArrayResize(Tri[i].code0FExtreme,i+1,i+1);
-        ArrayResize(Tri[i].code0FgFvgExtreme,i+1,i+1);
-        ArrayResize(Tri[i].code0FgFvrExtreme,i+1,i+1);
-        ArrayResize(Tri[i].comparecodeOut,1,1);
-        ArrayResize(Tri[i].u_inside,i+1,i+1);
-        ArrayResize(Tri[i].d_inside,i+1,i+1);
-        ArrayResize(Tri[i].fvgtype0F,i+1,i+1);
+        ArrayResize(Tri[i].comparecode,i+1,i+1)         ;
+        ArrayResize(Tri[i].comparecode0F,i+1,i+1)       ;
+        ArrayResize(Tri[i].code0FExtreme,i+1,i+1)       ;
+        ArrayResize(Tri[i].code0FgFvgExtreme,i+1,i+1)   ;
+        ArrayResize(Tri[i].code0FrFvgExtreme,i+1,i+1)   ;
+        ArrayResize(Tri[i].highfg,i+1,i+1)              ;
+        ArrayResize(Tri[i].lowfg,i+1,i+1)               ;
+        ArrayResize(Tri[i].gfvgfg,i+1,i+1)              ;
+        ArrayResize(Tri[i].rfvgfg,i+1,i+1)              ; 
+        ArrayResize(Tri[i].comparecodeOut,1,1)          ;
+        ArrayResize(Tri[i].u_inside,i+1,i+1)            ;
+        ArrayResize(Tri[i].d_inside,i+1,i+1)            ;
+        ArrayResize(Tri[i].fvgtype0F,i+1,i+1)           ;
     }
     Print("end initiation");
     EventSetTimer(120);
@@ -140,15 +144,19 @@ void OnTick() {
             double temp0X ;
             double tempXF ;  
             for (int i=0; i<(PERIOD); ++i){  
-                ArrayInitialize(Tri[i].comparecode, NULL);
-                ArrayInitialize(Tri[i].comparecode0F, NULL);
-                ArrayInitialize(Tri[i].code0FExtreme, NULL);
-                ArrayInitialize(Tri[i].code0FgFvgExtreme, NULL);
-                ArrayInitialize(Tri[i].code0FrFvgExtreme, NULL);
-                ArrayInitialize(Tri[i].comparecodeOut, NULL);
-                ArrayInitialize(Tri[i].u_inside, NULL);
-                ArrayInitialize(Tri[i].d_inside, NULL);
-                ArrayInitialize(Tri[i].fvgtype0F, NULL);
+                ArrayInitialize(Tri[i].comparecode, NULL)       ;
+                ArrayInitialize(Tri[i].comparecode0F, NULL)     ;
+                ArrayInitialize(Tri[i].code0FExtreme, NULL)     ;
+                ArrayInitialize(Tri[i].code0FgFvgExtreme, NULL) ;
+                ArrayInitialize(Tri[i].code0FrFvgExtreme, NULL) ;
+                ArrayInitialize(Tri[i].highfg, NULL)            ;
+                ArrayInitialize(Tri[i].lowfg, NULL)             ;
+                ArrayInitialize(Tri[i].gfvgfg, NULL)            ;
+                ArrayInitialize(Tri[i].rfvgfg, NULL)            ;
+                ArrayInitialize(Tri[i].comparecodeOut, NULL)    ;
+                ArrayInitialize(Tri[i].u_inside, NULL)          ;
+                ArrayInitialize(Tri[i].d_inside, NULL)          ;
+                ArrayInitialize(Tri[i].fvgtype0F, NULL)         ;
                 Tri[i].wide2itv_d = -1;
                 Tri[i].wide2itv_u = -1;
                 Tri[i].wide2itv0X = -1;
@@ -168,34 +176,16 @@ void OnTick() {
                 tempu = 0;
             }
             for (int i=0; i<(PERIOD); ++i){
-                for(int j=0; j<=i; ++j){
-                    for(int k=0; k<=i; k++){
-                        if((iHigh(symbolname,PERIOD_M1,k)>Tri[i].code0FExtreme[j])){
-                            highfg = true ; 
-                            //if(i==198)printf("Tri[%d].code0FExtreme[%d]= %.4f", i,j,Tri[i].code0FExtreme[j]) ;
-                            //if(i==198)printf("iHigh(symbolname,PERIOD_M1,%d)= %.4f", k, iHigh(symbolname,PERIOD_M1,k)) ;
-                            break; 
-                        } 
-                        else highfg = false ;
-                    }
-                    for(int k=0; k<=i; k++){
-                        if((iLow(symbolname,PERIOD_M1,k)<Tri[i].code0FExtreme[j])){
-                            lowfg = true ; 
-                            break;    
-                        } 
-                        else lowfg = false ;
-                    }
-                }
-            }void BoundTouchCheck(Tri, i)
-             void FvgTouchCheck(Tri, i)
+                BoundTouchCheck(Tri[i], i, symboltemp[k]);
+                FvgTouchCheck(Tri[i], i, symboltemp[k])  ;
+            }
             Print("diff zone  ", helper.Extime());
+            printf("in Outputfile process");
+            TriWrite(symboltemp[k], Tri, sectornametemp[k]);
+            FvgWrite(symboltemp[k], fvgarr, sectornametemp[k]);
         }
         timerfg = false ;
     }
-    printf("in Outputfile process");
-        if(sectornametemp[k]==NULL) continue ;
-        TriWrite(symboltemp[k], Tri, sectornametemp[k]);
-        FvgWrite(symboltemp[k], fvgarr, sectornametemp[k]);
 }
 void OnTimer(){
     printf("in timer");
