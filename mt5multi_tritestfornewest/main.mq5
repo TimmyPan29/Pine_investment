@@ -74,6 +74,8 @@ int OnInit() {
         ArrayResize(Tri[i].comparecode,i+1,i+1);
         ArrayResize(Tri[i].comparecode0F,i+1,i+1);
         ArrayResize(Tri[i].code0FExtreme,i+1,i+1);
+        ArrayResize(Tri[i].code0FgFvgExtreme,i+1,i+1);
+        ArrayResize(Tri[i].code0FgFvrExtreme,i+1,i+1);
         ArrayResize(Tri[i].comparecodeOut,1,1);
         ArrayResize(Tri[i].u_inside,i+1,i+1);
         ArrayResize(Tri[i].d_inside,i+1,i+1);
@@ -141,6 +143,8 @@ void OnTick() {
                 ArrayInitialize(Tri[i].comparecode, NULL);
                 ArrayInitialize(Tri[i].comparecode0F, NULL);
                 ArrayInitialize(Tri[i].code0FExtreme, NULL);
+                ArrayInitialize(Tri[i].code0FgFvgExtreme, NULL);
+                ArrayInitialize(Tri[i].code0FrFvgExtreme, NULL);
                 ArrayInitialize(Tri[i].comparecodeOut, NULL);
                 ArrayInitialize(Tri[i].u_inside, NULL);
                 ArrayInitialize(Tri[i].d_inside, NULL);
@@ -168,11 +172,9 @@ void OnTick() {
         timerfg = false ;
     }
     printf("in Outputfile process");
-    for(int k=0; k<10; ++k){
         if(sectornametemp[k]==NULL) continue ;
         TriWrite(symboltemp[k], Tri, sectornametemp[k]);
         FvgWrite(symboltemp[k], fvgarr, sectornametemp[k]);
-    }
 }
 void OnTimer(){
     printf("in timer");

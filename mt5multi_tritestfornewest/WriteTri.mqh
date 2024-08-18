@@ -54,8 +54,8 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
                 for(int k=0; k<=i; k++){
                     if((iHigh(symbolname,PERIOD_M1,k)>Tri[i].code0FExtreme[j])){
                         highfg = true ; 
-                        if(i==198)printf("Tri[%d].code0FExtreme[%d]= %.4f", i,j,Tri[i].code0FExtreme[j]) ;
-                        if(i==198)printf("iHigh(symbolname,PERIOD_M1,%d)= %.4f", k, iHigh(symbolname,PERIOD_M1,k)) ;
+                        //if(i==198)printf("Tri[%d].code0FExtreme[%d]= %.4f", i,j,Tri[i].code0FExtreme[j]) ;
+                        //if(i==198)printf("iHigh(symbolname,PERIOD_M1,%d)= %.4f", k, iHigh(symbolname,PERIOD_M1,k)) ;
                         break; 
                     } 
                     else highfg = false ;
