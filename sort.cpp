@@ -31,7 +31,7 @@ int main() {
 
     // 初始化索引数组
     for (int i = 0; i < size; ++i) {
-        index[i] = i;
+        index[i] = i+1;
     }
 
     // 使用插入排序对数组进行排序，同时维护索引
@@ -40,7 +40,7 @@ int main() {
     // 输出排序后的结果和原始索引
     std::cout << "Sorted values and their original indices:" << std::endl;
     for (int i = 0; i < size; ++i) {
-        std::cout << "Value: " << values[i] << ", Original index: " << index[i] << std::endl;
+        std::cout << "Value: " << values[i] << ", Original period: " << index[i] << std::endl;
     }
 
     return 0;

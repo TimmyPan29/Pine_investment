@@ -30,8 +30,6 @@ struct BOS{
     label           sbd_lb      ;
     line            sbd_ln      ;
     string          s_ddate     ;
-    datetime        t_temp1     ;
-    datetime        t_temp2     ;
 
     BOS():sbu_lb(""),sbu_ln(""),sbd_lb(""),sbd_ln(""){
         htfint = 0;
@@ -73,15 +71,20 @@ struct BOS{
 struct FVG{
     int namei                 ;
     int Property[]            ; //property= 2 green , =1 red, =0 no existence
+    int leadblockfg[]         ; // if true, lead from certain bar blocked the fvg no matter which is red or green fvg. 0 is not blocked, 1 is partly blocked, and  2 is fully blocked
+    double leadblockbound[]   ; // if leadbolckfg is true, I must know exactly the value of bound blocked .
     int kbar[]                ; // index : 0 ~ datasize-2 are targets
     double kbarclose[]        ;
     double kbarhigh[]         ;
     double kbarlow[]          ;
     double kbaropen[]         ;
+    datetime kbartime[]       ;
     double LTprice[]          ;
     double RBprice[]          ;
-    int effkbar[];
-    int effkbarend[];
+    datetime Boxtime[]         ;
+    int effkbar[]             ;
+    int effkbarend[]          ;
+    bool outsidebosfvgfg[]    ;
     FVG(){}
     FVG(int i){
         namei = i ;
@@ -90,20 +93,31 @@ struct FVG{
         ArrayResize(kbarhigh,FVGarraysize,FVGarraysize) ;
         ArrayResize(kbarlow,FVGarraysize,FVGarraysize)  ;
         ArrayResize(kbaropen,FVGarraysize,FVGarraysize) ;
-        ArrayResize(Property,300,300)   ;
-        ArrayResize(LTprice,300,300)    ;
-        ArrayResize(RBprice,300,300)    ;
-        ArrayResize(effkbar,300,300)    ;
-        ArrayResize(effkbarend,300,300) ;
-        ArrayInitialize(kbar,-1)        ;
-        ArrayInitialize(kbarclose,-1)   ;
-        ArrayInitialize(kbarhigh,-1)    ;
-        ArrayInitialize(kbarlow,-1)     ;
-        ArrayInitialize(kbaropen,-1)    ;
-        ArrayInitialize(Property,-1)    ;
-        ArrayInitialize(LTprice,-1)     ;
-        ArrayInitialize(RBprice,-1)     ;
-        ArrayInitialize(effkbar,-1)     ;
+        ArrayResize(kbartime,FVGarraysize,FVGarraysize) ;
+        ArrayResize(Property,300,300)                   ;
+        ArrayResize(leadblockfg,300,300)                ;
+        ArrayResize(leadblockbound,300,300)             ;
+        ArrayResize(LTprice,300,300)                    ;
+        ArrayResize(RBprice,300,300)                    ;
+        ArrayResize(Boxtime,300,300)                     ;
+        ArrayResize(effkbar,300,300)                    ;
+        ArrayResize(effkbarend,300,300)                 ;
+        ArrayResize(outsidebosfvgfg,300,300)            ;
+        ArrayInitialize(kbar,-1)                        ;
+        ArrayInitialize(kbarclose,-1)                   ;
+        ArrayInitialize(kbarhigh,-1)                    ;
+        ArrayInitialize(kbarlow,-1)                     ;
+        ArrayInitialize(kbaropen,-1)                    ;
+        ArrayInitialize(kbartime,0)                     ;
+        ArrayInitialize(Property,-1)                    ;
+        ArrayInitialize(leadblockfg,-1)                 ;
+        ArrayInitialize(leadblockbound,-1)              ;
+        ArrayInitialize(LTprice,-1)                     ;
+        ArrayInitialize(RBprice,-1)                     ;
+        ArrayInitialize(Boxtime,0)                       ;
+        ArrayInitialize(effkbar,-1)                     ;
+        ArrayInitialize(effkbarend,-1)                  ;
+        ArrayInitialize(outsidebosfvgfg,true)          ;
     }
     
     bool FVGkbarBull(int k){
@@ -112,30 +126,35 @@ struct FVG{
         if (kbarclose[k] - kbaropen[k] == 0 && k!=0) b = FVGkbarBull(k-1);
         return b ;
     }
-    void Putfvg_chlo(const RawCandles& rc, int& cnt , int htfint){ 
+    void Putfvg_chlo(const matrix& Mat, int& cnt , int htfint){ //OHLCT
+        int kbaridx   = kbar[cnt]             ;
+        int kbaridxm1 = cnt>0? kbar[cnt-1] : 0;
         if(cnt==0){
-            kbarclose[cnt]  = rc.rawprices[kbar[cnt]];
-            kbarhigh[cnt]   = rc.rawhigh[kbar[cnt]] ;
-            kbarlow[cnt]    = rc.rawlow[kbar[cnt]]  ;
-            kbaropen[cnt]   = rc.rawopen[kbar[cnt]] ;
+            kbarclose[cnt]  = Mat[3][kbaridx]      ;
+            kbarhigh[cnt]   = Mat[1][kbaridx]      ;
+            kbarlow[cnt]    = Mat[2][kbaridx]      ;
+            kbaropen[cnt]   = Mat[0][kbaridx]      ;
+            kbartime[cnt]   = Mat[4][kbaridx]      ;
         }
         else{
             if(htfint == 1){
-                kbarclose[cnt]  = rc.rawprices[kbar[cnt]];
-                kbarhigh[cnt]   = rc.rawhigh[kbar[cnt]] ;
-                kbarlow[cnt]    = rc.rawlow[kbar[cnt]]  ;
-                kbaropen[cnt]   = rc.rawopen[kbar[cnt]] ;
+                kbarclose[cnt]  = Mat[3][kbaridx]      ;
+                kbarhigh[cnt]   = Mat[1][kbaridx]      ;
+                kbarlow[cnt]    = Mat[2][kbaridx]      ;
+                kbaropen[cnt]   = Mat[0][kbaridx]      ;
+                kbartime[cnt]   = Mat[4][kbaridx]      ;
             }
             else{
-                int start       = kbar[cnt-1]+1   ;
-                int end         = kbar[cnt]  ;
-                kbarclose[cnt]  = rc.rawprices[kbar[cnt]] ;
-                kbaropen[cnt]   = rc.rawopen[start] ;
-                kbarhigh[cnt]   = rc.rawhigh[start] ;
-                kbarlow[cnt]    = rc.rawlow[start] ;
+                int start       = kbaridxm1+1          ;
+                int end         = kbaridx              ;
+                kbarclose[cnt]  = Mat[3][kbaridx]      ;
+                kbartime[cnt]   = Mat[4][kbaridx]      ;
+                kbaropen[cnt]   = Mat[0][start]        ;
+                kbarhigh[cnt]   = Mat[1][start]        ;
+                kbarlow[cnt]    = Mat[2][start]        ;
                 while (start < end){
-                    kbarhigh[cnt] = kbarhigh[cnt]>rc.rawhigh[start+1]? kbarhigh[cnt] : rc.rawhigh[start+1] ;
-                    kbarlow[cnt]  = kbarlow[cnt]<rc.rawlow[start+1]? kbarlow[cnt] : rc.rawlow[start+1] ;
+                    kbarhigh[cnt] = kbarhigh[cnt]>Mat[1][start+1]? kbarhigh[cnt] : Mat[1][start+1]     ;
+                    kbarlow[cnt]  = kbarlow[cnt]<Mat[2][start+1]?  kbarlow[cnt]  : Mat[2][start+1]     ;
                     ++start ;
                 }
             }
@@ -197,6 +216,82 @@ struct FVG{
         }
         return temp ;
     }
+    double Findmaxhighaftk(int idx, int kbarsize, int& kbarend, BOS& bos1){//for lead line block fvg check, maxhigh lead will block green fvg no matter it is up bar or down bar .
+        int i = idx;
+        double temphigh;
+        double temp ;
+        datetime ktime ;
+        datetime temptime ;
+        if (i+3==kbarsize){
+            ktime = kbartime[kbarsize-1] ;
+            temp = kbarhigh[kbarsize-1] ; 
+        } 
+        else{
+            ktime = kbartime[i+3];
+            temp = kbarhigh[i+3];   
+        }
+        if(((bos1.sbd>0)&&(bos1.sbu<0))||((bos1.sbu>0)&&(bos1.sbd<0))){
+            temptime = bos1.sbd>0? bos1.sbd_t : bos1.sbu_t ;
+            while((i+3<kbarsize)&&(ktime<temptime)){
+                temphigh = kbarhigh[i+3];
+                if(temphigh>temp){
+                    temp = temphigh;
+                    kbarend = i+3 ;
+                } 
+                ++i ;
+            }
+        }
+        else{
+            temptime =  bos1.sbd_t>bos1.sbu_t? bos1.sbu_t : bos1.sbd_t ;
+            while((i+3<kbarsize)&&(ktime<temptime)){
+                temphigh = kbarhigh[i+3];
+                if(temphigh>temp){
+                    temp = temphigh;
+                    kbarend = i+3 ;
+                } 
+                ++i ;
+            }
+        }
+        return temp ;
+    }
+    double Findminlowaftk(int idx, int kbarsize, int& kbarend, BOS& bos1){//for lead line block fvg check, maxhigh lead will block green fvg no matter it is up bar or down bar .
+        int i = idx;
+        double templow;
+        double temp ;
+        datetime ktime ;
+        if (i+3==kbarsize){
+            ktime = kbartime[kbarsize-1] ;
+            temp = kbarlow[kbarsize-1] ; 
+        } 
+        else{
+            ktime = kbartime[i+3];
+            temp = kbarlow[i+3];   
+        }
+        if(((bos1.sbd>0)&&(bos1.sbu<0))||((bos1.sbu>0)&&(bos1.sbd<0))){
+            datetime temptime = bos1.sbd>0? bos1.sbd_t : bos1.sbu_t ;
+            while((i+3<kbarsize)&&(ktime<temptime)){
+                templow = kbarlow[i+3];
+                if(templow<temp){
+                    temp = templow;
+                    kbarend = i+3 ;
+                } 
+                ++i ;
+            }
+        }
+        else{
+            datetime temptime =  bos1.sbd_t>bos1.sbu_t? bos1.sbu_t : bos1.sbd_t ;
+            while((i+3<kbarsize)&&(ktime<temptime)){
+                templow = kbarlow[i+3];
+                if(templow<temp){
+                    temp = templow;
+                    kbarend = i+3 ;
+                } 
+                ++i ;
+            }
+        }
+        
+        return temp ;
+    }
     int Getfvgkbarsize(){
         int i=0 ;
         while(kbar[i]!=-1){
@@ -212,29 +307,62 @@ struct FVG{
         return i ;
     }
 
-    void Putefffvg(){
+    void Putefffvg(BOS& bos1){
         int kbarsize = Getfvgkbarsize() ;
         double maxpt;
         double minpt;
-        double boxLT;
+        double lhigh; //l for lead line. 
+        double llow ;
+        double boxLT; // LT for left top. 
         double boxRB;
+        datetime boxtime;
         int kbarmaxend ;
         int kbarminend ;
+        int kbarhighend;
+        int kbarlowend ;
         int    cnt =0;
         for(int putidx=0; putidx<kbarsize-2; ++putidx){
             kbarmaxend = 0;
             kbarminend = 0;
+            kbarhighend= 0;
+            kbarlowend = 0;
             maxpt = Findmaxcloseaftk(putidx, kbarsize, kbarmaxend);
             minpt = Findmincloseaftk(putidx, kbarsize, kbarminend);
+            lhigh = Findmaxhighaftk(putidx, kbarsize, kbarhighend, bos1);
+            llow  = Findminlowaftk(putidx, kbarsize, kbarlowend, bos1)  ;
             if(FVGupdown(putidx, kbarsize) == 2){ //green
                 boxLT = kbarhigh[putidx];
-                boxRB = kbarlow[putidx+2] ;
+                boxRB = kbarlow[putidx+2];
+                boxtime=kbartime[putidx+1];
                 if (minpt>boxRB){ //fvg exist
                     Property[cnt]    = 2 ;
                     LTprice[cnt]     = boxLT ;
                     RBprice[cnt]     = boxRB ;
+                    Boxtime[cnt]     = boxtime;
                     effkbar[cnt]     = kbar[putidx];
                     effkbarend[cnt]  = kbar[putidx+2];
+                    if(llow>boxRB){
+                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                        leadblockfg[cnt] = 0;   
+                    } 
+                    else if (llow <= boxLT){
+                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                        leadblockfg[cnt] = 2;  // properry, leadblockfg{x 0}or{x 1} belong noblock or partly blocked respectively;//{x 2}is fully blocked
+                        //fvg not exist anymore 
+                    }
+                    else{
+                        RBprice[cnt]        = llow ;
+                        leadblockbound[cnt] = llow ;
+                        leadblockfg[cnt] = 1;
+                    }
+                    if(leadblockfg[cnt]!=2){
+                        if((bos1.sbd>0) && (bos1.sbu<0))  outsidebosfvgfg[cnt] = true ;
+                        else if((bos1.sbd<0) && (bos1.sbu>0))  outsidebosfvgfg[cnt] =  true ;
+                        else{
+                            if(bos1.sbd_t>bos1.sbu_t) outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbd_t) && (boxtime>bos1.sbu_t))? true : false ;
+                            else outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbu_t) && (boxtime>bos1.sbd_t))? true : false ;
+                        }
+                    }
                     ++cnt;
                 }
                 else if (minpt<=boxLT){//fvg not exist
@@ -244,21 +372,61 @@ struct FVG{
                     Property[cnt]    = 4 ;
                     LTprice[cnt]     = boxLT ;
                     RBprice[cnt]     = minpt ;
+                    Boxtime[cnt]     = boxtime;
                     effkbar[cnt]     = kbar[putidx];
                     effkbarend[cnt]  = kbar[kbarminend];
-
+                    if(llow>boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                    else if (llow <= boxLT){
+                        leadblockfg[cnt] = 2;
+                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                        //fvg not exist anymore 
+                    }
+                    else{
+                        RBprice[cnt]        = llow ;
+                        leadblockbound[cnt] = llow ;
+                        leadblockfg[cnt] = 1;
+                    } 
+                    if(leadblockfg[cnt]!=2){
+                        if((bos1.sbd>0) && (bos1.sbu<0))  outsidebosfvgfg[cnt] = true ;
+                        else if((bos1.sbd<0) && (bos1.sbu>0))  outsidebosfvgfg[cnt] = true ;
+                        else{
+                            if(bos1.sbd_t>bos1.sbu_t) outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbd_t) && (boxtime>bos1.sbu_t))? true : false ;
+                            else outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbu_t) && (boxtime>bos1.sbd_t))? true : false ;
+                        }
+                    }
                     ++cnt;
                 }
             }
             else if(FVGupdown(putidx, kbarsize) == 1){ //red
                 boxLT = kbarlow[putidx];
                 boxRB = kbarhigh[putidx+2] ;
+                boxtime=kbartime[putidx+2];
                 if (maxpt<boxRB){ //fvg exist
                     Property[cnt]    = 1 ;
                     LTprice[cnt]     = boxLT ;
                     RBprice[cnt]     = boxRB ;
+                    Boxtime[cnt]    = boxtime;
                     effkbar[cnt]     = kbar[putidx];
                     effkbarend[cnt]  = kbar[putidx+2];
+                    if(lhigh<boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                    else if(lhigh >= boxLT){
+                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                        leadblockfg[cnt] = 2;
+                        //fvg not exist anymore 
+                    }
+                    else{
+                        RBprice[cnt]        = lhigh ;
+                        leadblockbound[cnt] = lhigh ;
+                        leadblockfg[cnt] = 1;
+                    }
+                    if(leadblockfg[cnt]!=2){
+                        if((bos1.sbd>0) && (bos1.sbu<0))  outsidebosfvgfg[cnt] = true ;
+                        else if((bos1.sbd<0) && (bos1.sbu>0))  outsidebosfvgfg[cnt] = true ;
+                        else{
+                            if(bos1.sbd_t>bos1.sbu_t) outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbd_t) && (boxtime>bos1.sbu_t))? true : false ;
+                            else outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbu_t) && (boxtime>bos1.sbd_t))? true : false ;
+                        }
+                    }
                     ++cnt;
                 }
                 else if (maxpt>=boxLT){//fvg not exist
@@ -268,12 +436,31 @@ struct FVG{
                     Property[cnt]    = 3 ;
                     LTprice[cnt]     = boxLT ;
                     RBprice[cnt]     = maxpt ;
+                    Boxtime [cnt]    = boxtime;
                     effkbar[cnt]     = kbar[putidx];
                     effkbarend[cnt]  = kbar[kbarmaxend];
+                    if(lhigh<boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                    else if(lhigh >= boxLT){
+                        leadblockfg[cnt] = 2;
+                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                        //fvg not exist anymore 
+                    }
+                    else{
+                        RBprice[cnt]        = lhigh ;
+                        leadblockbound[cnt] = lhigh ;
+                        leadblockfg[cnt] = 1;
+                    }
+                    if(leadblockfg[cnt]!=2){
+                        if((bos1.sbd>0) && (bos1.sbu<0))  outsidebosfvgfg[cnt] = true ;
+                        else if((bos1.sbd<0) && (bos1.sbu>0))  outsidebosfvgfg[cnt] = true ;
+                        else{
+                            if(bos1.sbd_t>bos1.sbu_t) outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbd_t) && (boxtime>bos1.sbu_t))? true : false ;
+                            else outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbu_t) && (boxtime>bos1.sbd_t))? true : false ;
+                        }
+                    }
                     ++cnt;
                 }
             }
-
             else{
                 if(FVGupdown(putidx, kbarsize) == -1) printf("overpass the size");
             }
@@ -285,12 +472,13 @@ struct Triset{
     uint    comparecode[]        ;
     uint    comparecode0F[]      ;
     double  code0FExtreme[]      ;
-    double  code0FgFvgExtreme[] ;
-    double  code0FrFvgExtreme[] ;
-    bool    highfg[]             ;
-    bool    lowfg[]              ;
-    bool    gfvgfg[]             ;
-    bool    rfvgfg[]             ; 
+    double  code0FgFvgExtreme[]  ;
+    double  code0FrFvgExtreme[]  ;
+    bool    code0Ffvgblockcheck[];
+    bool    highfg[]             ; //signal for touch high bound 
+    bool    lowfg[]              ; //signal for touch low bound
+    bool    gfvgfg[]             ; //signal for lead line touch green fvg
+    bool    rfvgfg[]             ; //signal for lead line touch red fvg 
     int     comparecodeOut[]     ;
     bool    u_inside[]           ;
     bool    d_inside[]           ;
@@ -482,60 +670,150 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
     double gfvgextreme = 0 ;
     double rfvgextreme = 999999;
     for (int i=0; i<effkbarsize; ++i){
-        flag = ((fvg.LTprice[i]<u && fvg.LTprice[i]>d) || (fvg.RBprice[i]<u && fvg.RBprice[i]>d))? true : false ;
-        if(flag){
-            if((fvg.Property[i]%2)==0) gfvgextreme = fvg.RBprice[i]>gfvgextreme? fvg.RBprice[i] : gfvgextreme ;
-            else rfvgextreme = fvg.RBprice[i]<rfvgextreme? fvg.RBprice[i] : rfvgextreme ;
-            code0FgFvgExtreme[j] = gfvgextreme ;
-            code0FrFvgExtreme[j] = rfvgextreme ;
-        }
-        if(fvgtype0F[j]!=0xF){
+        if((fvg.leadblockfg[i]!=2)&&(fvg.leadblockfg[i]!=-1)){
+            flag = (((fvg.LTprice[i]<u && fvg.LTprice[i]>d) || (fvg.RBprice[i]<u && fvg.RBprice[i]>d)) && fvg.outsidebosfvgfg[i])? true : false ;
             if(flag){
-                reg          = fvgtype0F[j] ;
-                fvgtype0F[j] = (fvg.Property[i]%2==0)? 2 : 1 ; //fvg.Property only exist {1,2,3,4}, four elements.
+                if((fvg.Property[i]%2)==0) gfvgextreme = fvg.RBprice[i]>gfvgextreme? fvg.RBprice[i] : gfvgextreme ;
+                else rfvgextreme = fvg.RBprice[i]<rfvgextreme? fvg.RBprice[i] : rfvgextreme ;
+                if((fvg.Property[i]%2)==0){
+                    if(fvg.leadblockfg[i]==1) code0FgFvgExtreme[j] = fvg.leadblockbound[i] ;
+                    else code0FgFvgExtreme[j] = gfvgextreme ;
+                }
+                else{
+                    if(fvg.leadblockfg[i]==1) code0FrFvgExtreme[j] = fvg.leadblockbound[i] ;
+                    else code0FrFvgExtreme[j] = rfvgextreme ;
+                }
+                code0Ffvgblockcheck[j] = fvg.leadblockfg[i] ;
             }
-            if(reg+fvgtype0F[j]==3){
-                fvgtype0F[j] = 0xF ;
+            if(fvgtype0F[j]!=0xF){
+                if(flag){
+                    reg          = fvgtype0F[j] ;
+                    if(reg==0){
+                        fvgtype0F[j] = (fvg.Property[i]%2==0)? 0x2 : 0x1 ;
+                    }
+                    else if(reg==2){
+                        fvgtype0F[j] = (fvg.Property[i]%2==0)? 0x2 : 0xF ;
+                    }
+                    else{
+                        fvgtype0F[j] = (fvg.Property[i]%2==1)? 0x1 : 0xF ;
+                    }
+                }
             }
+            else continue ;
         }
-        else continue ;
     } 
-    // for (int i=0; i<effkbarsize2; ++i){
-    //     flag = ((fvg2.LTprice[i]<u && fvg2.LTprice[i]>d) || (fvg2.RBprice[i]<u && fvg2.RBprice[i]>d))? true : false ;
-    //     if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
-    //         if(flag){
-    //             reg          = fvgtype0F[j] ;
-    //             fvgtype0F[j] = (fvg2.Property[i]%2==0)? 0xB : 0xA ;
-    //         }
-    //         if(reg+fvgtype0F[j]==12 || reg+fvgtype0F[j]==0x5F) fvgtype0F[j] = 0xE ;
-    //         else fvgtype0F[j] = fvgtype0F[j] == 0xB? 2 : 1;
-    //     }
-    //     else break ;
-    // } 
-    // for (int i=0; i<effkbarsize3; ++i){
-    //     flag = ((fvg3.LTprice[i]<u && fvg3.LTprice[i]>d) || (fvg3.RBprice[i]<u && fvg3.RBprice[i]>d))? true : false ;
-    //     if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
-    //         if(flag){
-    //             reg          = fvgtype0F[j] ;
-    //             fvgtype0F[j] = (fvg3.Property[i]%2==0)? 0xB : 0xA ;
-    //         }
-    //         if(reg+fvgtype0F[j]==12 || reg+fvgtype0F[j]==0x5F) fvgtype0F[j] = 0xE ;
-    //         else fvgtype0F[j] = fvgtype0F[j] == 0xB? 2 : 1;
-    //     }
-    //     else break ;
-    // } 
-    // for (int i=0; i<effkbarsize4; ++i){
-    //     flag = ((fvg4.LTprice[i]<u && fvg4.LTprice[i]>d) || (fvg4.RBprice[i]<u && fvg4.RBprice[i]>d))? true : false ;
-    //     if(fvgtype0F[j]!=0xF && fvgtype0F[j]!=0xE){
-    //         if(flag){
-    //             reg          = fvgtype0F[j] ;
-    //             fvgtype0F[j] = (fvg4.Property[i]%2==0)? 0xB : 0xA ;
-    //         }
-    //         if(reg+fvgtype0F[j]==12 || reg+fvgtype0F[j]==0x5F) fvgtype0F[j] = 0xE ;
-    //         else fvgtype0F[j] = fvgtype0F[j] == 0xB? 2 : 1;
-    //     }
-    //     else break ;
-    // } 
+    for (int i=0; i<effkbarsize2; ++i){
+        if((fvg2.leadblockfg[i]!=2)&&(fvg2.leadblockfg[i]!=-1)){
+            flag = (((fvg2.LTprice[i]<u && fvg2.LTprice[i]>d) || (fvg2.RBprice[i]<u && fvg2.RBprice[i]>d)) && fvg2.outsidebosfvgfg[i])? true : false ;
+            if(flag){
+                if((fvg2.Property[i]%2)==0) gfvgextreme = fvg2.RBprice[i]>gfvgextreme? fvg2.RBprice[i] : gfvgextreme ;
+                else rfvgextreme = fvg2.RBprice[i]<rfvgextreme? fvg2.RBprice[i] : rfvgextreme ;
+                if((fvg2.Property[i]%2)==0){
+                    if(fvg2.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>fvg2.leadblockbound[i]? code0FgFvgExtreme[j] : fvg2.leadblockbound[i];
+                    else code0FgFvgExtreme[j] = gfvgextreme ;
+                }
+                else{
+                    if(fvg2.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<fvg2.leadblockbound[i]? code0FrFvgExtreme[j] : fvg2.leadblockbound[i];
+                    else code0FrFvgExtreme[j] = rfvgextreme ;
+                }
+                code0Ffvgblockcheck[j] = fvg2.leadblockfg[i] ;
+            }
+            if((fvgtype0F[j]!=0xF) && (fvgtype0F[j]!=0xB) && (fvgtype0F[j]!=0xA) && (fvgtype0F[j]!=0xD) && (fvgtype0F[j]!=0xC)){
+                if(flag){
+                    reg          = fvgtype0F[j] ;
+                    if(reg==0) break ;
+                    else if(reg==2){
+                        fvgtype0F[j] = (fvg2.Property[i]%2==0)? 0x4 : 0xB ;
+                    }
+                    else if(reg==1){
+                        fvgtype0F[j] = (fvg2.Property[i]%2==1)? 0x3 : 0xA ;
+                    }
+                    else if(reg==4){
+                        fvgtype0F[j] = (fvg2.Property[i]%2==0)? 0x4 : 0xD ;
+                    }
+                    else{
+                        fvgtype0F[j] = (fvg2.Property[i]%2==1)? 0x3 : 0xC ;
+                    }
+                }
+            }
+            else continue ;      
+        }
+        
+    } 
+    for (int i=0; i<effkbarsize3; ++i){
+        if((fvg3.leadblockfg[i]!=2)&&(fvg3.leadblockfg[i]!=-1)){
+            flag = (((fvg3.LTprice[i]<u && fvg3.LTprice[i]>d) || (fvg3.RBprice[i]<u && fvg3.RBprice[i]>d)) && fvg3.outsidebosfvgfg[i])? true : false ;
+            if(flag){
+                if((fvg3.Property[i]%2)==0) gfvgextreme = fvg3.RBprice[i]>gfvgextreme? fvg3.RBprice[i] : gfvgextreme ;
+                else rfvgextreme = fvg3.RBprice[i]<rfvgextreme? fvg3.RBprice[i] : rfvgextreme ;
+                if((fvg3.Property[i]%2)==0){
+                    if(fvg3.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>fvg3.leadblockbound[i]? code0FgFvgExtreme[j] : fvg3.leadblockbound[i];
+                    else code0FgFvgExtreme[j] = gfvgextreme ;
+                }
+                else{
+                    if(fvg3.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<fvg3.leadblockbound[i]? code0FrFvgExtreme[j] : fvg3.leadblockbound[i];
+                    else code0FrFvgExtreme[j] = rfvgextreme ;
+                }
+                code0Ffvgblockcheck[j] = fvg3.leadblockfg[i] ;
+            }
+            if((fvgtype0F[j]!=0xF) && (fvgtype0F[j]!=0xB) && (fvgtype0F[j]!=0xA) && (fvgtype0F[j]!=0xD) && (fvgtype0F[j]!=0xC)){
+                if(flag){
+                    reg          = fvgtype0F[j] ;
+                    if(reg==0) break ;
+                    else if(reg==2){
+                        fvgtype0F[j] = (fvg3.Property[i]%2==0)? 0x4 : 0xB ;
+                    }
+                    else if(reg==1){
+                        fvgtype0F[j] = (fvg3.Property[i]%2==1)? 0x3 : 0xA ;
+                    }
+                    else if(reg==4){
+                        fvgtype0F[j] = (fvg3.Property[i]%2==0)? 0x4 : 0xD ;
+                    }
+                    else{
+                        fvgtype0F[j] = (fvg3.Property[i]%2==1)? 0x3 : 0xC ;
+                    }
+                }
+            }
+            else continue ;    
+        }
+    } 
+    for (int i=0; i<effkbarsize4; ++i){
+        if((fvg4.leadblockfg[i]!=2)&&(fvg4.leadblockfg[i]!=-1)){
+            flag = (((fvg4.LTprice[i]<u && fvg4.LTprice[i]>d) || (fvg4.RBprice[i]<u && fvg4.RBprice[i]>d)) && fvg4.outsidebosfvgfg[i])? true : false ;
+            if(flag){
+                if((fvg4.Property[i]%2)==0) gfvgextreme = fvg4.RBprice[i]>gfvgextreme? fvg4.RBprice[i] : gfvgextreme ;
+                else rfvgextreme = fvg4.RBprice[i]<rfvgextreme? fvg4.RBprice[i] : rfvgextreme ;
+                if((fvg4.Property[i]%2)==0){
+                    if(fvg4.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>fvg4.leadblockbound[i]? code0FgFvgExtreme[j] : fvg4.leadblockbound[i];
+                    else code0FgFvgExtreme[j] = gfvgextreme ;
+                }
+                else{
+                    if(fvg4.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<fvg4.leadblockbound[i]? code0FrFvgExtreme[j] : fvg4.leadblockbound[i];
+                    else code0FrFvgExtreme[j] = rfvgextreme ;
+                }
+                code0Ffvgblockcheck[j] = fvg4.leadblockfg[i] ;
+            }
+            if((fvgtype0F[j]!=0xF) && (fvgtype0F[j]!=0xB) && (fvgtype0F[j]!=0xA) && (fvgtype0F[j]!=0xD) && (fvgtype0F[j]!=0xC)){
+                if(flag){
+                    reg          = fvgtype0F[j] ;
+                    if(reg==0) break ;
+                    else if(reg==2){
+                        fvgtype0F[j] = (fvg4.Property[i]%2==0)? 0x4 : 0xB ;
+                    }
+                    else if(reg==1){
+                        fvgtype0F[j] = (fvg4.Property[i]%2==1)? 0x3 : 0xA ;
+                    }
+                    else if(reg==4){
+                        fvgtype0F[j] = (fvg4.Property[i]%2==0)? 0x4 : 0xD ;
+                    }
+                    else{
+                        fvgtype0F[j] = (fvg4.Property[i]%2==1)? 0x3 : 0xC ;
+                    }
+                }
+            }
+            else continue ;   
+        }
+    } 
 }
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
@@ -581,42 +859,55 @@ void Boolcheck(const double& arr[], int& signsbd, int& signsbu){
 }
 
 void BOSJudge(BOS& bosdata, const int size, RawCandles& rd, const int starti, Helper& helper, FVG& fvgarr, const int& i){
-    int k                         ;                     
+    int k                         ;                 
     int qidxnow                   ;
     int qidxpt                    ;
     double tempprice              ;
     datetime temptime             ;
     int cnt                       ;
+    int tempmin                   ;
+    int tempminm1                 ;
     k   = starti+1                ;
     cnt = 0                       ;
     while(k < size){//last one can not be considered cuz it's not closed
         if(i<PERIODX4){
-            qidxnow = helper.TurnMin(rd.datadate[k])==0? 1439 : helper.TurnMin(rd.datadate[k])-1;
-            qidxpt  = helper.TurnMin(rd.datadate[k-1])==0? 1439 : helper.TurnMin(rd.datadate[k-1])-1 ;   
+            tempmin   = helper.TurnMin(rd.mat_rates[4][k])   ;
+            tempminm1 = helper.TurnMin(rd.mat_rates[4][k-1]) ;
         }
         else if(i<PERIODX8){
-            qidxnow = helper.TurnMinX2(rd.datadate[k])==0? 2879 : helper.TurnMinX2(rd.datadate[k])-1;
-            qidxpt  = helper.TurnMinX2(rd.datadate[k-1])==0? 2879 : helper.TurnMinX2(rd.datadate[k-1])-1 ;  
+            tempmin   = helper.TurnMinX2(rd.mat_rates[4][k])   ;
+            tempminm1 = helper.TurnMinX2(rd.mat_rates[4][k-1]) ;
         }
         else if(i<PERIODX12){
-            qidxnow = helper.TurnMinX3(rd.datadate[k])==0? 4319 : helper.TurnMinX3(rd.datadate[k])-1;
-            qidxpt  = helper.TurnMinX3(rd.datadate[k-1])==0? 4319 : helper.TurnMinX3(rd.datadate[k-1])-1 ;  
+            tempmin   = helper.TurnMinX3(rd.mat_rates[4][k])   ;
+            tempminm1 = helper.TurnMinX3(rd.mat_rates[4][k-1]) ;
         }
         else{
-            qidxnow = helper.TurnMinX4(rd.datadate[k])==0? 5759 : helper.TurnMinX4(rd.datadate[k])-1;
-            qidxpt  = helper.TurnMinX4(rd.datadate[k-1])==0? 5759 : helper.TurnMinX4(rd.datadate[k-1])-1 ;  
+            tempmin   = helper.TurnMinX4(rd.mat_rates[4][k])   ;
+            tempminm1 = helper.TurnMinX4(rd.mat_rates[4][k-1]) ;
         }
+        //不管哪個週期遇到23:59 都要把這個bar收進來rawdata裡面{
+        qidxnow   = tempmin-1==-1? 0 : tempmin;
+        qidxpt    = tempminm1-1==-1? 0 : tempminm1;   
         if(rd.dataQuo[qidxnow] != rd.dataQuo[qidxpt]){
-            // if(rd.rawprices[k-1]==bosdata.regclose3){
-            //     ++k ;
-            //     continue ;
-            // } // it doesn't affect the behavior that original case does
-            //Print("qidxnow= ", qidxnow, "qidxpt", qidxpt, "bosdata.htfint", bosdata.htfint);
-            tempprice         = rd.rawprices[k-1] ;
-            temptime          = rd.datadate[k-1]  ;
-            fvgarr.kbar[cnt]  = k-1 ;
-              //as period 2 for a example, we need to take one forward bar consider for calculating high and low price.
-            // int i =past k ; i<nowk ; ++i //plz use circular buff
+            if(tempmin==0){
+                tempprice         = rd.mat_rates[3][k-1] ;
+                temptime          = rd.mat_rates[4][k-1] ;
+                if(tempprice == bosdata.regclose3){
+                    ++k;
+                    continue;
+                }
+                fvgarr.kbar[cnt]     = k-1 ;
+            }
+            else{
+                tempprice         = rd.mat_rates[3][k] ;
+                temptime          = rd.mat_rates[4][k] ;
+                if(tempprice == bosdata.regclose3){
+                    ++k;
+                    continue;
+                }
+                fvgarr.kbar[cnt]     = k ;
+            }
             ++cnt;
             //if(bosdata.htfint==4)printf("k= %d \t tempprice@k-1= %.5f \t date@k-1= %s\n htfint= %.1f", k, tempprice,TimeToString(temptime,TIME_DATE|TIME_MINUTES),bosdata.htfint);
             if(bosdata.state == 1){
@@ -696,7 +987,6 @@ void BOSJudge(BOS& bosdata, const int size, RawCandles& rd, const int starti, He
         }
         ++k; 
     }//while end
-    //printf("cnt= %d\tk= %d", cnt,k);
 }//func end
 
 Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, BOS& bos1, BOS& bos2, BOS& bos3, BOS& bos4, int j, double& tempd, double& tempu, double& delta0X, double& deltaXF){
@@ -745,66 +1035,93 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, BOS& bos1,
 
     tempd   = ts.TriItvCompare_d(bos1, bos2, bos3, bos4, tempd, j);
     tempu   = ts.TriItvCompare_u(bos1, bos2, bos3, bos4, tempu, j);
-    ts.TriItvComparefvg(fvg, fvg2, fvg3, fvg4, bos1, j);
+    //ts.TriItvComparefvg(fvg, fvg2, fvg3, fvg4, bos1, j);
     delta0X = ts.TriItvCompare0X(fvg, fvg2, fvg3, fvg4, bos1, bos2, bos3, bos4, delta0X, j, count3);
     deltaXF = ts.TriItvCompareXF(fvg, fvg2, fvg3, fvg4, bos1, bos2, bos3, bos4, deltaXF, j, count3);
 
     //Print("bos1.htfint: ", bos1.htfint);
     return ts;
 }
-void BoundTouchCheck(Triset& ts, const int& htfint, const string& symbolname){
+void BoundTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string& symbolname, const int& datasize){
     for (int j=0; j<=htfint; ++j){
         uint code = ts.comparecode0F[j] ;
         double exe= ts.code0FExtreme[j] ;
         if(code!=0 && ((code & __LEVEL1SBUMASK)==__LEVEL1SBUMASK)){
-            for(int k=0; k<=htfint; k++){
-                if((iHigh(symbolname,PERIOD_M1,k)>exe)){
+            for(int k=0; k<datasize; k++){
+                datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
+                if((iHigh(symbolname,PERIOD_M1,k)>exe) && (temptime>=bos1.sbd_t)){
                     ts.highfg[j] = true ; 
                     //if(i==198)printf("ts.code0FExtreme[%d]= %.4f", i,j,ts.code0FExtreme[j]) ;
                     //if(i==198)printf("iHigh(symbolname,PERIOD_M1,%d)= %.4f", k, iHigh(symbolname,PERIOD_M1,k)) ;
                     break; 
                 } 
-                else ts.highfg[j] = false ;
+                else{
+                    if(temptime<bos1.sbd_t){
+                        ts.highfg[j] = false ;
+                        break ; 
+                    }
+                }
             }
         }
         else if(code!=0 && ((code & __LEVEL1SBDMASK)== 0)){
-            for(int k=0; k<=htfint; k++){
-                if((iLow(symbolname,PERIOD_M1,k)<exe)){
+            for(int k=0; k<datasize; k++){
+                datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
+                if((iLow(symbolname,PERIOD_M1,k)<exe)&&(temptime>=bos1.sbu_t)){
                     ts.lowfg[j] = true ; 
                     break;    
                 } 
-                else ts.lowfg[j] = false ;
+                else{
+                    if(temptime<bos1.sbd_t){
+                        ts.lowfg[j] = false ;
+                        break ; 
+                    }
+                } 
             }
         }
     }
 }
-void FvgTouchCheck(Triset& ts, const int& htfint, const string& symbolname){
+void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string& symbolname, const int& datasze){
     for (int j=0; j<=htfint; ++j){
         uint code = ts.comparecode0F[j] ;
         int  type = ts.fvgtype0F[j]     ;
         double gfvgexe = ts.code0FgFvgExtreme[j];
         double rfvgexe = ts.code0FrFvgExtreme[j];
-        if(code && type==0xF){
-            if((code & __LEVEL1SBDMASK) == 0){
-                for(int k=0; k<=htfint; k++){
-                    if((iLow(symbolname,PERIOD_M1,k)<=gfvgexe)){
-                        ts.gfvgfg[j] = true ; 
-                        break; 
-                    } 
-                    else ts.gfvgfg[j] = false ;
+        if(code!=0){
+            if((type==0xF)||(type==0xA)||(type==0xB)||(type==0xC)||(type==0xD)){
+                if((code & __LEVEL1SBDMASK) == 0){
+                    for(int k=0; k<datasize; k++){
+                        datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
+                        if((iLow(symbolname,PERIOD_M1,k)<=gfvgexe) && (temptime>=bos1.sbu_t)){
+                            ts.gfvgfg[j] = true ; 
+                            break; 
+                        } 
+                        else{
+                            if(temptime<bos1.sbu_t){
+                                ts.gfvgfg[j] = false ;
+                                break ; 
+                            }
+                        } 
+                    }
+                }
+                else{
+                    for(int k=0; k<datasize; k++){
+                        datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
+                        if((iHigh(symbolname,PERIOD_M1,k)>=rfvgexe) && (temptime>=bos1.sbd_t)){
+                            ts.rfvgfg[j] = true ; 
+                            break;    
+                        } 
+                        else{
+                            if(temptime>bos1.sbd_t){
+                                ts.rfvgfg[j] = false ;
+                                break ; 
+                            }
+                        }
+                    }
                 }
             }
-            else{
-                for(int k=0; k<=htfint; k++){
-                    if((iHigh(symbolname,PERIOD_M1,k)>=rfvgexe)){
-                        ts.rfvgfg[j] = true ; 
-                        break;    
-                    } 
-                    else ts.rfvgfg[j] = false ;
-                }
-            }
+            else continue ;
         }
-        else continue ;
+        
     }
 }
 #endif

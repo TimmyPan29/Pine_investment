@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-
+#include <cmath> // 包含floor和ceil函數
 class CircularBuffer {
 public:
     CircularBuffer(size_t size) : buffer(size), head(0), tail(0), full(false) {}
@@ -40,6 +40,9 @@ int main() {
 
     // 輸出環形緩衝區的內容
     cb.printBuffer();
-
+    float   min=399 ;
+    float   htf=400 ;
+    float r = (min/htf) ;
+    printf("r=%.4f", std::floor(r)) ;
     return 0;
 }
