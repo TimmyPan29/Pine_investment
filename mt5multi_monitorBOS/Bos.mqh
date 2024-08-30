@@ -245,6 +245,7 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
     int tempminm1                 ;
     int tempminreg=-1             ;
     datetime testt                ;
+    int htfint=i+1                ;
     k   = starti+1                ;
     cnt = 0                       ;
     while(k < size){//last one can not be considered cuz it's not closed
@@ -270,6 +271,10 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
         qidxnow   = tempmin-tempminm1<0? 0 : tempmin;
         qidxpt    = tempminm1-tempminreg<0? 0 : tempminm1;
         tempminreg= qidxpt ;
+        if(qidxnow!=0 && ((qidxnow+1)%htfint!=0)){
+            ++k ;
+            continue;
+        }
         if(rd.dataQuo[qidxnow] != rd.dataQuo[qidxpt]){
             if(qidxnow==0 ){
                 tempprice         = rd.mat_rates[3][k-1] ;

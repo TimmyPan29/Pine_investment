@@ -81,9 +81,6 @@ int OnInit() {
         ArrayResize(Tri[i].lowfg,i+1,i+1)               ;
         ArrayResize(Tri[i].gfvgfg,i+1,i+1)              ;
         ArrayResize(Tri[i].rfvgfg,i+1,i+1)              ; 
-        ArrayResize(Tri[i].comparecodeOut,1,1)          ;
-        ArrayResize(Tri[i].u_inside,i+1,i+1)            ;
-        ArrayResize(Tri[i].d_inside,i+1,i+1)            ;
         ArrayResize(Tri[i].fvgtype0F,i+1,i+1)           ;
     }
     Print("end initiation");
@@ -135,6 +132,7 @@ void OnTick() {
                 }
                 fvgarr[i].Putefffvg(Bosarr[i]) ;
             }
+            printf("putfvg success");
             double tempd  ;
             double tempu  ;
             double temp0X ;
@@ -150,14 +148,15 @@ void OnTick() {
                 ArrayInitialize(Tri[i].lowfg, NULL)             ;
                 ArrayInitialize(Tri[i].gfvgfg, NULL)            ;
                 ArrayInitialize(Tri[i].rfvgfg, NULL)            ;
-                ArrayInitialize(Tri[i].comparecodeOut, NULL)    ;
-                ArrayInitialize(Tri[i].u_inside, NULL)          ;
-                ArrayInitialize(Tri[i].d_inside, NULL)          ;
                 ArrayInitialize(Tri[i].fvgtype0F, NULL)         ;
-                Tri[i].wide2itv_d = -1;
-                Tri[i].wide2itv_u = -1;
                 Tri[i].wide2itv0X = -1;
                 Tri[i].wide2itvXF = -1;
+            }
+            for (int i=0; i<(PERIOD); ++i){ 
+                tempd = 0;
+                tempu = 0;
+                temp0X = 0;
+                tempXF = 0;
                 for(int j=0; j<=i; ++j){
                     if(i==0 && j==0){
                         Tri[0]=TriCode(fvgarr[0], fvgarr[1], fvgarr[2], fvgarr[3], Tri[0], Bosarr[0], Bosarr[1], Bosarr[2], Bosarr[3], j, tempd, tempu, temp0X, tempXF);
@@ -169,9 +168,8 @@ void OnTick() {
                         Tri[i]=TriCode(fvgarr[i], fvgarr[i+(j+1)], fvgarr[i+((j+1)<<1)], fvgarr[i+(j+1)*3], Tri[i], Bosarr[i], Bosarr[i+(j+1)], Bosarr[i+((j+1)<<1)], Bosarr[i+(j+1)*3], j, tempd, tempu, temp0X, tempXF);
                     }
                 }
-                tempd = 0;
-                tempu = 0;
             }
+            printf("puttri success");
             for (int i=0; i<(PERIOD); ++i){
                 BoundTouchCheck(Tri[i], Bosarr[i], i, symboltemp[k], datasize);
                 FvgTouchCheck(Tri[i], Bosarr[i], i, symboltemp[k], datasize)  ;

@@ -24,6 +24,8 @@ input Treasure tr9           = Forex ;
 input int      symbol_n9     = 8     ;
 input Treasure tr10          = Forex ;
 input int      symbol_n10    = 9     ;
+input int    ii=100;
+input int    jj=29;
 
 input int      datasize      = 1000000;
 input Barchoice bar          = Bar1000;
@@ -80,7 +82,9 @@ int OnInit() {
         ArrayResize(Tri[i].highfg,i+1,i+1)              ;
         ArrayResize(Tri[i].lowfg,i+1,i+1)               ;
         ArrayResize(Tri[i].gfvgfg,i+1,i+1)              ;
-        ArrayResize(Tri[i].rfvgfg,i+1,i+1)              ; 
+        ArrayResize(Tri[i].rfvgfg,i+1,i+1)              ;
+        ArrayResize(Tri[i].localmaxd,i+1,i+1)           ;
+        ArrayResize(Tri[i].localminu,i+1,i+1)           ; 
         ArrayResize(Tri[i].fvgtype0F,i+1,i+1)           ;
     }
     Print("end initiation");
@@ -149,6 +153,8 @@ void OnTick() {
                 ArrayInitialize(Tri[i].gfvgfg, NULL)            ;
                 ArrayInitialize(Tri[i].rfvgfg, NULL)            ;
                 ArrayInitialize(Tri[i].fvgtype0F, NULL)         ;
+                ArrayInitialize(Tri[i].localmaxd, NULL)         ;
+                ArrayInitialize(Tri[i].localminu, NULL)         ;
                 Tri[i].wide2itv0X = -1;
                 Tri[i].wide2itvXF = -1;
             }

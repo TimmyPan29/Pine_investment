@@ -4,6 +4,7 @@
 #include "GETDATA.mqh"
 #include "Helper.mqh"
 #define FVGarraysize 3000
+#define MAXSBU       9999999
 struct BOS{
     double          htfint      ;//=i
     string          htfname     ;//IntegerToString(i)
@@ -11,6 +12,8 @@ struct BOS{
     double          sbd         ;
     datetime        sbu_t       ;
     datetime        sbd_t       ;
+    datetime        sbubrk_t    ;
+    datetime        sbdbrk_t    ;
     int             slope1      ;
     int             slope2      ;
     int             state       ; //ini 
@@ -84,7 +87,7 @@ struct FVG{
     datetime Boxtime[]         ;
     int effkbar[]             ;
     int effkbarend[]          ;
-    bool outsidebosfvgfg[]    ;
+    int fvgsyndrone[]    ;
     FVG(){}
     FVG(int i){
         namei = i ;
@@ -102,7 +105,7 @@ struct FVG{
         ArrayResize(Boxtime,300,300)                     ;
         ArrayResize(effkbar,300,300)                    ;
         ArrayResize(effkbarend,300,300)                 ;
-        ArrayResize(outsidebosfvgfg,300,300)            ;
+        ArrayResize(fvgsyndrone,300,300)            ;
         ArrayInitialize(kbar,-1)                        ;
         ArrayInitialize(kbarclose,-1)                   ;
         ArrayInitialize(kbarhigh,-1)                    ;
@@ -117,7 +120,7 @@ struct FVG{
         ArrayInitialize(Boxtime,0)                      ;
         ArrayInitialize(effkbar,-1)                     ;
         ArrayInitialize(effkbarend,-1)                  ;
-        ArrayInitialize(outsidebosfvgfg,false)          ;
+        ArrayInitialize(fvgsyndrone,-1)                 ;
     }
     
     bool FVGkbarBull(int k){
@@ -161,7 +164,7 @@ struct FVG{
         }
         // for(int l=0; l<FVGarraysize && kbarclose[l]!=-1; l++){
         //     string str = TimeToString(kbartime[l], TIME_DATE|TIME_MINUTES);
-        //     if(namei==17)printf("namei= %.0f value= %.5f time=%s", namei, kbarclose[l], str);
+        //     if(namei==23)printf("namei= %.0f value= %.5f time=%s", namei, kbarclose[l], str);
         // }    
     }
     int FVGupdown(int idx, int kbarsize){
@@ -224,34 +227,41 @@ struct FVG{
         int i = idx;
         double temphigh;
         double temp ;
-        datetime ktime=0 ;
-        datetime temptime = bos1.sbd>0? bos1.sbd_t : bos1.sbu_t ;
-        if (i+3==kbarsize){
+        datetime ktime    ;
+        datetime temptime ;
+        int cnt = 0;
+        int i_3 = i+3 ;
+        int offset = bos1.htfint*60 ;
+        if (i_3==kbarsize){
             temp = kbarhigh[kbarsize-1] ; 
-        } 
+            ktime= kbartime[kbarsize-1] ;
+        }
         else{
-            temp = kbarhigh[i+3];   
+            temp = kbarhigh[i_3] ; 
+            ktime= kbartime[i_3] ;
         }
         if(((bos1.sbd>0)&&(bos1.sbu<0))||((bos1.sbu>0)&&(bos1.sbd<0))){
-            while((i+3<kbarsize)&&(ktime<temptime)){
-                temphigh = kbarhigh[i+3];
-                ktime = kbartime[i+3];
+            temptime = bos1.sbd<0? bos1.sbdbrk_t : bos1.sbubrk_t ;
+            while(((i_3+cnt)<kbarsize)&&(ktime<temptime)){
+                temphigh = kbarhigh[i_3+cnt];
                 if(temphigh>temp){
                     temp = temphigh;
-                    kbarend = i+3 ;
+                    kbarend = i_3+cnt ;//kbarend=highest high end after k
                 } 
-                ++i ;
-                ktime = kbartime[i+3];
+                ++cnt ;
+                ktime = kbartime[i_3+cnt];
             }
         }
         else{
-            while(i+3<kbarsize){
-                temphigh = kbarhigh[i+3];
+            temptime = bos1.sbd_t<bos1.sbu_t?  bos1.sbu_t :  bos1.sbd_t ;
+            while( ((i_3+cnt)<kbarsize) && (ktime<temptime) ){
+                temphigh = kbarhigh[i_3+cnt];
                 if(temphigh>temp){
                     temp = temphigh;
-                    kbarend = i+3 ;
+                    kbarend = i_3+cnt ;
                 } 
-                ++i ;
+                ++cnt ;
+                ktime = kbartime[i_3+cnt];
             }
         }
         return temp ;
@@ -260,45 +270,49 @@ struct FVG{
         int i = idx;
         double templow;
         double temp ;
-        datetime ktime=0 ;
+        datetime ktime ;
         string teststr ;
         datetime temptime ;
-        if (i+3==kbarsize){
+        int cnt = 0;
+        int i_3 = i+3 ;
+        int offset = bos1.htfint*60 ;
+        if (i_3==kbarsize){
             temp = kbarlow[kbarsize-1] ; 
-        } 
-        else{
-            temp = kbarlow[i+3];   
+            ktime= kbartime[kbarsize-1] ;
         }
+        else{
+            temp = kbarlow[i_3] ; 
+            ktime= kbartime[i_3] ;
+        }
+         
         if(((bos1.sbd>0)&&(bos1.sbu<0))||((bos1.sbu>0)&&(bos1.sbd<0))){
-            temptime = bos1.sbd>0? bos1.sbd_t : bos1.sbu_t ;
-            while((i+3<kbarsize)&&(ktime<temptime)){
-                templow = kbarlow[i+3];
-                ktime = kbartime[i+3];
+            temptime = bos1.sbd<0? bos1.sbdbrk_t : bos1.sbubrk_t ;
+            while( ((i_3+cnt)<kbarsize)&&(ktime<temptime) ){
+                templow = kbarlow[i_3+cnt];
                 if(templow<temp){
                     temp = templow;
-                    kbarend = i+3 ;
+                    kbarend = i_3+cnt ; //kbarend=lowest low end after k
                 } 
-                // if(bos1.htfint==95){
-                //     teststr = TimeToString(ktime, TIME_DATE | TIME_MINUTES);
-                //     printf("%s", teststr);
-                //     teststr = TimeToString(temptime, TIME_DATE | TIME_MINUTES);
-                //     printf("%s", teststr);
-                // }
-                ++i ;
-                ktime = kbartime[i+3];
+                ++cnt ;
+                ktime = kbartime[i_3+cnt];
             }
         }
         else{
-            while(i+3<kbarsize){
-                templow = kbarlow[i+3];
+            temptime = bos1.sbd_t<bos1.sbu_t?  bos1.sbu_t :  bos1.sbd_t ;
+            while( ((i_3+cnt)<kbarsize) && (ktime<temptime) ){
+                templow = kbarlow[i_3+cnt];
                 if(templow<temp){
                     temp = templow;
-                    kbarend = i+3 ;
+                    kbarend = i_3+cnt ;
                 } 
-                ++i ;
+                ++cnt ;
+                ktime = kbartime[i_3+cnt];
             }
         }
-        
+        // if(bos1.htfint==100){
+        //     teststr = TimeToString(ktime, TIME_DATE | TIME_MINUTES);
+        //     printf("%.5f, %s, sbd= %.5f ,sbu= %.5f", templow, teststr, bos1.sbd, bos1.sbu);
+        // } 
         return temp ;
     }
     int Getfvgkbarsize(){
@@ -315,7 +329,6 @@ struct FVG{
         }
         return i ;
     }
-
     void Putefffvg(BOS& bos1){
         int kbarsize = Getfvgkbarsize() ;
         double maxpt;
@@ -329,7 +342,12 @@ struct FVG{
         int kbarminend ;
         int kbarhighend;
         int kbarlowend ;
-        int    cnt =0;
+        int fvgcolor   ;
+        int    cnt = 0;
+        datetime dt  = bos1.sbd_t;
+        datetime ut  = bos1.sbu_t;
+        datetime dbt = bos1.sbdbrk_t;
+        datetime ubt = bos1.sbubrk_t;
         for(int putidx=0; putidx<kbarsize-2; ++putidx){
             kbarmaxend = 0;
             kbarminend = 0;
@@ -339,51 +357,18 @@ struct FVG{
             minpt = Findmincloseaftk(putidx, kbarsize, kbarminend);
             lhigh = Findmaxhighaftk(putidx, kbarsize, kbarhighend, bos1);
             llow  = Findminlowaftk(putidx, kbarsize, kbarlowend, bos1)  ;
-            if(FVGupdown(putidx, kbarsize) == 2){ //green
-                boxLT = kbarhigh[putidx];
-                boxRB = kbarlow[putidx+2];
-                boxtime=kbartime[putidx+1];
-                if (minpt>boxRB){ //fvg exist
-                    Property[cnt]    = 2 ;
-                    LTprice[cnt]     = boxLT ;
-                    RBprice[cnt]     = boxRB ;
-                    Boxtime[cnt]     = boxtime;
-                    effkbar[cnt]     = kbar[putidx];
-                    effkbarend[cnt]  = kbar[putidx+2];
-                    if(llow>boxRB){
-                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
-                        leadblockfg[cnt] = 0;   
-                    } 
-                    else if (llow <= boxLT){
-                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
-                        leadblockfg[cnt] = 2;  // properry, leadblockfg{x 0}or{x 1} belong noblock or partly blocked respectively;//{x 2}is fully blocked
-                        //fvg not exist anymore 
-                    }
-                    else{
-                        RBprice[cnt]        = llow ;
-                        leadblockbound[cnt] = llow ;
-                        leadblockfg[cnt] = 1;
-                    }
-                    if(leadblockfg[cnt]!=2){
-                        if((bos1.sbd>0) && (bos1.sbu<0))  outsidebosfvgfg[cnt] = boxtime<bos1.sbd_t? true : false ;
-                        else if((bos1.sbd<0) && (bos1.sbu>0))  outsidebosfvgfg[cnt] =  boxtime<bos1.sbu_t? true : false ;
-                        else{
-                            if(bos1.sbd_t>bos1.sbu_t) outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbd_t) && (boxtime>bos1.sbu_t))? true : false ;
-                            else outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbu_t) && (boxtime>bos1.sbd_t))? true : false ;
-                        }
-                    }
-                    ++cnt;
-                }
+            fvgcolor = FVGupdown(putidx, kbarsize) ;
+            //-----set property and judge whether the box was blocked or not-----//
+            if(fvgcolor == 2){ //green
+                boxLT    = kbarhigh[putidx];
+                boxRB    = kbarlow[putidx+2] ;
+                boxtime  = kbartime[putidx+1];
+                if (minpt>boxRB) Property[cnt]    = 2 ; //fvg exist
                 else if (minpt<=boxLT){//fvg not exist
-                    
+                    continue;
                 } 
-                else{ //fvg exist but is shorten
-                    Property[cnt]    = 4 ;
-                    LTprice[cnt]     = boxLT ;
-                    RBprice[cnt]     = minpt ;
-                    Boxtime[cnt]     = boxtime;
-                    effkbar[cnt]     = kbar[putidx];
-                    effkbarend[cnt]  = kbar[kbarminend];
+                else Property[cnt]    = 4 ; //fvg exist but is shorten
+                if(Property[cnt]>0){
                     if(llow>boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
                     else if (llow <= boxLT){
                         leadblockfg[cnt] = 2;
@@ -391,91 +376,323 @@ struct FVG{
                         //fvg not exist anymore 
                     }
                     else{
-                        RBprice[cnt]        = llow ;
-                        leadblockbound[cnt] = llow ;
                         leadblockfg[cnt] = 1;
-                    } 
-                    if(leadblockfg[cnt]!=2){
-                        if((bos1.sbd>0) && (bos1.sbu<0))  outsidebosfvgfg[cnt] = true ;
-                        else if((bos1.sbd<0) && (bos1.sbu>0))  outsidebosfvgfg[cnt] = true ;
-                        else{
-                            if(bos1.sbd_t>bos1.sbu_t) outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbd_t) && (boxtime>bos1.sbu_t))? true : false ;
-                            else outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbu_t) && (boxtime>bos1.sbd_t))? true : false ;
-                        }
                     }
-                    ++cnt;
                 }
             }
-            else if(FVGupdown(putidx, kbarsize) == 1){ //red
-                boxLT = kbarlow[putidx];
-                boxRB = kbarhigh[putidx+2] ;
-                boxtime=kbartime[putidx+1];
-                if (maxpt<boxRB){ //fvg exist
-                    Property[cnt]    = 1 ;
+            else if(fvgcolor == 1){ //red
+                boxLT    = kbarlow[putidx];
+                boxRB    = kbarhigh[putidx+2] ;
+                boxtime  = kbartime[putidx+1];
+                if (maxpt<boxRB) Property[cnt]    = 1 ; //fvg exist
+                else if (maxpt>=boxLT){//fvg not exist
+                    continue;
+                } 
+                else Property[cnt]    = 3 ;//fvg exist but is shorten
+                if(Property[cnt]>0){   
+                    if(lhigh<boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                    else if(lhigh >= boxLT) leadblockfg[cnt] = 2;        
+                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+                        //fvg not exist anymore 
+                    else leadblockfg[cnt] = 1;
+                }
+            }
+            else{
+                if(FVGupdown(putidx, kbarsize) == -1) printf("overpass the size");
+                continue;
+            }
+            //-----set fvgsyndrone aligning with property-----//
+            if(Property[cnt]>0){
+                if((bos1.sbd>0) && (bos1.sbu<0)){//break
+                    if(boxtime<ubt) fvgsyndrone[cnt] = 7 ; 
+                    else fvgsyndrone[cnt] = 9 ; 
+                }  
+                else if((bos1.sbd<0) && (bos1.sbu>0)){//break
+                    if(boxtime<dbt) fvgsyndrone[cnt] = 8 ; 
+                    else fvgsyndrone[cnt] = 10 ; 
+                }  
+                else{//cover
+                    if(ut>dt){
+                        if(boxtime<=dt) fvgsyndrone[cnt] = 2 ; //before cover
+                        else if(boxtime>ut) fvgsyndrone[cnt] = 6;//after cover
+                        else fvgsyndrone[cnt] =4 ; //in the middle of cover
+                    } 
+                    else{
+                        if(boxtime<=ut) fvgsyndrone[cnt] = 1 ; //before cover
+                        else if(boxtime>dt) fvgsyndrone[cnt] = 5; //after cover
+                        else fvgsyndrone[cnt] =3 ; //in the middle of cover
+                    } 
+                }  
+            }
+            //printf("fvgsyndrone[cnt]= %d", fvgsyndrone[cnt]);
+            //-----set real box value with fvgsyndrone, the variables following are all under >0 property situation -----//
+            int syn   = fvgsyndrone[cnt] ;
+            int pro   = Property[cnt]    ;
+            int ldblk = leadblockfg[cnt] ;
+            if(syn==4 || syn==6 || syn==3 || syn==5 || syn==9 || syn==10){
+                if(ldblk==0){
                     LTprice[cnt]     = boxLT ;
                     RBprice[cnt]     = boxRB ;
                     Boxtime[cnt]     = boxtime;
                     effkbar[cnt]     = kbar[putidx];
                     effkbarend[cnt]  = kbar[putidx+2];
-                    if(lhigh<boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
-                    else if(lhigh >= boxLT){
-                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
-                        leadblockfg[cnt] = 2;
-                        //fvg not exist anymore 
-                    }
-                    else{
-                        RBprice[cnt]        = lhigh ;
-                        leadblockbound[cnt] = lhigh ;
-                        leadblockfg[cnt] = 1;
-                    }
-                    if(leadblockfg[cnt]!=2){
-                        if((bos1.sbd>0) && (bos1.sbu<0))  outsidebosfvgfg[cnt] = true ;
-                        else if((bos1.sbd<0) && (bos1.sbu>0))  outsidebosfvgfg[cnt] = true ;
-                        else{
-                            if(bos1.sbd_t>bos1.sbu_t) outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbd_t) && (boxtime>bos1.sbu_t))? true : false ;
-                            else outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbu_t) && (boxtime>bos1.sbd_t))? true : false ;
-                        }
-                    }
-                    ++cnt;
                 }
-                else if (maxpt>=boxLT){//fvg not exist
-                    
-                } 
-                else{ //fvg exist but is shorten
-                    Property[cnt]    = 3 ;
+                else{
+                    if(pro%2==0){//even
+                        LTprice[cnt]     = boxLT ;
+                        RBprice[cnt]     = minpt<boxLT? boxLT : minpt<boxRB? minpt : boxRB ;
+                        Boxtime[cnt]     = boxtime;
+                        effkbar[cnt]     = kbar[putidx];
+                        effkbarend[cnt]  = kbar[kbarminend];
+                    }
+                    else{//odd
+                        LTprice[cnt]     = boxLT ;
+                        RBprice[cnt]     = maxpt>boxLT? boxLT : maxpt>boxRB? maxpt : boxRB ;
+                        Boxtime[cnt]     = boxtime;
+                        effkbar[cnt]     = kbar[putidx];
+                        effkbarend[cnt]  = kbar[kbarmaxend];
+                    }
+                }
+            }
+            else if(syn==1 || syn==2 || syn==7 || syn==8){
+                if(pro%2==0){//even
                     LTprice[cnt]     = boxLT ;
-                    RBprice[cnt]     = maxpt ;
-                    Boxtime [cnt]    = boxtime;
+                    RBprice[cnt]     = llow<boxLT? boxLT : llow<boxRB? llow : boxRB ;
+                    Boxtime[cnt]     = boxtime;
+                    effkbar[cnt]     = kbar[putidx];
+                    effkbarend[cnt]  = kbar[kbarminend];
+                }
+                else{//odd
+                    LTprice[cnt]     = boxLT ;
+                    RBprice[cnt]     = lhigh>boxLT? boxLT : lhigh>boxRB? lhigh : boxRB ;
+                    Boxtime[cnt]     = boxtime;
                     effkbar[cnt]     = kbar[putidx];
                     effkbarend[cnt]  = kbar[kbarmaxend];
-                    if(lhigh<boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
-                    else if(lhigh >= boxLT){
-                        leadblockfg[cnt] = 2;
-                        //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
-                        //fvg not exist anymore 
-                    }
-                    else{
-                        RBprice[cnt]        = lhigh ;
-                        leadblockbound[cnt] = lhigh ;
-                        leadblockfg[cnt] = 1;
-                    }
-                    if(leadblockfg[cnt]!=2){
-                        if((bos1.sbd>0) && (bos1.sbu<0))  outsidebosfvgfg[cnt] = true ;
-                        else if((bos1.sbd<0) && (bos1.sbu>0))  outsidebosfvgfg[cnt] = true ;
-                        else{
-                            if(bos1.sbd_t>bos1.sbu_t) outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbd_t) && (boxtime>bos1.sbu_t))? true : false ;
-                            else outsidebosfvgfg[cnt] = ((boxtime<=bos1.sbu_t) && (boxtime>bos1.sbd_t))? true : false ;
-                        }
-                    }
-                    ++cnt;
                 }
             }
             else{
-                if(FVGupdown(putidx, kbarsize) == -1) printf("overpass the size");
+                printf("wrong fvgsyndrone entrance, syn= %d", syn);
+                break;
             }
+            if(Property[cnt]>0) cnt++ ;
         }//for end
         //printf("cnt= %d, namei= %d", cnt, namei);
     }//fun end
+
+    // void Putefffvg(BOS& bos1){
+    //     int kbarsize = Getfvgkbarsize() ;
+    //     double maxpt;
+    //     double minpt;
+    //     double lhigh; //l for lead line. 
+    //     double llow ;
+    //     double boxLT; // LT for left top. 
+    //     double boxRB;
+    //     datetime boxtime;
+    //     int kbarmaxend ;
+    //     int kbarminend ;
+    //     int kbarhighend;
+    //     int kbarlowend ;
+    //     int    cnt = 0;
+    //     datetime dt  = bos1.sbd_t;
+    //     datetime ut  = bos1.sbu_t;
+    //     datetime dbt = bos1.sbdbrk_t;
+    //     datetime ubt = bos1.sbubrk_t;
+    //     for(int putidx=0; putidx<kbarsize-2; ++putidx){
+    //         kbarmaxend = 0;
+    //         kbarminend = 0;
+    //         kbarhighend= 0;
+    //         kbarlowend = 0;
+    //         maxpt = Findmaxcloseaftk(putidx, kbarsize, kbarmaxend);
+    //         minpt = Findmincloseaftk(putidx, kbarsize, kbarminend);
+    //         lhigh = Findmaxhighaftk(putidx, kbarsize, kbarhighend, bos1);
+    //         llow  = Findminlowaftk(putidx, kbarsize, kbarlowend, bos1)  ;
+    //         if(FVGupdown(putidx, kbarsize) == 2){ //green
+    //             boxLT  = kbarhigh[putidx];
+    //             boxRB  = kbarlow[putidx+2];
+    //             boxtime=kbartime[putidx+1];
+    //             if (minpt>boxRB){ //fvg exist
+    //                 Property[cnt]    = 2 ;
+    //                 LTprice[cnt]     = boxLT ;
+    //                 RBprice[cnt]     = boxRB ;
+    //                 Boxtime[cnt]     = boxtime;
+    //                 effkbar[cnt]     = kbar[putidx];
+    //                 effkbarend[cnt]  = kbar[putidx+2];
+    //                 if((bos1.sbd>0) && (bos1.sbu<0)){
+    //                     if(boxtime<dbt) fvgsyndrone[cnt] = 7 ; 
+    //                     else fvgsyndrone[cnt] = 9 ; 
+    //                 }  
+    //                 else if((bos1.sbd<0) && (bos1.sbu>0)){
+    //                     if(boxtime<ubt) fvgsyndrone[cnt] = 8 ; 
+    //                     else fvgsyndrone[cnt] = 10 ; 
+    //                 }  
+    //                 else{
+    //                     if(ut>dt){
+    //                         if(boxtime<=dt) fvgsyndrone[cnt] = 2 ;
+    //                         else if(boxtime>ut) fvgsyndrone[cnt] = 6;
+    //                         else fvgsyndrone[cnt] =4 ;
+    //                     } 
+    //                     else{
+    //                         if(boxtime<=ut) fvgsyndrone[cnt] = 1 ;
+    //                         else if(boxtime>dt) fvgsyndrone[cnt] = 5;
+    //                         else fvgsyndrone[cnt] =3 ;
+    //                     } 
+    //                 }
+    //                 if(llow>boxRB){
+    //                     //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+    //                     leadblockfg[cnt] = 0;   
+    //                 } 
+    //                 else if (llow <= boxLT){
+    //                     //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+    //                     leadblockfg[cnt] = 2;  // properry, leadblockfg{x 0}or{x 1} belong noblock or partly blocked respectively;//{x 2}is fully blocked
+    //                     //fvg not exist anymore 
+    //                 }
+    //                 else{
+    //                     leadblockfg[cnt] = 1;
+    //                 }
+    //                 if(fvgsyndrone[cnt]>2 && fvgsyndrone[cnt]<7){//after coverage
+
+    //                 }
+    //                 ++cnt;
+
+    //             }
+    //             else if (minpt<=boxLT){//fvg not exist
+                    
+    //             } 
+    //             else{ //fvg exist but is shorten
+    //                 Property[cnt]    = 4 ;
+    //                 LTprice[cnt]     = boxLT ;
+    //                 RBprice[cnt]     = minpt ;
+    //                 Boxtime[cnt]     = boxtime;
+    //                 effkbar[cnt]     = kbar[putidx];
+    //                 effkbarend[cnt]  = kbar[kbarminend];
+    //                 if((bos1.sbd>0) && (bos1.sbu<0)){//break
+    //                     if(boxtime<dbt) fvgsyndrone[cnt] = 7 ; 
+    //                     else fvgsyndrone[cnt] = 9 ; 
+    //                 }  
+    //                 else if((bos1.sbd<0) && (bos1.sbu>0)){//break
+    //                     if(boxtime<ubt) fvgsyndrone[cnt] = 8 ; 
+    //                     else fvgsyndrone[cnt] = 10 ; 
+    //                 }  
+    //                 else{//cover
+    //                     if(ut>dt){
+    //                         if(boxtime<=dt) fvgsyndrone[cnt] = 2 ;
+    //                         else if(boxtime>ut) fvgsyndrone[cnt] = 6;
+    //                         else fvgsyndrone[cnt] =4 ;
+    //                     } 
+    //                     else{
+    //                         if(boxtime<=ut) fvgsyndrone[cnt] = 1 ;
+    //                         else if(boxtime>dt) fvgsyndrone[cnt] = 5;
+    //                         else fvgsyndrone[cnt] =3 ;
+    //                     } 
+    //                 }
+    //                 if(llow>boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+    //                 else if (llow <= boxLT){
+    //                     leadblockfg[cnt] = 2;
+    //                     //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+    //                     //fvg not exist anymore 
+    //                 }
+    //                 else{
+    //                     RBprice[cnt]        = llow ;
+    //                     leadblockbound[cnt] = llow ;
+    //                     leadblockfg[cnt] = 1;
+    //                 } 
+    //                 ++cnt;
+    //             }
+    //         }
+    //         else if(FVGupdown(putidx, kbarsize) == 1){ //red
+    //             boxLT = kbarlow[putidx];
+    //             boxRB = kbarhigh[putidx+2] ;
+    //             boxtime=kbartime[putidx+1];
+    //             if (maxpt<boxRB){ //fvg exist
+    //                 Property[cnt]    = 1 ;
+    //                 LTprice[cnt]     = boxLT ;
+    //                 RBprice[cnt]     = boxRB ;
+    //                 Boxtime[cnt]     = boxtime;
+    //                 effkbar[cnt]     = kbar[putidx];
+    //                 effkbarend[cnt]  = kbar[putidx+2];
+    //                 if((bos1.sbd>0) && (bos1.sbu<0)){
+    //                     if(boxtime<dbt) fvgsyndrone[cnt] = 7 ; 
+    //                     else fvgsyndrone[cnt] = 9 ; 
+    //                 }  
+    //                 else if((bos1.sbd<0) && (bos1.sbu>0)){
+    //                     if(boxtime<ubt) fvgsyndrone[cnt] = 8 ; 
+    //                     else fvgsyndrone[cnt] = 10 ; 
+    //                 }  
+    //                 else{
+    //                     if(ut>dt){
+    //                         if(boxtime<=dt) fvgsyndrone[cnt] = 2 ;
+    //                         else if(boxtime>ut) fvgsyndrone[cnt] = 6;
+    //                         else fvgsyndrone[cnt] =4 ;
+    //                     } 
+    //                     else{
+    //                         if(boxtime<=ut) fvgsyndrone[cnt] = 1 ;
+    //                         else if(boxtime>dt) fvgsyndrone[cnt] = 5;
+    //                         else fvgsyndrone[cnt] =3 ;
+    //                     } 
+    //                 }
+    //                 if(lhigh<boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+    //                 else if(lhigh >= boxLT){
+    //                     //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+    //                     leadblockfg[cnt] = 2;
+    //                     //fvg not exist anymore 
+    //                 }
+    //                 else{
+    //                     RBprice[cnt]        = lhigh ;
+    //                     leadblockbound[cnt] = lhigh ;
+    //                     leadblockfg[cnt] = 1;
+    //                 }
+    //                 ++cnt;
+    //             }
+    //             else if (maxpt>=boxLT){//fvg not exist
+                    
+    //             } 
+    //             else{ //fvg exist but is shorten
+    //                 Property[cnt]    = 3 ;
+    //                 LTprice[cnt]     = boxLT ;
+    //                 RBprice[cnt]     = maxpt ;
+    //                 Boxtime [cnt]    = boxtime;
+    //                 effkbar[cnt]     = kbar[putidx];
+    //                 effkbarend[cnt]  = kbar[kbarmaxend];
+    //                 if((bos1.sbd>0) && (bos1.sbu<0)){
+    //                     if(boxtime<dbt) fvgsyndrone[cnt] = 7 ; 
+    //                     else fvgsyndrone[cnt] = 9 ; 
+    //                 }  
+    //                 else if((bos1.sbd<0) && (bos1.sbu>0)){
+    //                     if(boxtime<ubt) fvgsyndrone[cnt] = 8 ; 
+    //                     else fvgsyndrone[cnt] = 10 ; 
+    //                 }  
+    //                 else{
+    //                     if(ut>dt){
+    //                         if(boxtime<=dt) fvgsyndrone[cnt] = 2 ;
+    //                         else if(boxtime>ut) fvgsyndrone[cnt] = 6;
+    //                         else fvgsyndrone[cnt] =4 ;
+    //                     } 
+    //                     else{
+    //                         if(boxtime<=ut) fvgsyndrone[cnt] = 1 ;
+    //                         else if(boxtime>dt) fvgsyndrone[cnt] = 5;
+    //                         else fvgsyndrone[cnt] =3 ;
+    //                     } 
+    //                 }
+    //                 if(lhigh<boxRB) leadblockfg[cnt] = 0;//leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+    //                 else if(lhigh >= boxLT){
+    //                     leadblockfg[cnt] = 2;
+    //                     //leadblockbound[cnt] = -1 ; when original initialization, it's set -1
+    //                     //fvg not exist anymore 
+    //                 }
+    //                 else{
+    //                     RBprice[cnt]        = lhigh ;
+    //                     leadblockbound[cnt] = lhigh ;
+    //                     leadblockfg[cnt] = 1;
+    //                 }
+    //                 ++cnt;
+    //             }
+    //         }
+    //         else{
+    //             if(FVGupdown(putidx, kbarsize) == -1) printf("overpass the size");
+    //         }
+    //     }//for end
+    //     //printf("cnt= %d, namei= %d", cnt, namei);
+    // }//fun end
 };
 struct Triset{
     uint    comparecode[]        ;
@@ -488,8 +705,10 @@ struct Triset{
     bool    lowfg[]              ; //signal for touch low bound
     bool    gfvgfg[]             ; //signal for lead line touch green fvg
     bool    rfvgfg[]             ; //signal for lead line touch red fvg 
-    int     wide2itv0X           ;
-    int     wide2itvXF           ;
+    int     wide2itv0X           ; //for finding global itv
+    int     wide2itvXF           ; //for finding global itv
+    int     localmaxd[]          ;
+    int     localminu[]          ;
     int     fvgtype0F[]          ;
     Triset():wide2itv0X(-1),wide2itvXF(-1){}
     double TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3);
@@ -499,18 +718,18 @@ struct Triset{
 
 double Triset::TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3){//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
     double deltatemp = delta0X ;
-    double minsbu ; //for TriFVGcheck0F
-    double tempmin; //for TriFVGcheck0F
+    double temp1;
     if(count3==1){
         delta0X     = MathMax(bos2.sbd, bos3.sbd);
         delta0X     = MathMax(delta0X, bos4.sbd);
-        if(delta0X<0) delta0X=0 ;
-        minsbu      = MathMin(bos1.sbu, bos2.sbu);
-        if(minsbu<0) minsbu = bos1.sbu > bos2.sbu? bos1.sbu : bos2.sbu ;
-        tempmin     = MathMin(bos3.sbu, bos4.sbu);
-        if(tempmin<0) tempmin = bos3.sbu > bos4.sbu? bos3.sbu : bos4.sbu ;
-        minsbu      = MathMin(minsbu, tempmin);
-        if(minsbu<0) minsbu = bos1.sbu;
+        temp1       = MathMin(bos2.sbu, bos3.sbu);
+        temp1       = temp1>0? temp1 : bos2.sbu>bos3.sbu? bos2.sbu : bos3.sbu;
+        temp1       = MathMin(temp1, bos4.sbu);
+        temp1       = temp1>0? temp1 : bos4.sbu;
+        temp1       = (temp1>0 && temp1<bos1.sbu)? temp1 : bos1.sbu;
+        if(delta0X<0) delta0X = 0 ; //can not be -1
+        localmaxd[j] = delta0X;
+        localminu[j] = temp1  ;
         TriFVGcheck0F(fvg, fvg2, fvg3, fvg4, bos1.sbu, delta0X, j); //fix bos1.sbu from minsbu
         code0FExtreme[j] = delta0X ;
         //delta0X = temp1 - temp2 ;//其實不用差來算也可以 把0當成基準來比較就好
@@ -530,28 +749,30 @@ double Triset::TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const
 }
 double Triset::TriItvCompareXF (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3){//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
     double deltatemp = deltaXF ;
-    double maxsbd ; //for TriFVGcheck0F
-    double tempmax; //for TriFVGcheck0F
+    double temp1;
+    double temp2;
     if(count3==5){
         deltaXF     = MathMin(bos2.sbu, bos3.sbu);
         if(deltaXF<0) deltaXF= bos2.sbu>bos3.sbu? bos2.sbu : bos3.sbu ;
         deltaXF     = MathMin(deltaXF , bos4.sbu);
         if(deltaXF<0) deltaXF= deltaXF>bos4.sbu? deltaXF : bos4.sbu ;
-        if(deltaXF<0) deltaXF= 999999 ;
-        maxsbd      = MathMax(bos1.sbd, bos2.sbd);
-        tempmax     = MathMax(bos3.sbd, bos4.sbd);
-        maxsbd      = MathMax(maxsbd, tempmax); 
+        if(deltaXF<0) deltaXF= MAXSBU ; //can not be -2
+        temp1     = MathMax(bos1.sbd, bos2.sbd);
+        temp2     = MathMax(bos3.sbd, bos4.sbd);
+        temp1     = temp1>temp2? temp1 : temp2;
+        localmaxd[j] = temp1;
+        localminu[j] = deltaXF  ;
         //if((fvg.namei==159) && (j==158)) printf("fvg%.0f j=%.0f,SBU= %.5f, SBD=%.5f", fvg.namei, j, deltaXF, bos1.sbd);
         TriFVGcheck0F(fvg, fvg2, fvg3, fvg4, deltaXF, bos1.sbd, j); //fix bos1.sbd from maxsbd
         code0FExtreme[j] = deltaXF ;
         if(wide2itvXF==-1){
             wide2itvXF = j ;
-            deltatemp = deltaXF ; // I need to get min or max value, so that can deal with 0Ffile touch high level bos problem 
+            deltatemp  = deltaXF ; // I need to get min or max value, so that can deal with 0Ffile touch high level bos problem 
         }
         else{
-            if(deltatemp <= deltaXF){
+            if(deltatemp <= deltaXF){ 
                 wide2itvXF = j ;
-                deltatemp = deltaXF ;
+                deltatemp  = deltaXF ;
             }
         }
         return deltatemp ;
@@ -563,23 +784,42 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
     int effkbarsize2 = fvg2.Getfvgeffkbarsize();
     int effkbarsize3 = fvg3.Getfvgeffkbarsize();
     int effkbarsize4 = fvg4.Getfvgeffkbarsize();
+    bool s1fg ;
+    bool s2fg ;
+    bool s3fg ;
+    bool s4fg ;
     bool flag ;
+    string str;
     fvgtype0F[j] = 0 ;
     int  reg     = fvgtype0F[j]  ;
     double gfvgextreme = 0 ;
-    double rfvgextreme = 999999;
+    double rfvgextreme = MAXSBU;
+    string filename;
+    int handle;
+    string line;
+    if(fvg.namei==ii && (j+1==jj)){
+        filename =StringFormat("%s"+"\\fvg.txt", AccountInfoString(ACCOUNT_COMPANY));
+        handle=FileOpen(filename,FILE_WRITE|FILE_TXT);
+        line="";
+    }
     for (int i=0; i<effkbarsize; ++i){
+        s1fg = (fvg.LTprice[i]<u && fvg.LTprice[i]>d) || (fvg.RBprice[i]<u && fvg.RBprice[i]>d);
         if((fvg.leadblockfg[i]!=2)&&(fvg.leadblockfg[i]!=-1)){
-            flag = (((fvg.LTprice[i]<u) && (fvg.LTprice[i]>d)) || ((fvg.RBprice[i]<u) && (fvg.RBprice[i]>d)) && fvg.outsidebosfvgfg[i])? true : false ;
+            flag = (s1fg && fvg.fvgsyndrone[i]!=5 && fvg.fvgsyndrone[i]!=6) ;
+            if(fvg.namei==ii && fvg.namei==ii){
+                str = TimeToString(fvg.Boxtime[i], TIME_DATE|TIME_MINUTES);
+                line = StringFormat("l1=%.0f, l=%.0f, fvg.outs[%.0f]= %d,fvg.p[%.0f]= %d,fvg.l[%.0f]= %d LT=%.5f RB=%.5f, sfg=%d ,flag=%d, u=%.5f, d=%.5f, T=%s" ,fvg.namei, fvg.namei, i, fvg.fvgsyndrone[i], i, fvg.Property[i], i, fvg.leadblockfg[i], fvg.LTprice[i], fvg.RBprice[i], s1fg, flag, u, d, str);
+                FileWrite(handle, line);
+            }
             if(flag){
                 if((fvg.Property[i]%2)==0) gfvgextreme = fvg.RBprice[i]>gfvgextreme? fvg.RBprice[i] : gfvgextreme ;
                 else rfvgextreme = fvg.RBprice[i]<rfvgextreme? fvg.RBprice[i] : rfvgextreme ;
                 if((fvg.Property[i]%2)==0){
-                    if(fvg.leadblockfg[i]==1) code0FgFvgExtreme[j] = fvg.leadblockbound[i] ;
+                    if(fvg.leadblockfg[i]==1) code0FgFvgExtreme[j] = gfvgextreme ;
                     else code0FgFvgExtreme[j] = gfvgextreme ;
                 }
                 else{
-                    if(fvg.leadblockfg[i]==1) code0FrFvgExtreme[j] = fvg.leadblockbound[i] ;
+                    if(fvg.leadblockfg[i]==1) code0FrFvgExtreme[j] = rfvgextreme ;
                     else code0FrFvgExtreme[j] = rfvgextreme ;
                 }
                 code0Ffvgblockcheck[j] = fvg.leadblockfg[i] ;
@@ -604,17 +844,23 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
         }
     } 
     for (int i=0; i<effkbarsize2; ++i){
+        s2fg = (fvg2.LTprice[i]<u && fvg2.LTprice[i]>d) || (fvg2.RBprice[i]<u && fvg2.RBprice[i]>d);
         if((fvg2.leadblockfg[i]!=2)&&(fvg2.leadblockfg[i]!=-1)){
-            flag = (((fvg2.LTprice[i]<u) && (fvg2.LTprice[i]>d)) || ((fvg2.RBprice[i]<u) && (fvg2.RBprice[i]>d)) && fvg2.outsidebosfvgfg[i])? true : false ;
+            flag = (s2fg && fvg2.fvgsyndrone[i]!=5 && fvg2.fvgsyndrone[i]!=6) ;
+            if(fvg.namei==ii && fvg2.namei==(ii+jj)){
+                str = TimeToString(fvg2.Boxtime[i], TIME_DATE|TIME_MINUTES);
+                line = StringFormat("l1=%.0f, l2=%.0f, fvg2.outs[%.0f]= %d,fvg2.p[%.0f]= %d,fvg2.l[%.0f]= %d LT=%.5f RB=%.5f, s2fg=%d ,flag=%d, u=%.5f, d=%.5f, T=%s" ,fvg.namei, fvg2.namei, i, fvg2.fvgsyndrone[i], i, fvg2.Property[i], i, fvg2.leadblockfg[i], fvg2.LTprice[i], fvg2.RBprice[i], s2fg, flag, u, d, str);
+                FileWrite(handle, line);
+            }
             if(flag){
                 if((fvg2.Property[i]%2)==0) gfvgextreme = fvg2.RBprice[i]>gfvgextreme? fvg2.RBprice[i] : gfvgextreme ;
                 else rfvgextreme = fvg2.RBprice[i]<rfvgextreme? fvg2.RBprice[i] : rfvgextreme ;
                 if((fvg2.Property[i]%2)==0){
-                    if(fvg2.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>fvg2.leadblockbound[i]? code0FgFvgExtreme[j] : fvg2.leadblockbound[i];
+                    if(fvg2.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>gfvgextreme? code0FgFvgExtreme[j] : gfvgextreme;
                     else code0FgFvgExtreme[j] = gfvgextreme ;
                 }
                 else{
-                    if(fvg2.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<fvg2.leadblockbound[i]? code0FrFvgExtreme[j] : fvg2.leadblockbound[i];
+                    if(fvg2.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<rfvgextreme? code0FrFvgExtreme[j] : rfvgextreme;
                     else code0FrFvgExtreme[j] = rfvgextreme ;
                 }
                 code0Ffvgblockcheck[j] = fvg2.leadblockfg[i] ;
@@ -622,7 +868,7 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
             if((fvgtype0F[j]!=0xF) && (fvgtype0F[j]!=0xB) && (fvgtype0F[j]!=0xA) && (fvgtype0F[j]!=0xD) && (fvgtype0F[j]!=0xC)){
                 if(flag){
                     reg          = fvgtype0F[j] ;
-                    if(reg==0) break ;
+                    if(reg==0) continue ;
                     else if(reg==2){
                         fvgtype0F[j] = (fvg2.Property[i]%2==0)? 0x4 : 0xB ;
                     }
@@ -637,22 +883,28 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
                     }
                 }
             }
-            else break ;      
+            else continue ;      
         }
         
     } 
     for (int i=0; i<effkbarsize3; ++i){
+        s3fg = (fvg3.LTprice[i]<u && fvg3.LTprice[i]>d) || (fvg3.RBprice[i]<u && fvg3.RBprice[i]>d);
         if((fvg3.leadblockfg[i]!=2)&&(fvg3.leadblockfg[i]!=-1)){
-            flag = (((fvg3.LTprice[i]<u) && (fvg3.LTprice[i]>d)) || ((fvg3.RBprice[i]<u) && (fvg3.RBprice[i]>d)) && fvg3.outsidebosfvgfg[i])? true : false ;
+            flag = (s3fg && fvg3.fvgsyndrone[i]!=5 && fvg3.fvgsyndrone[i]!=6) ;
+            if(fvg.namei==ii && fvg3.namei==(ii+jj+jj)){
+                str = TimeToString(fvg3.Boxtime[i], TIME_DATE|TIME_MINUTES);
+                line = StringFormat("l1=%.0f, l3=%.0f, fvg3.outs[%.0f]= %d,fvg3.p[%.0f]= %d,fvg3.l[%.0f]= %d LT=%.5f RB=%.5f, s3fg=%d ,flag=%d, u=%.5f, d=%.5f, T=%s" ,fvg.namei, fvg3.namei, i, fvg3.fvgsyndrone[i], i, fvg3.Property[i], i, fvg3.leadblockfg[i], fvg3.LTprice[i], fvg3.RBprice[i], s3fg, flag, u, d, str);
+                FileWrite(handle, line);
+            }
             if(flag){
                 if((fvg3.Property[i]%2)==0) gfvgextreme = fvg3.RBprice[i]>gfvgextreme? fvg3.RBprice[i] : gfvgextreme ;
                 else rfvgextreme = fvg3.RBprice[i]<rfvgextreme? fvg3.RBprice[i] : rfvgextreme ;
                 if((fvg3.Property[i]%2)==0){
-                    if(fvg3.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>fvg3.leadblockbound[i]? code0FgFvgExtreme[j] : fvg3.leadblockbound[i];
+                    if(fvg3.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>gfvgextreme? code0FgFvgExtreme[j] : gfvgextreme;
                     else code0FgFvgExtreme[j] = gfvgextreme ;
                 }
                 else{
-                    if(fvg3.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<fvg3.leadblockbound[i]? code0FrFvgExtreme[j] : fvg3.leadblockbound[i];
+                    if(fvg3.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<rfvgextreme? code0FrFvgExtreme[j] : rfvgextreme;
                     else code0FrFvgExtreme[j] = rfvgextreme ;
                 }
                 code0Ffvgblockcheck[j] = fvg3.leadblockfg[i] ;
@@ -660,7 +912,7 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
             if((fvgtype0F[j]!=0xF) && (fvgtype0F[j]!=0xB) && (fvgtype0F[j]!=0xA) && (fvgtype0F[j]!=0xD) && (fvgtype0F[j]!=0xC)){
                 if(flag){
                     reg          = fvgtype0F[j] ;
-                    if(reg==0) break ;
+                    if(reg==0) continue ;
                     else if(reg==2){
                         fvgtype0F[j] = (fvg3.Property[i]%2==0)? 0x4 : 0xB ;
                     }
@@ -675,21 +927,27 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
                     }
                 }
             }
-            else break ;    
+            else continue ;    
         }
     } 
     for (int i=0; i<effkbarsize4; ++i){
+        s4fg = (fvg4.LTprice[i]<u && fvg4.LTprice[i]>d) || (fvg4.RBprice[i]<u && fvg4.RBprice[i]>d);
         if((fvg4.leadblockfg[i]!=2)&&(fvg4.leadblockfg[i]!=-1)){
-            flag = (((fvg4.LTprice[i]<u) && (fvg4.LTprice[i]>d)) || ((fvg4.RBprice[i]<u) && (fvg4.RBprice[i]>d)) && fvg4.outsidebosfvgfg[i])? true : false ;
+            flag = (s4fg && fvg4.fvgsyndrone[i]!=5 && fvg4.fvgsyndrone[i]!=6) ;
+            if(fvg.namei==ii && fvg4.namei==(ii+jj+jj+jj)){
+                str = TimeToString(fvg4.Boxtime[i], TIME_DATE|TIME_MINUTES);
+                line = StringFormat("l1=%.0f, l4=%.0f, fvg4.outs[%.0f]= %d,fvg4.p[%.0f]= %d,fvg4.l[%.0f]= %d LT=%.5f RB=%.5f, s4fg=%d ,flag=%d, u=%.5f, d=%.5f, T=%s" ,fvg.namei, fvg4.namei, i, fvg4.fvgsyndrone[i], i, fvg4.Property[i], i, fvg4.leadblockfg[i], fvg4.LTprice[i], fvg4.RBprice[i], s4fg, flag, u, d, str);
+                FileWrite(handle, line);              
+            }
             if(flag){
                 if((fvg4.Property[i]%2)==0) gfvgextreme = fvg4.RBprice[i]>gfvgextreme? fvg4.RBprice[i] : gfvgextreme ;
                 else rfvgextreme = fvg4.RBprice[i]<rfvgextreme? fvg4.RBprice[i] : rfvgextreme ;
                 if((fvg4.Property[i]%2)==0){
-                    if(fvg4.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>fvg4.leadblockbound[i]? code0FgFvgExtreme[j] : fvg4.leadblockbound[i];
+                    if(fvg4.leadblockfg[i]==1) code0FgFvgExtreme[j] = code0FgFvgExtreme[j]>gfvgextreme? code0FgFvgExtreme[j] : gfvgextreme;
                     else code0FgFvgExtreme[j] = gfvgextreme ;
                 }
                 else{
-                    if(fvg4.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<fvg4.leadblockbound[i]? code0FrFvgExtreme[j] : fvg4.leadblockbound[i];
+                    if(fvg4.leadblockfg[i]==1) code0FrFvgExtreme[j] = code0FrFvgExtreme[j]<rfvgextreme? code0FrFvgExtreme[j] : rfvgextreme;
                     else code0FrFvgExtreme[j] = rfvgextreme ;
                 }
                 code0Ffvgblockcheck[j] = fvg4.leadblockfg[i] ;
@@ -697,7 +955,7 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
             if((fvgtype0F[j]!=0xF) && (fvgtype0F[j]!=0xB) && (fvgtype0F[j]!=0xA) && (fvgtype0F[j]!=0xD) && (fvgtype0F[j]!=0xC)){
                 if(flag){
                     reg          = fvgtype0F[j] ;
-                    if(reg==0) break ;
+                    if(reg==0) continue ;
                     else if(reg==2){
                         fvgtype0F[j] = (fvg4.Property[i]%2==0)? 0x4 : 0xB ;
                     }
@@ -712,9 +970,10 @@ void Triset::TriFVGcheck0F(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const doub
                     }
                 }
             }
-            else break ;   
+            else continue ;   
         }
-    } 
+    }
+    if(fvg.namei==ii && (j+1==jj)) FileClose(handle);
 }
 uint LeftRotate(uint value, int shift) {
     int bits = 32; // 假设是32位无符号整数
@@ -856,12 +1115,14 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                 if(bosdata.regclose3>bosdata.sbu){
                     bosdata.sbu     = -2;
                     bosdata.sbu_t   = -2;
+                    bosdata.sbubrk_t= bosdata.regclose3_t;  
                     bosdata.sbd     = bosdata.reg1key;
                     bosdata.sbd_t   = bosdata.reg1key_t;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd     = -1 ;
                     bosdata.sbd_t   = -1 ;
+                    bosdata.sbdbrk_t= bosdata.regclose3_t;  
                     bosdata.sbu     = bosdata.reg1key;
                     bosdata.sbu_t   = bosdata.reg1key_t;
                 }
@@ -873,12 +1134,14 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg2key_t   = bosdata.regclose2_t;
                     bosdata.sbu         = bosdata.reg2key;
                     bosdata.sbu_t       = bosdata.reg2key_t;
+                    bosdata.sbubrk_t    = 0;
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd         = -1;
                     bosdata.sbd_t       = -1;
+                    bosdata.sbdbrk_t    = bosdata.regclose3_t;  
                 }
                 bosdata.state = 1;
             }
@@ -888,12 +1151,14 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg2key_t   = bosdata.regclose2_t;
                     bosdata.sbd         = bosdata.reg2key;
                     bosdata.sbd_t       = bosdata.reg2key_t;
+                    bosdata.sbdbrk_t    = 0;
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
                 }
                 if(bosdata.regclose3>bosdata.sbu){
                     bosdata.sbu         = -2;
                     bosdata.sbu_t       = -2;
+                    bosdata.sbubrk_t    = bosdata.regclose3_t;  
                 }
                 bosdata.state = 1;
             }
@@ -911,6 +1176,12 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, const BOS&
     //-1 == no sbd, -2 == no sbu
     uint code       = 0 ;
     int count3      = 0 ;
+    int mask[8]     = {__LEVEL4SBDMASK, __LEVEL3SBDMASK, __LEVEL2SBDMASK, __LEVEL1SBUMASK, __LEVEL1SBUMASK, __LEVEL2SBUMASK, __LEVEL3SBUMASK, __LEVEL4SBUMASK};
+    datetime sbt[8] = {bos4.sbdbrk_t, bos3.sbdbrk_t, bos2.sbdbrk_t, bos1.sbdbrk_t, bos1.sbubrk_t, bos2.sbubrk_t, bos3.sbubrk_t, bos4.sbubrk_t};
+    string sbt_s[8] = {""} ;
+    for(int i=0; i<8; ++i){
+        sbt_s[i] = TimeToString(sbt[i], TIME_DATE|TIME_MINUTES);
+    }
     double arr[8]   = {bos4.sbd, bos3.sbd, bos2.sbd, bos1.sbd, bos1.sbu, bos2.sbu, bos3.sbu, bos4.sbu};
     int    index[8] ={28, 24, 20, 16, 12, 8, 4, 0}; //according to the index[i], I can know that which bos is represnented. And. i is comparison result.
     int    signsbd ;
@@ -922,18 +1193,81 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, const BOS&
     }
 
 //code filtered 0F
+//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
     if(( code & __LEVEL1SBDMASK  ) == 0) ++count3 ;
     if(( code & __LEVEL1SBUMASK  ) == (__LEVEL1SBUMASK)) count3=count3+5 ;
-
 //comparecode[j] is rawcode----------//  
     ts.comparecode[j]         = code ;
 //comparecode0F[j] is code filtered by algorithm----------//
-    if(count3==1 || count3==5) ts.comparecode0F[j]  = code; //1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
-    else ts.comparecode0F[j]  = 0;
-
+    if(count3==1){
+        bool fg = true;
+        bool give = false;
+        for (int i = 0; i < 3; ++i) {
+            if(((code&mask[i])>>index[i])==0){
+                fg   = fg&&(sbt[i]<sbt[3]) ;
+                give = true;
+            }
+        }
+        if(fg&&give) ts.comparecode0F[j]  = code ; 
+    }
+    else if(count3==5){
+        bool fg = true;
+        bool give = false;
+        for (int i = 5; i < 8; ++i) {
+            if(((code&mask[i])>>index[i])==0xF){
+                fg   = fg&&(sbt[i]<sbt[4]) ;
+                give = true;
+            }
+        }
+        if(fg&&give) ts.comparecode0F[j]  = code ; 
+    }
+    else ts.comparecode0F[j] = 0 ;
+    
     delta0X = ts.TriItvCompare0X(fvg, fvg2, fvg3, fvg4, bos1, bos2, bos3, bos4, delta0X, j, count3);
     deltaXF = ts.TriItvCompareXF(fvg, fvg2, fvg3, fvg4, bos1, bos2, bos3, bos4, deltaXF, j, count3);
-
+    if((fvg.namei==ii)&&(j+1==jj)){
+        string filename =StringFormat("%s"+"\\testfile.txt", AccountInfoString(ACCOUNT_COMPANY));
+        int handle=FileOpen(filename,FILE_WRITE|FILE_TXT);
+        string line="";
+        string dt;
+        string ut;
+        datetime t1;
+        datetime t2;
+        line = StringFormat("bos4=%.0f, bos3=%.0f, bos2=%.0f, bos1=%.0f, ii= %.0f, jj= %.0f, code=%08X%01X", bos4.htfint, bos3.htfint, bos2.htfint, bos1.htfint, ii, jj, code, ts.fvgtype0F[j]) ;
+        FileWrite(handle, line);
+        t1 = bos4.sbd_t<0? 0 : bos4.sbd_t;
+        t2 = bos4.sbu_t<0? 0 : bos4.sbu_t;
+        dt = TimeToString(t1, TIME_DATE|TIME_MINUTES);
+        ut = TimeToString(t2, TIME_DATE|TIME_MINUTES);
+        line = StringFormat("%.5f, %.5f, %s, %s" , bos4.sbd, bos4.sbu, dt, ut) ;
+        FileWrite(handle, line);
+        t1 = bos3.sbd_t<0? 0 : bos3.sbd_t;
+        t2 = bos3.sbu_t<0? 0 : bos3.sbu_t;
+        dt = TimeToString(t1, TIME_DATE|TIME_MINUTES);
+        ut = TimeToString(t2, TIME_DATE|TIME_MINUTES);
+        line = StringFormat("%.5f, %.5f, %s, %s" , bos3.sbd, bos3.sbu, dt, ut) ;
+        FileWrite(handle, line);
+        t1 = bos2.sbd_t<0? 0 : bos2.sbd_t;
+        t2 = bos2.sbu_t<0? 0 : bos2.sbu_t;
+        dt = TimeToString(t1, TIME_DATE|TIME_MINUTES);
+        ut = TimeToString(t2, TIME_DATE|TIME_MINUTES);
+        line = StringFormat("%.5f, %.5f, %s, %s" , bos2.sbd, bos2.sbu, dt, ut) ;
+        FileWrite(handle, line);
+        t1 = bos1.sbd_t<0? 0 : bos1.sbd_t;
+        t2 = bos1.sbu_t<0? 0 : bos1.sbu_t;
+        dt = TimeToString(t1, TIME_DATE|TIME_MINUTES);
+        ut = TimeToString(t2, TIME_DATE|TIME_MINUTES);
+        line = StringFormat("%.5f, %.5f, %s, %s" , bos1.sbd, bos1.sbu, dt, ut) ;
+        FileWrite(handle, line);
+        if(handle!=INVALID_HANDLE){
+            for (int i = 0; i < 8; ++i){
+                line = StringFormat("Break Time= %s", sbt_s[i]);
+                FileWrite(handle, line);
+            }
+        }
+        FileClose(handle);
+        //ArrayPrint(sbt_s);
+    }
     //Print("bos1.htfint: ", bos1.htfint);
     return ts;
 }
@@ -941,9 +1275,13 @@ void BoundTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const strin
     for (int j=0; j<=htfint; ++j){
         uint code = ts.comparecode0F[j] ;
         double exe= ts.code0FExtreme[j] ;
-        if(code!=0 && ((code & __LEVEL1SBUMASK)==__LEVEL1SBUMASK)){
+        if(code!=0 && ((code & __LEVEL1SBUMASK)==__LEVEL1SBUMASK)){//0xZZZZFZZZ
             for(int k=0; k<datasize; k++){
                 datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
+                if(exe==MAXSBU){
+                    ts.highfg[j] = false ;
+                    break;
+                }
                 if((iHigh(symbolname,PERIOD_M1,k)>exe) && (temptime>=bos1.sbd_t)){
                     ts.highfg[j] = true ; 
                     //if(i==198)printf("ts.code0FExtreme[%d]= %.4f", i,j,ts.code0FExtreme[j]) ;
@@ -958,7 +1296,7 @@ void BoundTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const strin
                 }
             }
         }
-        else if(code!=0 && ((code & __LEVEL1SBDMASK)== 0)){
+        else if(code!=0 && ((code & __LEVEL1SBDMASK)== 0)){//0xZZZ0ZZZZ
             for(int k=0; k<datasize; k++){
                 datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
                 if((iLow(symbolname,PERIOD_M1,k)<exe)&&(temptime>=bos1.sbu_t)){
@@ -977,36 +1315,36 @@ void BoundTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const strin
 }
 void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string& symbolname, const int& datasze){
     for (int j=0; j<=htfint; ++j){
-        uint code = ts.comparecode0F[j] ;
-        int  type = ts.fvgtype0F[j]     ;
+        uint code      = ts.comparecode0F[j] ;
+        int  type      = ts.fvgtype0F[j]     ;
         double gfvgexe = ts.code0FgFvgExtreme[j];
         double rfvgexe = ts.code0FrFvgExtreme[j];
         if(code!=0){
             if((type==0xF)||(type==0xA)||(type==0xB)||(type==0xC)||(type==0xD)){
-                if((code & __LEVEL1SBDMASK) == 0){
+                if((code & __LEVEL1SBDMASK) == 0){ //0xZZZ0ZZZZ
                     for(int k=0; k<datasize; k++){
                         datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
-                        if((iLow(symbolname,PERIOD_M1,k)<=gfvgexe) && (temptime>=bos1.sbu_t)){
+                        if((iLow(symbolname,PERIOD_M1,k)<=gfvgexe) && (temptime>=bos1.sbdbrk_t)){
                             ts.gfvgfg[j] = true ; 
                             break; 
                         } 
                         else{
-                            if(temptime<bos1.sbu_t){
+                            if(temptime<bos1.sbdbrk_t){
                                 ts.gfvgfg[j] = false ;
                                 break ; 
                             }
                         } 
                     }
                 }
-                else{
+                else{//0xZZZZFZZZ
                     for(int k=0; k<datasize; k++){
                         datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
-                        if((iHigh(symbolname,PERIOD_M1,k)>=rfvgexe) && (temptime>=bos1.sbd_t)){
+                        if((iHigh(symbolname,PERIOD_M1,k)>=rfvgexe) && (temptime>=bos1.sbubrk_t)){
                             ts.rfvgfg[j] = true ; 
                             break;    
                         } 
                         else{
-                            if(temptime<bos1.sbd_t){
+                            if(temptime<bos1.sbubrk_t){
                                 ts.rfvgfg[j] = false ;
                                 break ; 
                             }
