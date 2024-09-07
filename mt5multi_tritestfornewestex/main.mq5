@@ -39,6 +39,7 @@ Fetcher fc                 ;
 FVG fvgarr[PERIODX4]       ;
 BOS Bosarr[PERIODX4]       ;//設一天會卡死 base最多到359 超過360要再想辦法
 Triset Tri[PERIOD]         ;
+matrix MatGold = matrix::Zeros(PERIODX4, 11); //商品名稱(第一列) code 基本週期 itv 空單還是多單  FVG型態 上 下界價錢 在區間內的最高的綠色FVG價格 在區間內的最低的紅色FVG價格 目前價格
 int quooffset = 0;
 bool timerfg  = true        ;
 //vector quooffset{symbol1Off, symbol2Off, symbol3Off, symbol4Off, symbol5Off, symbol6Off, symbol7Off, symbol8Off, symbol9Off, symbol10Off};
@@ -182,10 +183,15 @@ void OnTick() {
             }
             Print("diff zone  ", helper.Extime());
             printf("in Outputfile process");
-            TriWrite(symboltemp[k], Tri, sectornametemp[k]);
+            TriWrite(symboltemp[k], Tri, sectornametemp[k], MatGold);
             FvgWrite(symboltemp[k], fvgarr, sectornametemp[k]);
+            GoldWrite(symboltemp[k], MatGold, sectornametemp[k]);
+            MatBosinit(MatGold, PERIODX4, 11)   ;
         }
         timerfg = false ;
+        for (int i=0; i<(PERIOD); ++i){
+            Tri[i].TriInit();
+        }
     }
 }
 void OnTimer(){

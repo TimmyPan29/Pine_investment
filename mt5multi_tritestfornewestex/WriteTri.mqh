@@ -1,8 +1,8 @@
 #ifndef __WRITETRI_MQH__
 #define __WRITETRI_MQH__
 
-void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
-   string filename  =StringFormat("%s"+"\\%s"+"\\Tricode"+"\\Tri_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
+void TriWrite(string symbolname, const Triset& Tri[], string sectorname, matrix& mg){
+    string filename  = StringFormat("%s"+"\\%s"+"\\Tricode"+"\\Tri_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
     int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
     if(filehandle!=INVALID_HANDLE){
         FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
@@ -95,16 +95,42 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname){
 
                     line  += StringFormat("0x%08X%01X ", Tri[i].comparecode0F[j], Tri[i].fvgtype0F[j]);
                 }
-            }
-            if(anycode){
+            }//j for end
+            if(anycode){//商品名稱(第一列) code 基本週期 itv 空單還是多單  FVG型態 上 下界價錢 在區間內的最低的紅色FVG價格 在區間內的最高的綠色FVG價格  [(突破sbd時最初sbu的價錢(空單停損用) 時間點)]or[(突破sbu時最初sbd的價錢(多單停損用) 時間點)]
                 line2 += "widespace";
                 line += StringFormat("%d %d", idxd+1,idxu+1);
                 FileWrite(filehandle2, line2);
                 FileWrite(filehandle2, line); 
                 anycode = false ;
+                if(idxu+1==0){
+                    mg[i][0]  = Tri[i].comparecode0F[idxd] ;
+                    mg[i][1]  = i+1 ;
+                    mg[i][2]  = idxd+1 ;
+                    mg[i][3]  = 0 ;
+                    mg[i][4]  = Tri[i].fvgtype0F[idxd] ;
+                    mg[i][5]  = Bosarr[i].sbu ;
+                    mg[i][6]  = Tri[i].localmaxd[idxd] ;
+                    mg[i][7]  = Tri[i].code0FrFvgExtreme[idxd] ;
+                    mg[i][8]  = Tri[i].code0FgFvgExtreme[idxd] ;
+                    mg[i][9]  = Bosarr[i].i2bsbu  ;
+                    mg[i][10] = Bosarr[i].i2bsbu_t;
+                }
+                else if(idxd+1==0){
+                    mg[i][0]  = Tri[i].comparecode0F[idxu] ;
+                    mg[i][1]  = i+1 ;
+                    mg[i][2]  = idxu+1 ;
+                    mg[i][3]  = 0xF ;
+                    mg[i][4]  = Tri[i].fvgtype0F[idxu] ;
+                    mg[i][5]  = Tri[i].localminu[idxu] ;
+                    mg[i][6]  = Bosarr[i].sbd ;
+                    mg[i][7]  = Tri[i].code0FrFvgExtreme[idxu];
+                    mg[i][7]  = Tri[i].code0FgFvgExtreme[idxu];
+                    mg[i][8]  = Bosarr[i].i2bsbd  ;
+                    mg[i][9]  = Bosarr[i].i2bsbd_t;
+                }
             }
-        }
-    if(anycodereg) FileWrite(filehandle2, "//------------------------------***HARDBONE CO.,LTD***------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//"); 
+        }//i for end
+    if(anycodereg) FileWrite(filehandle2, "//+------------------------------***HARDBONE CO.,LTD***----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+//"); 
     FileClose(filehandle2);
     Print("FileOpen OK");
     }
@@ -137,39 +163,25 @@ void FvgWrite(string symbolname, const FVG& fvg[], string sectorname){
     else Print("Operation FileOpen failed, error ",GetLastError());
     ResetLastError();
 }
+void GoldWrite(string symbolname, const matrix& mg, string sectorname){//商品名稱(第一列) code 基本週期 itv 空單還是多單  FVG型態 上 下界價錢 在區間內的最低的紅色FVG價格 在區間內的最高的綠色FVG價格  [(突破sbd時最初sbu的價錢(空單停損用應該要引線) 時間點)]or[(突破sbu時最初sbd的價錢(多單停損用應該要引線) 時間點)]
+    string filename  =StringFormat("%s"+"\\%s"+"\\Gold"+"\\Gold_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
+    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
+    if(filehandle!=INVALID_HANDLE){
+        FileWrite(filehandle, symbolname);
+        string line  = "" ;
+        bool anycode=false;
+        for(int i=0; i<PERIODX4; ++i){
+            if(mg[i][0]==0) continue ;
+            line = StringFormat("%.0f %.0f %.0f %.0f %.0f %.5f %.5f %.5f %.5f %.5f %.0f", mg[i][0], mg[i][1], mg[i][2], mg[i][3], mg[i][4], mg[i][5], mg[i][6], mg[i][7], mg[i][8], mg[i][9], mg[i][10]);
+            FileWrite(filehandle, line);
+            anycode = true ;
+        }
+        if(anycode) FileWrite(filehandle, "//+------------------------------***HARDBONE CO.,LTD***----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+//") ;
+        FileClose(filehandle);
+        Print("FileOpenlast OK");
+    }
+    else Print("Operation FileOpen failed, error ",GetLastError());
+    ResetLastError();
+}
 #endif
 
-// void OnStart()
-//   {
-// //--- incorrect file opening method
-//    string terminal_data_path=TerminalInfoString(TERMINAL_DATA_PATH);
-//    string filename=terminal_data_path+"\\MQL5\\Files\\"+"fractals.txt";
-//    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
-//    if(filehandle<0)
-//      {
-//       Print("Failed to open the file by the absolute path ");
-//       Print("Error code ",GetLastError());
-//      }
- 
-// //--- correct way of working in the "file sandbox"
-//    ResetLastError();
-//    filehandle=FileOpen("Tri.txt",FILE_WRITE|FILE_TXT);
-//    if(filehandle!=INVALID_HANDLE)
-//      {
-//       FileWrite(filehandle,"miaomiao",TimeCurrent(),Symbol(), EnumToString(_Period),"狗狗","\n ddd");
-//       FileClose(filehandle);
-//       Print("FileOpen OK");
-//      }
-//    else Print("Operation FileOpen failed, error ",GetLastError());
-//    ResetLastError();
-// //--- another example with the creation of an enclosed directory in MQL5\Files\
-//    string subfolder="Research";
-//    filehandle=FileOpen(subfolder+"\\fractals.txt",FILE_WRITE|FILE_TXT);
-//       if(filehandle!=INVALID_HANDLE)
-//      {
-//       FileWrite(filehandle,TimeCurrent(),Symbol(), EnumToString(_Period));
-//       FileClose(filehandle);
-//       Print("The file must be created in the folder "+terminal_data_path+"\\"+subfolder);
-//      }
-//    else Print("File open failed, error ",GetLastError());
-//   }

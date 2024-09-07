@@ -13,12 +13,6 @@ struct BOS{
     datetime        sbd_t       ;
     int             cntbosd     ;
     int             cntbosu     ;
-    double          i2bsbu      ;
-    datetime        i2bsbu_t    ;
-    int             cnti2bu     ;
-    double          i2bsbd      ;
-    datetime        i2bsbd_t    ;
-    int             cnti2bd     ;
     int             slope1      ;
     int             slope2      ;
     int             cnt1idx     ;
@@ -45,62 +39,50 @@ struct BOS{
     string          s_ddate     ;
 
     BOS():sbu_lb(""),sbu_ln(""),sbd_lb(""),sbd_ln(""){
-        htfint      = 0;
-        htfname     = "";
-        sbu         = 0;
-        sbd         = 0;
-        sbu_t       = 0;
-        sbd_t       = 0;
-        cntbosu     = 0;
-        cntbosd     = 0;
-        i2bsbu      = 0;
-        i2bsbu_t    = 0;
-        cnti2bu     = 0;
-        i2bsbd      = 0;
-        i2bsbd_t    = 0;
-        cnti2bd     = 0;
-        slope1      = 0;
-        slope2      = 0;
-        state       = 1;
-        regclose1   = 0;
-        regclose2   = 0;
-        regclose3   = 0;
+        htfint = 0;
+        htfname = "";
+        sbu = 0;
+        sbd = 0;
+        sbu_t = 0;
+        sbd_t = 0;
+        cntbosu=0;
+        cntbosd=0;
+        slope1 = 0;
+        slope2 = 0;
+        state = 1;
+        regclose1 = 0;
+        regclose2 = 0;
+        regclose3 = 0;
         regclose1_t = 0;
         regclose2_t = 0;
         regclose3_t = 0;
-        cnt1idx     = 0;
-        cnt2idx     = 0;
-        cnt3idx     = 0;
+        cnt1idx     = 0  ;
+        cnt2idx     = 0  ;
+        cnt3idx     = 0  ;
     }
 
     // 带参数的构造函数
     BOS(int i):sbu_lb("sbu_lb" + IntegerToString(i)),sbu_ln("sbu_line" + IntegerToString(i)),sbd_lb("sbd_lb" + IntegerToString(i)),sbd_ln("sbd_line" + IntegerToString(i)) {
-        htfint      = i;
-        htfname     = IntegerToString(i);
-        sbu         = 0;
-        sbd         = 0;
-        sbu_t       = 0;
-        sbd_t       = 0;
-        cntbosu     = 0;
-        cntbosd     = 0;
-        i2bsbu      = 0;
-        i2bsbu_t    = 0;
-        cnti2bu     = 0;
-        i2bsbd      = 0;
-        i2bsbd_t    = 0;
-        cnti2bd     = 0;
-        slope1      = 0;
-        slope2      = 0;
-        state       = 1;
-        regclose1   = 0;
-        regclose2   = 0;
-        regclose3   = 0;
+        htfint = i;
+        htfname = IntegerToString(i);
+        sbu = 0;
+        sbd = 0;
+        sbu_t = 0;
+        sbd_t = 0;
+        cntbosu=0;
+        cntbosd=0;
+        slope1 = 0;
+        slope2 = 0;
+        state = 1;
+        regclose1 = 0;
+        regclose2 = 0;
+        regclose3 = 0;
         regclose1_t = 0;
         regclose2_t = 0;
         regclose3_t = 0;
-        cnt1idx     = 0;
-        cnt2idx     = 0;
-        cnt3idx     = 0;
+        cnt1idx     = 0  ;
+        cnt2idx     = 0  ;
+        cnt3idx     = 0  ;
     }
 };
 struct FVG{
@@ -210,81 +192,7 @@ struct FVG{
             }
         }     
     }
-    void bosi2b_hlt(const matrix& Mat, matrix& Matdo, matrix& Matuo, const BOS& bos, const int& i){
-        if(bos.i2bsbd>0){
-            int didx   = kbar[bos.cnti2bd]             ;
-            int didxm1 = bos.cnti2bd>0? kbar[bos.cnti2bd-1] : 0        ;  
-            if(namei==1){//P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT
-                Matdo[i][9]  = Mat[3][didx];
-                Matdo[i][10] = Mat[1][didx];
-                Matdo[i][11] = Mat[2][didx];
-                Matdo[i][12] = Mat[0][didx];
-                Matdo[i][13] = Mat[4][didx];
-            }
-            else{
-                int start       = didxm1+1          ;
-                int end         = didx              ;
-                //int temph       = didxm1+1          ;
-                //int templ       = didxm1+1          ;
-                Matdo[i][9]  = Mat[3][didx];
-                Matdo[i][10] = Mat[1][start];
-                Matdo[i][11] = Mat[2][start];
-                Matdo[i][12] = Mat[0][start];
-                Matdo[i][13] = Mat[4][didx];
-                while(start<end){
-                    Matdo[i][10] = Matdo[i][10]>Mat[1][start+1]? Matdo[i][10] : Mat[1][start+1];
-                    //temph       = Matdo[i][10]>Mat[1][start+1]? temph       : start+1;
-                    Matdo[i][11] = Matdo[i][11]<Mat[2][start+1]? Matdo[i][11] : Mat[2][start+1];
-                    //templ       = Matdo[i][11]<Mat[2][start+1]? templ       : start+1;
-                    ++start;
-                }
-            }
-        }
-        else{
-            Matdo[i][9] = -1;
-            Matdo[i][10] = 0;
-            Matdo[i][11] = 0;
-            Matdo[i][12] = 0;
-            Matdo[i][13] = 0;
-        }
-        if(bos.i2bsbu>0){
-            int uidx   = kbar[bos.cnti2bu]             ;
-            int uidxm1 = bos.cnti2bu>0? kbar[bos.cnti2bu-1] : 0        ;
-            if(namei==1){//P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT
-                Matuo[i][9]  = Mat[3][uidx];
-                Matuo[i][10] = Mat[1][uidx];
-                Matuo[i][11] = Mat[2][uidx];
-                Matuo[i][12] = Mat[0][uidx];
-                Matuo[i][13] = Mat[4][uidx];
-            }
-            else{
-                int start       = uidxm1+1          ;
-                int end         = uidx              ;
-                //int temph       = uidxm1+1          ;
-                //int templ       = uidxm1+1          ;
-                Matuo[i][9]  = Mat[3][uidx];
-                Matuo[i][10] = Mat[1][start];
-                Matuo[i][11] = Mat[2][start];
-                Matuo[i][12] = Mat[0][start];
-                Matuo[i][13] = Mat[4][uidx];
-                while(start<end){
-                    Matuo[i][10] = Matuo[i][10]>Mat[1][start+1]? Matuo[i][10] : Mat[1][start+1];
-                    //temph       = Matuo[i][10]>Mat[1][start+1]? temph       : start+1;
-                    Matuo[i][11] = Matuo[i][11]<Mat[2][start+1]? Matuo[i][11] : Mat[2][start+1];
-                    //templ       = Matuo[i][11]<Mat[2][start+1]? templ       : start+1;
-                    ++start;
-                }
-            }
-        }
-        else{
-            Matuo[i][9] = -2;
-            Matuo[i][10] = 0;
-            Matuo[i][11] = 0;
-            Matuo[i][12] = 0;
-            Matuo[i][13] = 0;
-        }
-    }
-    void bos_hlt(const matrix& Mat, matrix& Matd, matrix& Matu, const BOS& bos, const int& i){ //cal the high low argument with bosdata and Rawdata from Mat //P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT
+    void bos_hlt(const matrix& Mat, matrix& Matd, matrix& Matu, const BOS& bos, const int& i){ //cal the high low argument with bosdata and Rawdata from Mat //P bos H L O BT HT LT OT  , //Mat OHLCT
         Matd[i][0] = namei;
         Matu[i][0] = namei;
         if(bos.sbd>0){
@@ -330,7 +238,7 @@ struct FVG{
                 Matd[i][7] = Mat[4][templ];
             }
         }
-        else{ //P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT
+        else{ //P bos H L O BT HT LT OT
             Matd[i][1] = -1;
             Matd[i][4] = 0;
             Matd[i][5] = 0;
@@ -564,35 +472,19 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                 //else //Buff_key1維持原樣
                 if(bosdata.regclose3>bosdata.sbu){                    
                     bosdata.sbu     = -2;
-                    bosdata.sbu_t   = 0 ;
-                    bosdata.i2bsbu  = -2;
-                    bosdata.i2bsbu_t= 0 ;
-                    bosdata.cnti2bu = 0 ; 
-                    bosdata.cnti2bd = bosdata.cntbosd;
+                    bosdata.sbu_t   = -2;
                     bosdata.sbd     = bosdata.reg1key;
                     bosdata.sbd_t   = bosdata.reg1key_t;
                     bosdata.cntbosd = bosdata.cntkey1;
-                    bosdata.cntbosu = 0 ; 
+                    bosdata.cntbosu = -1 ; 
                 }
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd     = -1 ;
-                    bosdata.sbd_t   = 0  ;
-                    bosdata.i2bsbd  = -1 ;
-                    bosdata.i2bsbd_t= 0  ;
-                    bosdata.cnti2bu = bosdata.cntbosu;
-                    bosdata.cnti2bd = 0  ;
+                    bosdata.sbd_t   = -1 ;
                     bosdata.sbu     = bosdata.reg1key;
                     bosdata.sbu_t   = bosdata.reg1key_t;
-                    bosdata.cntbosd = 0 ;
+                    bosdata.cntbosd = -1 ;
                     bosdata.cntbosu = bosdata.cntkey1;
-                }
-                if(bosdata.sbu>0 && bosdata.sbd>0){
-                    bosdata.i2bsbu  = bosdata.sbu  ;
-                    bosdata.i2bsbu_t= bosdata.sbu_t;
-                    bosdata.cnti2bu = bosdata.cntbosu;
-                    bosdata.i2bsbd  = bosdata.sbd  ;
-                    bosdata.i2bsbd_t= bosdata.sbd_t;
-                    bosdata.cnti2bd = bosdata.cntbosd;
                 }
                 bosdata.state = 1;
             }
@@ -607,17 +499,11 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg1key_t   = bosdata.reg2key_t;
                     bosdata.cntbosu     = bosdata.cntkey2;
                     bosdata.cntkey1     = bosdata.cntkey2;
-                    bosdata.i2bsbu      = bosdata.sbu  ;
-                    bosdata.i2bsbu_t    = bosdata.sbu_t;
-                    bosdata.cnti2bu     = bosdata.cntbosu;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd         = -1;
-                    bosdata.sbd_t       = 0 ;
-                    bosdata.i2bsbd      = -1;
-                    bosdata.i2bsbd_t    = 0 ;
-                    bosdata.cnti2bd     = 0 ;
-                    bosdata.cntbosd     = 0 ;
+                    bosdata.sbd_t       = -1;
+                    bosdata.cntbosd     = -1;
                 }
                 bosdata.state = 1;
             }
@@ -632,17 +518,11 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg1key_t   = bosdata.reg2key_t;
                     bosdata.cntbosd     = bosdata.cntkey2;
                     bosdata.cntkey1     = bosdata.cntkey2;
-                    bosdata.i2bsbd      = bosdata.sbd  ;
-                    bosdata.i2bsbd_t    = bosdata.sbd_t;
-                    bosdata.cnti2bd     = bosdata.cntbosd;
                 }
                 if(bosdata.regclose3>bosdata.sbu){
                     bosdata.sbu         = -2;
-                    bosdata.sbu_t       = 0 ;
-                    bosdata.i2bsbu      = -2;
-                    bosdata.i2bsbu_t    = 0 ;
-                    bosdata.cnti2bu     = 0 ;
-                    bosdata.cntbosu     = 0 ;
+                    bosdata.sbu_t       = -2;
+                    bosdata.cntbosu     = -1;
                 }
                 bosdata.state = 1;
             }
@@ -650,15 +530,14 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
             //     string str = TimeToString(testt, TIME_DATE | TIME_MINUTES);
             //     printf("fvg%d.sbd= %.5f", fvg.namei, fvg.sbd);
             //     printf("bosdata.state= %d bosdata.slope1= %.1f bosdata.slope2= %.1f bosdata.sbd= %.5f bosdata.sbu= %.5f bosdata.reg1key= %.5f bosdata.reg2key= %.5f bosdata.regclose1= %.5f bosdata.regclose2= %.5f bosdata.regclose3= %.5f time= %s",bosdata.state, bosdata.slope1, bosdata.slope2, bosdata.sbd, bosdata.sbu, bosdata.reg1key, bosdata.reg2key, bosdata.regclose1, bosdata.regclose2, bosdata.regclose3, str);
-            // }
-            //printf("bosdata.cntbosd= %d, bosdata.cnti2bd= %d", bosdata.cntbosd, bosdata.cnti2bd);
+            // } 
         }
         ++k; 
     }//while end
     //printf("cnt= %d\tk= %d", cnt,k);
 }//func end
 
-////P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT
+//P bos H L O T T T T
 
 void Boscopy(const matrix& M_sbd, const matrix& M_sbu, matrix& M_sbdo, matrix& M_sbuo, const int& i){ //in this, i is reordered, so we need find the order from less to greater period i is not 1 2 3 4 ... 1440 anymore. fvg[reoreder idx] will be correct. 
     for(int j=0; j<9; ++j){
@@ -670,7 +549,7 @@ void Boscopy(const matrix& M_sbd, const matrix& M_sbu, matrix& M_sbdo, matrix& M
 }
 
 //-----filter-----//
-//RMd: P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT , Rmd is M_sbdordered
+//RMd: P bos H L O BT HT LT OT , Rmd is M_sbdordered
 //Md:  P bos H L BT ,  Md is M_sbdCP
 void CheckClosePosPeriod(matrix& Md, matrix& Mu, const matrix& RMd, const matrix& RMu, const int& Pd, const int& Pu){//R is raw
     int      period;

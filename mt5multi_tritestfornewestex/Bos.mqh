@@ -14,6 +14,10 @@ struct BOS{
     datetime        sbd_t       ;
     datetime        sbubrk_t    ;
     datetime        sbdbrk_t    ;
+    double          i2bsbu      ;
+    datetime        i2bsbu_t    ;
+    double          i2bsbd      ;
+    datetime        i2bsbd_t    ;
     int             slope1      ;
     int             slope2      ;
     int             state       ; //ini 
@@ -35,18 +39,22 @@ struct BOS{
     string          s_ddate     ;
 
     BOS():sbu_lb(""),sbu_ln(""),sbd_lb(""),sbd_ln(""){
-        htfint = 0;
-        htfname = "";
-        sbu = 0.0;
-        sbd = 0.0;
-        sbu_t = 0;
-        sbd_t = 0;
-        slope1 = 0.0;
-        slope2 = 0.0;
-        state = 1;
-        regclose1 = 0.0;
-        regclose2 = 0.0;
-        regclose3 = 0.0;
+        htfint      = 0;
+        htfname     = "";
+        sbu         = 0.0;
+        sbd         = 0.0;
+        sbu_t       = 0;
+        sbd_t       = 0;
+        i2bsbu      = 0;
+        i2bsbu_t    = 0;
+        i2bsbd      = 0;
+        i2bsbd_t    = 0;
+        slope1      = 0.0;
+        slope2      = 0.0;
+        state       = 1;
+        regclose1   = 0.0;
+        regclose2   = 0.0;
+        regclose3   = 0.0;
         regclose1_t = 0.0;
         regclose2_t = 0.0;
         regclose3_t = 0.0;
@@ -54,18 +62,22 @@ struct BOS{
 
     // 带参数的构造函数
     BOS(int i):sbu_lb("sbu_lb" + IntegerToString(i)),sbu_ln("sbu_line" + IntegerToString(i)),sbd_lb("sbd_lb" + IntegerToString(i)),sbd_ln("sbd_line" + IntegerToString(i)) {
-        htfint = i;
-        htfname = IntegerToString(i);
-        sbu = 0;
-        sbd = 0;
-        sbu_t = 0;
-        sbu_t = 0;
-        slope1 = 0;
-        slope2 = 0;
-        state = 1;
-        regclose1 = 0;
-        regclose2 = 0;
-        regclose3 = 0;
+        htfint      = i;
+        htfname     = IntegerToString(i);
+        sbu         = 0;
+        sbd         = 0;
+        sbu_t       = 0;
+        sbu_t       = 0;
+        i2bsbu      = 0;
+        i2bsbu_t    = 0;
+        i2bsbd      = 0;
+        i2bsbd_t    = 0;
+        slope1      = 0;
+        slope2      = 0;
+        state       = 1;
+        regclose1   = 0;
+        regclose2   = 0;
+        regclose3   = 0;
         regclose1_t = 0;
         regclose2_t = 0;
         regclose3_t = 0;
@@ -711,11 +723,26 @@ struct Triset{
     int     localminu[]          ;
     int     fvgtype0F[]          ;
     Triset():wide2itv0X(-1),wide2itvXF(-1){}
+    void   TriInit();
     double TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3);
     double TriItvCompareXF (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3);
     void   TriFVGcheck0F   (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const double& u, const double& d, const int& j);
 };
-
+void Triset::TriInit(){
+    ArrayInitialize(comparecode,NULL);
+    ArrayInitialize(comparecode0F,NULL);
+    ArrayInitialize(code0FExtreme,NULL);
+    ArrayInitialize(code0FgFvgExtreme,NULL);
+    ArrayInitialize(code0FrFvgExtreme,NULL);
+    ArrayInitialize(code0Ffvgblockcheck,NULL);
+    ArrayInitialize(highfg,NULL);
+    ArrayInitialize(lowfg,NULL);
+    ArrayInitialize(gfvgfg,NULL);
+    ArrayInitialize(rfvgfg,NULL);
+    ArrayInitialize(localmaxd,NULL);
+    ArrayInitialize(localminu,NULL);
+    ArrayInitialize(fvgtype0F,NULL);
+}
 double Triset::TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3){//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
     double deltatemp = delta0X ;
     double temp1;
@@ -1112,16 +1139,26 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg1key_t   = bosdata.regclose2_t ;
                 }
                 //else //Buff_key1維持原樣
+                if(bosdata.sbu>0 && bosdata.sbd>0){
+                    bosdata.i2bsbu  = bosdata.sbu  ;
+                    bosdata.i2bsbu_t= bosdata.sbu_t;
+                    bosdata.i2bsbd  = bosdata.sbd  ;
+                    bosdata.i2bsbd_t= bosdata.sbd_t;
+                }
                 if(bosdata.regclose3>bosdata.sbu){
                     bosdata.sbu     = -2;
-                    bosdata.sbu_t   = -2;
+                    bosdata.sbu_t   = 0;
+                    bosdata.i2bsbu  = -2;
+                    bosdata.i2bsbu_t= 0 ;
                     bosdata.sbubrk_t= bosdata.regclose3_t;  
                     bosdata.sbd     = bosdata.reg1key;
                     bosdata.sbd_t   = bosdata.reg1key_t;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd     = -1 ;
-                    bosdata.sbd_t   = -1 ;
+                    bosdata.sbd_t   = 0 ;
+                    bosdata.i2bsbd  = -1 ;
+                    bosdata.i2bsbd_t= 0  ;
                     bosdata.sbdbrk_t= bosdata.regclose3_t;  
                     bosdata.sbu     = bosdata.reg1key;
                     bosdata.sbu_t   = bosdata.reg1key_t;
@@ -1135,12 +1172,19 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.sbu         = bosdata.reg2key;
                     bosdata.sbu_t       = bosdata.reg2key_t;
                     bosdata.sbubrk_t    = 0;
+                    bosdata.sbdbrk_t    = 0;
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
+                    bosdata.i2bsbu      = bosdata.sbu  ;
+                    bosdata.i2bsbu_t    = bosdata.sbu_t;
+                    bosdata.i2bsbd      = bosdata.sbd  ;
+                    bosdata.i2bsbd_t    = bosdata.sbd_t;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd         = -1;
-                    bosdata.sbd_t       = -1;
+                    bosdata.sbd_t       = 0 ;
+                    bosdata.i2bsbd      = -1;
+                    bosdata.i2bsbd_t    = 0 ;
                     bosdata.sbdbrk_t    = bosdata.regclose3_t;  
                 }
                 bosdata.state = 1;
@@ -1151,13 +1195,20 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg2key_t   = bosdata.regclose2_t;
                     bosdata.sbd         = bosdata.reg2key;
                     bosdata.sbd_t       = bosdata.reg2key_t;
+                    bosdata.sbubrk_t    = 0;
                     bosdata.sbdbrk_t    = 0;
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
+                    bosdata.i2bsbu      = bosdata.sbu  ;
+                    bosdata.i2bsbu_t    = bosdata.sbu_t;
+                    bosdata.i2bsbd      = bosdata.sbd  ;
+                    bosdata.i2bsbd_t    = bosdata.sbd_t;
                 }
                 if(bosdata.regclose3>bosdata.sbu){
                     bosdata.sbu         = -2;
-                    bosdata.sbu_t       = -2;
+                    bosdata.sbu_t       = 0 ;
+                    bosdata.i2bsbu      = -2;
+                    bosdata.i2bsbu_t    = 0 ;
                     bosdata.sbubrk_t    = bosdata.regclose3_t;  
                 }
                 bosdata.state = 1;
@@ -1355,6 +1406,13 @@ void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string&
             else continue ;
         }
         
+    }
+}
+void MatBosinit(matrix& mat, const int& rows, const int& columes){
+    for(int i=0; i<rows; ++i){
+        for(int j=0; j<columes; ++j){
+            mat[i][j]=0 ;
+        }
     }
 }
 #endif
