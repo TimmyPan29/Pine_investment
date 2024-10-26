@@ -114,10 +114,10 @@ struct FVG{
         ArrayResize(leadblockbound,300,300)             ;
         ArrayResize(LTprice,300,300)                    ;
         ArrayResize(RBprice,300,300)                    ;
-        ArrayResize(Boxtime,300,300)                     ;
+        ArrayResize(Boxtime,300,300)                    ;
         ArrayResize(effkbar,300,300)                    ;
         ArrayResize(effkbarend,300,300)                 ;
-        ArrayResize(fvgsyndrone,300,300)            ;
+        ArrayResize(fvgsyndrone,300,300)                ;
         ArrayInitialize(kbar,-1)                        ;
         ArrayInitialize(kbarclose,-1)                   ;
         ArrayInitialize(kbarhigh,-1)                    ;
@@ -1227,7 +1227,7 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, const BOS&
     //-1 == no sbd, -2 == no sbu
     uint code       = 0 ;
     int count3      = 0 ;
-    int mask[8]     = {__LEVEL4SBDMASK, __LEVEL3SBDMASK, __LEVEL2SBDMASK, __LEVEL1SBUMASK, __LEVEL1SBUMASK, __LEVEL2SBUMASK, __LEVEL3SBUMASK, __LEVEL4SBUMASK};
+    int mask[8]     = {__LEVEL4SBDMASK, __LEVEL3SBDMASK, __LEVEL2SBDMASK, __LEVEL1SBDMASK, __LEVEL1SBUMASK, __LEVEL2SBUMASK, __LEVEL3SBUMASK, __LEVEL4SBUMASK};
     datetime sbt[8] = {bos4.sbdbrk_t, bos3.sbdbrk_t, bos2.sbdbrk_t, bos1.sbdbrk_t, bos1.sbubrk_t, bos2.sbubrk_t, bos3.sbubrk_t, bos4.sbubrk_t};
     string sbt_s[8] = {""} ;
     for(int i=0; i<8; ++i){
@@ -1244,12 +1244,12 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, const BOS&
     }
 
 //code filtered 0F
-//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
+//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left hand side can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, Z can be 0 and F
     if(( code & __LEVEL1SBDMASK  ) == 0) ++count3 ;
     if(( code & __LEVEL1SBUMASK  ) == (__LEVEL1SBUMASK)) count3=count3+5 ;
 //comparecode[j] is rawcode----------//  
     ts.comparecode[j]         = code ;
-//comparecode0F[j] is code filtered by algorithm----------//
+//comparecode0F[j] is code filtered by algorithm, the function is to check the broken level's time is advanced of broken level 1's time .----------//
     if(count3==1){
         bool fg = true;
         bool give = false;
@@ -1258,8 +1258,10 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, const BOS&
                 fg   = fg&&(sbt[i]<sbt[3]) ;
                 give = true;
             }
+            else give  = false;
         }
-        if(fg&&give) ts.comparecode0F[j]  = code ; 
+        if(fg&&give) ts.comparecode0F[j]  = code ;
+        else ts.comparecode0F[j]  = 0 ;
     }
     else if(count3==5){
         bool fg = true;
@@ -1269,8 +1271,10 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, const BOS&
                 fg   = fg&&(sbt[i]<sbt[4]) ;
                 give = true;
             }
+            else give= false;
         }
         if(fg&&give) ts.comparecode0F[j]  = code ; 
+        else ts.comparecode0F[j]  = 0 ;
     }
     else ts.comparecode0F[j] = 0 ;
     
@@ -1364,7 +1368,7 @@ void BoundTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const strin
         }
     }
 }
-void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string& symbolname, const int& datasze){
+void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string& symbolname, const int& datasize){
     for (int j=0; j<=htfint; ++j){
         uint code      = ts.comparecode0F[j] ;
         int  type      = ts.fvgtype0F[j]     ;

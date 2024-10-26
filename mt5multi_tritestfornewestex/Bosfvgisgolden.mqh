@@ -1156,7 +1156,7 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, const BOS&
     //-1 == no sbd, -2 == no sbu
     uint code       = 0 ;
     int count3      = 0 ;
-    int mask[8]     = {__LEVEL4SBDMASK, __LEVEL3SBDMASK, __LEVEL2SBDMASK, __LEVEL1SBUMASK, __LEVEL1SBUMASK, __LEVEL2SBUMASK, __LEVEL3SBUMASK, __LEVEL4SBUMASK};
+    int mask[8]     = {__LEVEL4SBDMASK, __LEVEL3SBDMASK, __LEVEL2SBDMASK, __LEVEL1SBDMASK, __LEVEL1SBUMASK, __LEVEL2SBUMASK, __LEVEL3SBUMASK, __LEVEL4SBUMASK};
     datetime sbt[8] = {bos4.sbdbrk_t, bos3.sbdbrk_t, bos2.sbdbrk_t, bos1.sbdbrk_t, bos1.sbubrk_t, bos2.sbubrk_t, bos3.sbubrk_t, bos4.sbubrk_t};
     string sbt_s[8] = {""} ;
     for(int i=0; i<8; ++i){

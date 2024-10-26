@@ -14,6 +14,10 @@ struct BOS{
     datetime        sbd_t       ;
     datetime        sbubrk_t    ;
     datetime        sbdbrk_t    ;
+    double          i2bsbu      ;
+    datetime        i2bsbu_t    ;
+    double          i2bsbd      ;
+    datetime        i2bsbd_t    ;
     int             slope1      ;
     int             slope2      ;
     int             state       ; //ini 
@@ -35,18 +39,22 @@ struct BOS{
     string          s_ddate     ;
 
     BOS():sbu_lb(""),sbu_ln(""),sbd_lb(""),sbd_ln(""){
-        htfint = 0;
-        htfname = "";
-        sbu = 0.0;
-        sbd = 0.0;
-        sbu_t = 0;
-        sbd_t = 0;
-        slope1 = 0.0;
-        slope2 = 0.0;
-        state = 1;
-        regclose1 = 0.0;
-        regclose2 = 0.0;
-        regclose3 = 0.0;
+        htfint      = 0;
+        htfname     = "";
+        sbu         = 0.0;
+        sbd         = 0.0;
+        sbu_t       = 0;
+        sbd_t       = 0;
+        i2bsbu      = 0;
+        i2bsbu_t    = 0;
+        i2bsbd      = 0;
+        i2bsbd_t    = 0;
+        slope1      = 0.0;
+        slope2      = 0.0;
+        state       = 1;
+        regclose1   = 0.0;
+        regclose2   = 0.0;
+        regclose3   = 0.0;
         regclose1_t = 0.0;
         regclose2_t = 0.0;
         regclose3_t = 0.0;
@@ -54,18 +62,22 @@ struct BOS{
 
     // 带参数的构造函数
     BOS(int i):sbu_lb("sbu_lb" + IntegerToString(i)),sbu_ln("sbu_line" + IntegerToString(i)),sbd_lb("sbd_lb" + IntegerToString(i)),sbd_ln("sbd_line" + IntegerToString(i)) {
-        htfint = i;
-        htfname = IntegerToString(i);
-        sbu = 0;
-        sbd = 0;
-        sbu_t = 0;
-        sbu_t = 0;
-        slope1 = 0;
-        slope2 = 0;
-        state = 1;
-        regclose1 = 0;
-        regclose2 = 0;
-        regclose3 = 0;
+        htfint      = i;
+        htfname     = IntegerToString(i);
+        sbu         = 0;
+        sbd         = 0;
+        sbu_t       = 0;
+        sbu_t       = 0;
+        i2bsbu      = 0;
+        i2bsbu_t    = 0;
+        i2bsbd      = 0;
+        i2bsbd_t    = 0;
+        slope1      = 0;
+        slope2      = 0;
+        state       = 1;
+        regclose1   = 0;
+        regclose2   = 0;
+        regclose3   = 0;
         regclose1_t = 0;
         regclose2_t = 0;
         regclose3_t = 0;
@@ -102,10 +114,10 @@ struct FVG{
         ArrayResize(leadblockbound,300,300)             ;
         ArrayResize(LTprice,300,300)                    ;
         ArrayResize(RBprice,300,300)                    ;
-        ArrayResize(Boxtime,300,300)                     ;
+        ArrayResize(Boxtime,300,300)                    ;
         ArrayResize(effkbar,300,300)                    ;
         ArrayResize(effkbarend,300,300)                 ;
-        ArrayResize(fvgsyndrone,300,300)            ;
+        ArrayResize(fvgsyndrone,300,300)                ;
         ArrayInitialize(kbar,-1)                        ;
         ArrayInitialize(kbarclose,-1)                   ;
         ArrayInitialize(kbarhigh,-1)                    ;
@@ -711,15 +723,30 @@ struct Triset{
     int     localminu[]          ;
     int     fvgtype0F[]          ;
     Triset():wide2itv0X(-1),wide2itvXF(-1){}
+    void   TriInit();
     double TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3);
     double TriItvCompareXF (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3);
     void   TriFVGcheck0F   (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const double& u, const double& d, const int& j);
 };
-
-double Triset::TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3){//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
+void Triset::TriInit(){
+    ArrayInitialize(comparecode,NULL);
+    ArrayInitialize(comparecode0F,NULL);
+    ArrayInitialize(code0FExtreme,NULL);
+    ArrayInitialize(code0FgFvgExtreme,NULL);
+    ArrayInitialize(code0FrFvgExtreme,NULL);
+    ArrayInitialize(code0Ffvgblockcheck,NULL);
+    ArrayInitialize(highfg,NULL);
+    ArrayInitialize(lowfg,NULL);
+    ArrayInitialize(gfvgfg,NULL);
+    ArrayInitialize(rfvgfg,NULL);
+    ArrayInitialize(localmaxd,NULL);
+    ArrayInitialize(localminu,NULL);
+    ArrayInitialize(fvgtype0F,NULL);
+}
+double Triset::TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& delta0X, const int& j, const int& count3){//7 belong case 0xXXX0XXXX,those X beside 0 left hand side can't be touch, otherwise rule will break, 11 belong 0xXXXXFXXX, X nor 0 and F
     double deltatemp = delta0X ;
     double temp1;
-    if(count3==1){
+    if(count3==7){
         delta0X     = MathMax(bos2.sbd, bos3.sbd);
         delta0X     = MathMax(delta0X, bos4.sbd);
         temp1       = MathMin(bos2.sbu, bos3.sbu);
@@ -747,11 +774,11 @@ double Triset::TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const
     }
     else return delta0X ;
 }
-double Triset::TriItvCompareXF (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3){//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
+double Triset::TriItvCompareXF (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const BOS& bos1, const BOS& bos2, const BOS& bos3, const BOS& bos4, double& deltaXF, const int& j, const int& count3){//7 belong case 0xXXX0XXXX,those X beside 0 left hand side can't be touch, otherwise rule will break, 11 belong 0xXXXXFXXX, X nor 0 and F
     double deltatemp = deltaXF ;
     double temp1;
     double temp2;
-    if(count3==5){
+    if(count3==11){
         deltaXF     = MathMin(bos2.sbu, bos3.sbu);
         if(deltaXF<0) deltaXF= bos2.sbu>bos3.sbu? bos2.sbu : bos3.sbu ;
         deltaXF     = MathMin(deltaXF , bos4.sbu);
@@ -1112,16 +1139,26 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg1key_t   = bosdata.regclose2_t ;
                 }
                 //else //Buff_key1維持原樣
+                if(bosdata.sbu>0 && bosdata.sbd>0){
+                    bosdata.i2bsbu  = bosdata.sbu  ;
+                    bosdata.i2bsbu_t= bosdata.sbu_t;
+                    bosdata.i2bsbd  = bosdata.sbd  ;
+                    bosdata.i2bsbd_t= bosdata.sbd_t;
+                }
                 if(bosdata.regclose3>bosdata.sbu){
                     bosdata.sbu     = -2;
-                    bosdata.sbu_t   = -2;
+                    bosdata.sbu_t   = 0;
+                    bosdata.i2bsbu  = -2;
+                    bosdata.i2bsbu_t= 0 ;
                     bosdata.sbubrk_t= bosdata.regclose3_t;  
                     bosdata.sbd     = bosdata.reg1key;
                     bosdata.sbd_t   = bosdata.reg1key_t;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd     = -1 ;
-                    bosdata.sbd_t   = -1 ;
+                    bosdata.sbd_t   = 0 ;
+                    bosdata.i2bsbd  = -1 ;
+                    bosdata.i2bsbd_t= 0  ;
                     bosdata.sbdbrk_t= bosdata.regclose3_t;  
                     bosdata.sbu     = bosdata.reg1key;
                     bosdata.sbu_t   = bosdata.reg1key_t;
@@ -1135,12 +1172,19 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.sbu         = bosdata.reg2key;
                     bosdata.sbu_t       = bosdata.reg2key_t;
                     bosdata.sbubrk_t    = 0;
+                    bosdata.sbdbrk_t    = 0;
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
+                    bosdata.i2bsbu      = bosdata.sbu  ;
+                    bosdata.i2bsbu_t    = bosdata.sbu_t;
+                    bosdata.i2bsbd      = bosdata.sbd  ;
+                    bosdata.i2bsbd_t    = bosdata.sbd_t;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd         = -1;
-                    bosdata.sbd_t       = -1;
+                    bosdata.sbd_t       = 0 ;
+                    bosdata.i2bsbd      = -1;
+                    bosdata.i2bsbd_t    = 0 ;
                     bosdata.sbdbrk_t    = bosdata.regclose3_t;  
                 }
                 bosdata.state = 1;
@@ -1151,13 +1195,20 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg2key_t   = bosdata.regclose2_t;
                     bosdata.sbd         = bosdata.reg2key;
                     bosdata.sbd_t       = bosdata.reg2key_t;
+                    bosdata.sbubrk_t    = 0;
                     bosdata.sbdbrk_t    = 0;
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
+                    bosdata.i2bsbu      = bosdata.sbu  ;
+                    bosdata.i2bsbu_t    = bosdata.sbu_t;
+                    bosdata.i2bsbd      = bosdata.sbd  ;
+                    bosdata.i2bsbd_t    = bosdata.sbd_t;
                 }
                 if(bosdata.regclose3>bosdata.sbu){
                     bosdata.sbu         = -2;
-                    bosdata.sbu_t       = -2;
+                    bosdata.sbu_t       = 0 ;
+                    bosdata.i2bsbu      = -2;
+                    bosdata.i2bsbu_t    = 0 ;
                     bosdata.sbubrk_t    = bosdata.regclose3_t;  
                 }
                 bosdata.state = 1;
@@ -1193,36 +1244,20 @@ Triset TriCode(FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, Triset& ts, const BOS&
     }
 
 //code filtered 0F
-//1 belong case 0xZZZ0ZZZZ,those Z beside 0 left can't be touch, otherwise rule will break, 5 belong 0xZZZZFZZZ, X non 0 and F
+//1 belong case 0xXXX0XXXX,those X beside 0 left hand side can't be touch, otherwise rule will break, 5 belong 0xXXXXFXXX, X is nor 0 and F
+    //code filtered 0F
+    if(( code & __LEVEL2SBDMASK  )  > 0) ++count3 ;
+    if(( code & __LEVEL3SBDMASK  )  > 0) ++count3 ;
+    if(( code & __LEVEL4SBDMASK  )  > 0) ++count3 ;
     if(( code & __LEVEL1SBDMASK  ) == 0) ++count3 ;
+    if(( code & __LEVEL2SBUMASK  )  < (__LEVEL2SBUMASK)) ++count3 ;
+    if(( code & __LEVEL3SBUMASK  )  < (__LEVEL3SBUMASK)) ++count3 ;
+    if(( code & __LEVEL4SBUMASK  )  < (__LEVEL4SBUMASK)) ++count3 ;
     if(( code & __LEVEL1SBUMASK  ) == (__LEVEL1SBUMASK)) count3=count3+5 ;
-//comparecode[j] is rawcode----------//  
+    if(count3==7 || count3==11) ts.comparecode0F[j]  = code; //7 belong case 0xXXX0XXXX, 11 belong 0xXXXXFXXX, X non 0 and F
+    else ts.comparecode0F[j]  = 0;
     ts.comparecode[j]         = code ;
-//comparecode0F[j] is code filtered by algorithm----------//
-    if(count3==1){
-        bool fg = true;
-        bool give = false;
-        for (int i = 0; i < 3; ++i) {
-            if(((code&mask[i])>>index[i])==0){
-                fg   = fg&&(sbt[i]<sbt[3]) ;
-                give = true;
-            }
-        }
-        if(fg&&give) ts.comparecode0F[j]  = code ; 
-    }
-    else if(count3==5){
-        bool fg = true;
-        bool give = false;
-        for (int i = 5; i < 8; ++i) {
-            if(((code&mask[i])>>index[i])==0xF){
-                fg   = fg&&(sbt[i]<sbt[4]) ;
-                give = true;
-            }
-        }
-        if(fg&&give) ts.comparecode0F[j]  = code ; 
-    }
-    else ts.comparecode0F[j] = 0 ;
-    
+
     delta0X = ts.TriItvCompare0X(fvg, fvg2, fvg3, fvg4, bos1, bos2, bos3, bos4, delta0X, j, count3);
     deltaXF = ts.TriItvCompareXF(fvg, fvg2, fvg3, fvg4, bos1, bos2, bos3, bos4, deltaXF, j, count3);
     if((fvg.namei==ii)&&(j+1==jj)){
@@ -1275,7 +1310,7 @@ void BoundTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const strin
     for (int j=0; j<=htfint; ++j){
         uint code = ts.comparecode0F[j] ;
         double exe= ts.code0FExtreme[j] ;
-        if(code!=0 && ((code & __LEVEL1SBUMASK)==__LEVEL1SBUMASK)){//0xZZZZFZZZ
+        if(code!=0 && ((code & __LEVEL1SBUMASK)==__LEVEL1SBUMASK)){//0xXXXXFXXX
             for(int k=0; k<datasize; k++){
                 datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
                 if(exe==MAXSBU){
@@ -1296,7 +1331,7 @@ void BoundTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const strin
                 }
             }
         }
-        else if(code!=0 && ((code & __LEVEL1SBDMASK)== 0)){//0xZZZ0ZZZZ
+        else if(code!=0 && ((code & __LEVEL1SBDMASK)== 0)){//0xXXX0XXXX
             for(int k=0; k<datasize; k++){
                 datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
                 if((iLow(symbolname,PERIOD_M1,k)<exe)&&(temptime>=bos1.sbu_t)){
@@ -1313,7 +1348,7 @@ void BoundTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const strin
         }
     }
 }
-void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string& symbolname, const int& datasze){
+void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string& symbolname, const int& datasize){
     for (int j=0; j<=htfint; ++j){
         uint code      = ts.comparecode0F[j] ;
         int  type      = ts.fvgtype0F[j]     ;
@@ -1321,7 +1356,7 @@ void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string&
         double rfvgexe = ts.code0FrFvgExtreme[j];
         if(code!=0){
             if((type==0xF)||(type==0xA)||(type==0xB)||(type==0xC)||(type==0xD)){
-                if((code & __LEVEL1SBDMASK) == 0){ //0xZZZ0ZZZZ
+                if((code & __LEVEL1SBDMASK) == 0){ //0xXXX0XXXX
                     for(int k=0; k<datasize; k++){
                         datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
                         if((iLow(symbolname,PERIOD_M1,k)<=gfvgexe) && (temptime>=bos1.sbdbrk_t)){
@@ -1336,7 +1371,7 @@ void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string&
                         } 
                     }
                 }
-                else{//0xZZZZFZZZ
+                else{//0xXXXXFXXX
                     for(int k=0; k<datasize; k++){
                         datetime temptime = iTime(symbolname, PERIOD_M1, k) ;
                         if((iHigh(symbolname,PERIOD_M1,k)>=rfvgexe) && (temptime>=bos1.sbubrk_t)){
@@ -1355,6 +1390,13 @@ void FvgTouchCheck(Triset& ts, const BOS& bos1, const int& htfint, const string&
             else continue ;
         }
         
+    }
+}
+void MatBosinit(matrix& mat, const int& rows, const int& columes){
+    for(int i=0; i<rows; ++i){
+        for(int j=0; j<columes; ++j){
+            mat[i][j]=0 ;
+        }
     }
 }
 #endif

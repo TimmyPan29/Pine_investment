@@ -10,15 +10,22 @@
 //+
 //+
 //+-----
-//商品名稱(第一列) code 基本週期 itv 空單還是多單  FVG型態 上 下界價錢 在區間內的最低的紅色FVG價格 在區間內的最高的綠色FVG價格  [(突破sbd時最初sbu的價錢(空單停損用) 時間點)]or[(突破sbu時最初sbd的價錢(多單停損用) 時間點)], 訂單編號(掛單後取得)
+//商品名稱(第一列) code 基本週期 itv 空單還是多單(0是賣 F是買)  FVG型態 上 下界價錢(如果是賣 上界就是sbu 下界就是剩下三個level中最高的Sbd) 在區間內的最低的紅色FVG價格 在區間內的最高的綠色FVG價格  [(突破sbd時最初sbu的價錢(空單停損用) 時間點)]or[(突破sbu時最初sbd的價錢(多單停損用) 時間點)]
+//以上來自Gold檔案
 //如果掛單編號所在的列的元素只剩下自己 則此掛單取消
-//P bosd H L T T T i2bsbd H L T bosu H L T T T i2bsbu H L T
-//0 1    2 3 4 5 6 7      8 9 10 11  121314151617     181920
+//P bosd H L T T T i2bsbd H L T bosu H L T T T i2bsbu H L T  sbd_ted  sbu_ted
+//0 1    2 3 4 5 6 7      8 9 10 11  121314151617     181920 21       22
+//以上是TradeBos檔案
+
 class Golder{
 public:
     matrix GD ;
     matrix GDbos ;
+    matrix GD2;
+    matrix GDbos2;
     ulong  GDticket[];
+    ulong  GDposticket[];
+    ulong  GDposid[];
     int    GDticketCode[];
     int    GDticketPrd[];
     int    GDticketItv[];
@@ -32,7 +39,11 @@ public:
     Golder(int GDcolume, int GDboscolume){
         GD      = matrix::Zeros(PERIODX4, GDcolume);
         GDbos   = matrix::Zeros(PERIODX4, GDboscolume);
+        GD2     = matrix::Zeros(PERIODX4, GDcolume);
+        GDbos2  = matrix::Zeros(PERIODX4, GDboscolume);
         ArrayResize(GDticket, PERIODX4, 0);
+        ArrayResize(GDposticket, PERIODX4, 0);
+        ArrayResize(GDposid, PERIODX4, 0);
         ArrayResize(GDticketCode, PERIODX4, 0);
         ArrayResize(GDticketPrd, PERIODX4, 0);
         ArrayResize(GDticketItv, PERIODX4, 0);
@@ -45,6 +56,8 @@ public:
 void Golder::Init(){
     GD      = matrix::Zeros(PERIODX4, GD.Cols());
     GDbos   = matrix::Zeros(PERIODX4, GDbos.Cols());
+    GD2     = matrix::Zeros(PERIODX4, GD2.Cols());
+    GDbos2  = matrix::Zeros(PERIODX4, GDbos2.Cols());
     symbol  = "" ;
 }
 void MatBosinit(matrix& mat, const int& rows, const int& columes){
@@ -54,20 +67,102 @@ void MatBosinit(matrix& mat, const int& rows, const int& columes){
         }
     }
 }
-
+bool CheckExchangeMatch(Golder& G, const int& fixidx){ //All position data is sourced from Eighcap, and I wanna check whether the position from orther exchanges comply with the strategy's rule. this function performs as intended. 
+    //GD2 may match the pressure and support rule. 
+    if(G.GD[fixidx][1]==G.GD2[fixidx][1] && G.GD[fixidx][2]==G.GD2[fixidx][2] && (CheckPressureOrsupportGD2(G, fixidx)) ) return true;
+    else return false ;
+}
+bool CheckPressureOrsupportGD1(Golder& G, const int& pridm1){ //pridm1 = period -1
+    bool couldpending;
+    double ticketupperbound;
+    double ticketlowerbound;
+    datetime ticketsbdtimeed; //the time sbd established 成立時間
+    datetime ticketsbutimeed;
+    int type ;
+    type = G.GD[pridm1][3];
+    if(type == 0){ //sell ticket
+        ticketupperbound = G.GDbos[pridm1][12]; 
+        ticketlowerbound = G.GD[pridm1][6]    ; //GD has 1440 rows
+        ticketsbutimeed  = G.GDbos[pridm1][22];
+        for (int l=pridm1+1; l < PERIODX4; l++) {
+            if(G.GDbos[l][22]<ticketsbutimeed && (G.GDbos[l][11]<=ticketupperbound && G.GDbos[l][11]>=ticketlowerbound)){
+                couldpending = true ; //found it !
+                break ; //jump out of for loop cuz found it
+            }                        
+            else couldpending = false ;             
+        }
+    }
+    else{ // buy ticket
+        ticketupperbound = G.GD[pridm1][5]    ;
+        ticketlowerbound = G.GDbos[pridm1][3] ;
+        ticketsbutimeed  = G.GDbos[pridm1][21];
+        for (int l=pridm1+1; l < PERIODX4; l++) {
+            if(G.GDbos[l][21]<ticketsbdtimeed && (G.GDbos[l][1]<=ticketupperbound && G.GDbos[l][1]>=ticketlowerbound)){
+                couldpending = true ;
+                break ;
+            }                        
+            else couldpending = false ;             
+        }
+    }
+    return couldpending ;
+}
+bool CheckPressureOrsupportGD2(Golder& G, const int& pridm1){ //pridm1 = period -1
+    bool couldpending;
+    double ticketupperbound;
+    double ticketlowerbound;
+    datetime ticketsbdtimeed; //the time sbd established 成立時間
+    datetime ticketsbutimeed;
+    int type ;
+    type = G.GD2[pridm1][3];
+    if(type == 0){ //sell ticket
+        ticketupperbound = G.GDbos2[pridm1][12]; 
+        ticketlowerbound = G.GD2[pridm1][6]    ; //GD2 has 1440 rows
+        ticketsbutimeed  = G.GDbos2[pridm1][22];
+        for (int l=pridm1+1; l < PERIODX4; l++) {
+            if(G.GDbos2[l][22]<ticketsbutimeed && (G.GDbos2[l][11]<=ticketupperbound && G.GDbos2[l][11]>=ticketlowerbound)){
+                couldpending = true ; //found it !
+                break ; //jump out of for loop cuz found it
+            }                        
+            else couldpending = false ;             
+        }
+    }
+    else{ // buy ticket
+        ticketupperbound = G.GD2[pridm1][5]    ;
+        ticketlowerbound = G.GDbos2[pridm1][3] ;
+        ticketsbutimeed  = G.GDbos2[pridm1][21];
+        for (int l=pridm1+1; l < PERIODX4; l++) {
+            if(G.GDbos2[l][21]<ticketsbdtimeed && (G.GDbos2[l][1]<=ticketupperbound && G.GDbos2[l][1]>=ticketlowerbound)){
+                couldpending = true ;
+                break ;
+            }                        
+            else couldpending = false ;             
+        }
+    }
+    return couldpending ;
+}
 void SendPendingAndStore(Golder& G, const int& i, string defsymbol){
     trade.SetExpertMagicNumber(_magic);
-    if((G.GD[i][0]!=0) && (G.GDticketIng[i]==0)){
+    if((G.GD[i][0]!=0) && (G.GDticketIng[i]==0) && (CheckExchangeMatch(G,i))) {
+    //if((G.GD[i][0]!=0) && (G.GDticketIng[i]==0) ) {
         //printf("G.GD_p%d= %.0f", i+1, G.GD[i][0]) ;
         double pendingprice ;
         double nowprice  = SymbolInfoDouble(defsymbol, SYMBOL_BID) ;
-        int direction = G.GD[i][3]==0? ORDER_TYPE_SELL_LIMIT : ORDER_TYPE_BUY_LIMIT ;
+        double pip       ;
+        int direction    = G.GD[i][3]==0? ORDER_TYPE_SELL_LIMIT : ORDER_TYPE_BUY_LIMIT ;
+        pip = nowprice<10? 0.00001 : nowprice<400? 0.001 : nowprice>10000? 10 : 1 ;
         switch (direction){
         case ORDER_TYPE_SELL_LIMIT:
             pendingprice = (nowprice + (G.GDbos[i][18] - nowprice) * _profitpercent) ;
-            if(trade.SellLimit(_lot_size, pendingprice, defsymbol, G.GDbos[i][18], nowprice) ){
+            if(pendingprice-nowprice<0) break ;
+            if(MathAbs(nowprice-G.GDbos[i][18])<50*pip) break;
+            //if(MathAbs(nowprice-G.GDbos[i][18])>100*pip) break;
+            if(G.GDbos[i][18]<=0) break ;
+            if(!CheckPressureOrsupportGD1(G,i)) break ;
+            if(trade.SellLimit(_lot_size, pendingprice, defsymbol, G.GDbos[i][18], nowprice) ){ // lot pending symbol sl tp
+            //if(trade.BuyStop(_lot_size, pendingprice, defsymbol, nowprice, G.GDbos[i][18]) ){ // lot pending symbol sl tp
+            //if(trade.SellLimit(_lot_size, pendingprice, defsymbol, 54999, 53000) ){
                 printf("SellLimit order sended successfully ") ;
-                G.GDticket[i]      =  trade.ResultOrder() ;
+                G.GDticket[i]      =  trade.ResultOrder() ; //this is order ticket
                 G.GDticketCode[i]  =  G.GD[i][0] ;
                 G.GDticketPrd[i]   =  G.GD[i][1] ;
                 G.GDticketItv[i]   =  G.GD[i][2] ;
@@ -82,9 +177,15 @@ void SendPendingAndStore(Golder& G, const int& i, string defsymbol){
             break ;
         case ORDER_TYPE_BUY_LIMIT:
             pendingprice = nowprice - (nowprice - G.GDbos[i][9] ) * _profitpercent ;
+            if (pendingprice-nowprice>0) break ;
+            if(MathAbs(nowprice-G.GDbos[i][9])<50*pip) break;
+            //if(MathAbs(nowprice-G.GDbos[i][9])>100*pip) break;
+            if(G.GDbos[i][9]<=0) break ;
+            if(!CheckPressureOrsupportGD1(G,i)) break ;
             if(trade.BuyLimit(_lot_size, pendingprice, defsymbol, G.GDbos[i][9], nowprice) ){
+            //if(trade.SellStop(_lot_size, pendingprice, defsymbol, nowprice, G.GDbos[i][9]) ){
                 printf("BuyLimit order sended successfully ") ;
-                G.GDticket[i]      =  trade.ResultOrder() ;
+                G.GDticket[i]      =  trade.ResultOrder() ; //this is order ticket
                 G.GDticketCode[i]  =  G.GD[i][0] ;
                 G.GDticketPrd[i]   =  G.GD[i][1] ;
                 G.GDticketItv[i]   =  G.GD[i][2] ;
@@ -103,17 +204,21 @@ void SendPendingAndStore(Golder& G, const int& i, string defsymbol){
         }
     }
 }
-void MonitorPendingOrder(Golder& G){ // check the period where the ticket is at is exsiting or not
+void MonitorPendingOrder(Golder& G){ // check whether the period where the ticket belongs exsits and is valid or not
     for(int i=0; i<PERIODX4; ++i){
-        ulong ticket    = G.GDticket[i];
-        int  ticketing  = G.GDticketIng[i] ;
-        int   Itv       = G.GDticketItv[i];
-        if(ticketing==0 || ticketing==2) continue ;
+        ulong ticket     = G.GDticket[i];
+        int   ticketing  = G.GDticketIng[i] ;
+        int   Itv        = G.GDticketItv[i];
+        //if(ticket!=0)printf("G.GDticket[l]= %d", ticket);
+        if(ticketing==0 || ticketing==2) continue ; // it means that those pending order whose ticketing==1 will jump into else condition
         else{
-            if(Itv != G.GD[i][2] ){
+            //if(Itv != G.GD[i][2] || (!CheckPressureOrsupportGD1(G,i)) ){
+            if(Itv != G.GD[i][2] || (!CheckPressureOrsupportGD1(G,i)) || (!CheckPressureOrsupportGD2(G,i)) ){
                 if(trade.OrderDelete(ticket)){
                     printf("Order deleted ");
                     G.GDticket[i]      = 0 ;
+                    G.GDposticket[i]   = 0 ;
+                    G.GDposid[i]       = 0 ;
                     G.GDticketCode[i]  = 0 ;
                     G.GDticketPrd[i]   = 0 ;
                     G.GDticketItv[i]   = 0 ;
@@ -130,7 +235,7 @@ void DeleteMagicPendingOrder(long magic_number){
     int total_orders = OrdersTotal();
     for (int i = total_orders - 1; i >= 0; --i){
         ulong ticket      = OrderGetTicket(i);
-        long order_magic  = OrderGetInteger(ORDER_MAGIC); 
+        ulong order_magic = OrderGetInteger(ORDER_MAGIC); 
         int  ordertype    = OrderGetInteger(ORDER_TYPE) ;
         if (ticket){
             if(order_magic == magic_number){
@@ -146,55 +251,118 @@ void DeleteMagicPendingOrder(long magic_number){
 
 void PositionCheck(Golder& G){ //execute in ISR OnTrade
     int total_postion = PositionsTotal();
-    ulong posticket ;
     string possymbol ;
+    ulong    posid     ;
+    ulong    posticket ;
     if(total_postion>0){
-        PrintFormat("total_position: %d", total_postion);
         for(int i=0; i<total_postion; ++i){
             posticket = PositionGetTicket(i);
             if(PositionSelectByTicket(posticket)){
                 possymbol = PositionGetString(POSITION_SYMBOL);
+                posid     = PositionGetInteger(POSITION_IDENTIFIER);
                 if(possymbol != G.symbol) continue;
                 for(int l=0; l<PERIODX4; ++l){
-                    if(G.GDticket[l]==0) continue ;
-                    if(posticket == G.GDticket[l]) G.GDticketIng[l] = 2;
+                    //if(posticket == G.GDticket[l]) printf("G.GDticket[%d]= %d, ticketing= %d",l, G.GDticket[l], G.GDticketIng[l]);
+                    if(G.GDposticket[l]==0 && G.GDticketIng[l]==1){
+                        G.GDticketIng[l]   = 2;
+                        G.GDposticket[l]   = posticket;
+                        G.GDposid[l]       = posid ;
+                    } 
                     else continue;
+
                 }
             }
             else printf("posselect failed, Error code= %d", trade.ResultRetcode() );
         }
     }
 }
-
+void MonitorAndModifyPos(Golder& G){ // modify tp cuz dynamic sb rule. ex: buy position: the function activate when the level sbu occurs. 
+    double   oldsl       ;
+    double   oldtp       ;
+    int      level1sbtime;
+    double   level1sb    ;
+    ulong    posticket   ;
+    for(int i=0; i<PERIODX4; ++i){
+        if(G.GDticketIng[i] != 2) continue;
+        else{
+            if(PositionSelectByTicket(G.GDposticket[i])){
+                oldsl     = PositionGetDouble(POSITION_SL);
+                oldtp     = PositionGetDouble(POSITION_TP);
+                posticket = G.GDposticket[i] ;
+                switch(PositionGetInteger(POSITION_TYPE) ){
+                case POSITION_TYPE_SELL:
+                    if(G.GDbos[i][1] == -1) break;
+                    else{
+                        level1sbtime = G.GDbos[i][21] ;
+                        level1sb     = G.GDbos[i][1] ;
+                    }
+                    for(int l=i; i<PERIODX4; ++l){
+                        if(G.GDbos[l][21]>=level1sbtime && G.GDbos[l][1]>=oldtp){
+                            if( trade.PositionModify(posticket, oldsl, G.GDbos[l][1]) ) printf("the tp is modified");
+                            else printf("fail to modify the tp ") ;
+                        }
+                    }
+                    break;
+                case POSITION_TYPE_BUY:
+                    if(G.GDbos[i][11] == -2) break;
+                    else{
+                        level1sbtime = G.GDbos[i][22] ;
+                        level1sb     = G.GDbos[i][11] ;
+                    }
+                    for(int l=i; i<PERIODX4; ++l){
+                        if(G.GDbos[l][22]>=level1sbtime && G.GDbos[l][11]<=oldtp){
+                            if( trade.PositionModify(posticket, oldsl, G.GDbos[l][11]) ) printf("the tp is modified");
+                            else printf("fail to modify the tp ") ;
+                        }
+                    }
+                    break;
+                default:
+                    printf("neither sell nor buy");
+                    break ;
+                }
+            }
+            else printf("the ticket is void or wrong");
+        }
+    }
+}
 void DealCheck(Golder& G, const datetime& fromtime,  DealGolder& DG, const string& sectorname){
     datetime ct = TimeCurrent();
-    ulong deal_ticket;           
-    ulong dealorder  ;
-    long  dealmagic  ;
+    ulong  deal_ticket;           
+    ulong  dealorder  ;
+    ulong  dealmagic  ;
     string dealsymbol;
     double dealprofit;
     double dealvolume;
     int    dealentry ;
+    ulong  dealpos   ;
     string fromtime_str = TimeToString(fromtime, TIME_DATE|TIME_MINUTES);
+    int total_postion = PositionsTotal();
+    PrintFormat("total_position: %d", total_postion);
     if(HistorySelect(fromtime, ct)){
         uint total=HistoryDealsTotal();
         PrintFormat("total_history ranged: %d", total);
         for(int i=0; i<total; ++i){
             deal_ticket         = HistoryDealGetTicket(i);
             dealentry           = HistoryDealGetInteger(deal_ticket, DEAL_ENTRY);
+            dealpos             = HistoryDealGetInteger(deal_ticket, DEAL_POSITION_ID);
             dealsymbol          = HistoryDealGetString(deal_ticket, DEAL_SYMBOL);
-            if(dealsymbol!= G.symbol ) continue ;
-            if(dealentry != DEAL_ENTRY_OUT ) continue ;
+            if(dealsymbol != G.symbol ) continue ;
+            if(dealentry  != DEAL_ENTRY_OUT) continue; 
             dealmagic           = HistoryDealGetInteger(deal_ticket, DEAL_MAGIC);  
             dealorder           = HistoryDealGetInteger(deal_ticket, DEAL_ORDER); 
             dealvolume          = HistoryDealGetDouble(deal_ticket, DEAL_VOLUME);
-            dealprofit          = HistoryDealGetDouble(deal_ticket, DEAL_PROFIT);
+            dealprofit          = HistoryDealGetDouble(deal_ticket, DEAL_PROFIT); 
+            //printf("dealorder= %d, dealentry=%d", dealorder, dealentry);
             for(int l=0; l<PERIODX4; ++l){
-                if(G.GDticket[l]==0) continue ;
-                if(dealorder == G.GDticket[l]){
-                    printf("Get right ticket!") ;
+                if(G.GDticket[l]!=0 && G.GDticketIng[l]==2) printf("dealticket = %d", deal_ticket);
+                else continue ;
+                if(G.GDposid[l] == dealpos){
+                    printf("Get right posid!") ;
                     DG.dealmagic       = dealmagic;
-                    DG.dealorder       = dealorder;
+                    DG.dealorder       = G.GDticket[l];
+                    DG.dealposticket   = G.GDposticket[l];
+                    DG.dealposid       = dealpos;
+                    DG.dealticket      = deal_ticket;
                     DG.dealsymbol      = dealsymbol;
                     DG.dealcode        = G.GDticketCode[l];
                     DG.dealprd         = G.GDticketPrd[l];
@@ -206,6 +374,8 @@ void DealCheck(Golder& G, const datetime& fromtime,  DealGolder& DG, const strin
                     DG.DealWriteOut(sectorname);
 
                     G.GDticket[l]      = 0 ;
+                    G.GDposticket[l]   = 0 ;
+                    G.GDposid[l]       = 0 ;
                     G.GDticketCode[l]  = 0 ;
                     G.GDticketPrd[l]   = 0 ;
                     G.GDticketItv[l]   = 0 ;

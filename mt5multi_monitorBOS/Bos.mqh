@@ -3,7 +3,7 @@
 #include "Plotpack.mqh"
 #include "GETDATA.mqh"
 #include "Helper.mqh"
-#define FVGarraysize 3000
+#define FVGarraysize 4000
 struct BOS{
     double          htfint      ;//=i
     string          htfname     ;//IntegerToString(i)
@@ -11,6 +11,8 @@ struct BOS{
     double          sbd         ;
     datetime        sbu_t       ;
     datetime        sbd_t       ;
+    datetime        sbu_ted     ; //the sbu time established sbu的成立時間 與 生成座標不一樣
+    datetime        sbd_ted     ; //the sbd time established
     int             cntbosd     ;
     int             cntbosu     ;
     double          i2bsbu      ;
@@ -51,6 +53,8 @@ struct BOS{
         sbd         = 0;
         sbu_t       = 0;
         sbd_t       = 0;
+        sbu_ted     = 0;
+        sbd_ted     = 0;
         cntbosu     = 0;
         cntbosd     = 0;
         i2bsbu      = 0;
@@ -81,6 +85,8 @@ struct BOS{
         sbd         = 0;
         sbu_t       = 0;
         sbd_t       = 0;
+        sbu_ted     = 0;
+        sbd_ted     = 0;
         cntbosu     = 0;
         cntbosd     = 0;
         i2bsbu      = 0;
@@ -214,7 +220,7 @@ struct FVG{
         if(bos.i2bsbd>0){
             int didx   = kbar[bos.cnti2bd]             ;
             int didxm1 = bos.cnti2bd>0? kbar[bos.cnti2bd-1] : 0        ;  
-            if(namei==1){//P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT
+            if(namei==1){//P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT sbd_ted sbu_ted} , //Mat OHLCT
                 Matdo[i][9]  = Mat[3][didx];
                 Matdo[i][10] = Mat[1][didx];
                 Matdo[i][11] = Mat[2][didx];
@@ -250,7 +256,7 @@ struct FVG{
         if(bos.i2bsbu>0){
             int uidx   = kbar[bos.cnti2bu]             ;
             int uidxm1 = bos.cnti2bu>0? kbar[bos.cnti2bu-1] : 0        ;
-            if(namei==1){//P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT
+            if(namei==1){//P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT sbd_ted sbu_ted} , //Mat OHLCT
                 Matuo[i][9]  = Mat[3][uidx];
                 Matuo[i][10] = Mat[1][uidx];
                 Matuo[i][11] = Mat[2][uidx];
@@ -283,8 +289,12 @@ struct FVG{
             Matuo[i][12] = 0;
             Matuo[i][13] = 0;
         }
+        M_sbdo[i][14] = bos.sbd_ted ;//put sbd_ted and sbu_ted into Matdo, Matuo
+        M_sbdo[i][15] = bos.sbu_ted ;//put sbd_ted and sbu_ted into Matdo, Matuo
+        M_sbuo[i][14] = bos.sbd_ted ;//put sbd_ted and sbu_ted into Matdo, Matuo
+        M_sbuo[i][15] = bos.sbu_ted ;//put sbd_ted and sbu_ted into Matdo, Matuo
     }
-    void bos_hlt(const matrix& Mat, matrix& Matd, matrix& Matu, const BOS& bos, const int& i){ //cal the high low argument with bosdata and Rawdata from Mat //P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT
+    void bos_hlt(const matrix& Mat, matrix& Matd, matrix& Matu, const BOS& bos, const int& i){ //cal the high low argument with bosdata and Rawdata from Mat //P bos H L O BT HT LT OT  , //Mat OHLCT is original data
         Matd[i][0] = namei;
         Matu[i][0] = namei;
         if(bos.sbd>0){
@@ -330,7 +340,7 @@ struct FVG{
                 Matd[i][7] = Mat[4][templ];
             }
         }
-        else{ //P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT
+        else{ //P bos H L O BT HT LT OT  , //Mat OHLCT
             Matd[i][1] = -1;
             Matd[i][4] = 0;
             Matd[i][5] = 0;
@@ -492,7 +502,7 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
             tempminm1 = helper.TurnMinX4(rd.mat_rates[4][k-1]) ;
         }
         //不管哪個週期遇到23:59 都要把這個bar收進來rawdata裡面{
-        if(tempminreg==-1) tempminreg=tempminm1-1;
+        if(tempminreg==-1) tempminreg=tempminm1-1; //全部都要以1分鐘去想其他週期  比如 3分鐘週期00:00這根的收盤 其實是1分鐘的00:02這根的收盤
         qidxnow   = tempmin-tempminm1<0? 0 : tempmin;
         qidxpt    = tempminm1-tempminreg<0? 0 : tempminm1;
         tempminreg= qidxpt ;
@@ -519,8 +529,8 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                 }
                 fvg.kbar[cnt]     = k ;
             }
-            tempcnt = cnt ;
-            ++cnt;
+            tempcnt = cnt ; // tempcnt = kbar index
+            ++cnt; // cnt = NO. kbar
             //if(bosdata.htfint==4)printf("k= %d \t tempprice@k-1= %.5f \t date@k-1= %s\n htfint= %.1f", k, tempprice,TimeToString(temptime,TIME_DATE|TIME_MINUTES),bosdata.htfint);
             if(bosdata.state == 1){
                 bosdata.cnt1idx     = bosdata.cnt2idx  ;
@@ -567,11 +577,13 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.sbu_t   = 0 ;
                     bosdata.i2bsbu  = -2;
                     bosdata.i2bsbu_t= 0 ;
-                    bosdata.cnti2bu = 0 ; 
-                    bosdata.cnti2bd = bosdata.cntbosd;
+                    bosdata.cnti2bu = 0 ; //cnti2bu=0代表i2bu不存在這個idx的意思
+                    bosdata.cnti2bd = bosdata.cntbosd; //cnti2bd代表u破之後新sbd的之前上一個sbd的idx
                     bosdata.sbd     = bosdata.reg1key;
                     bosdata.sbd_t   = bosdata.reg1key_t;
-                    bosdata.cntbosd = bosdata.cntkey1;
+                    bosdata.sbu_ted = 0 ;
+                    bosdata.sbd_ted = bosdata.regclose3_t;
+                    bosdata.cntbosd = bosdata.cntkey1; //cntbosd 表示當前的sbd位於的idx
                     bosdata.cntbosu = 0 ; 
                 }
                 if(bosdata.regclose3<bosdata.sbd){
@@ -583,6 +595,8 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.cnti2bd = 0  ;
                     bosdata.sbu     = bosdata.reg1key;
                     bosdata.sbu_t   = bosdata.reg1key_t;
+                    bosdata.sbu_ted = bosdata.regclose3_t; 
+                    bosdata.sbd_ted = 0 ;
                     bosdata.cntbosd = 0 ;
                     bosdata.cntbosu = bosdata.cntkey1;
                 }
@@ -603,6 +617,7 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.cntkey2     = bosdata.cnt2idx ;
                     bosdata.sbu         = bosdata.reg2key;
                     bosdata.sbu_t       = bosdata.reg2key_t;
+                    bosdata.sbu_ted     = bosdata.regclose3_t; 
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
                     bosdata.cntbosu     = bosdata.cntkey2;
@@ -614,6 +629,7 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                 if(bosdata.regclose3<bosdata.sbd){
                     bosdata.sbd         = -1;
                     bosdata.sbd_t       = 0 ;
+                    bosdata.sbd_ted     = 0 ;
                     bosdata.i2bsbd      = -1;
                     bosdata.i2bsbd_t    = 0 ;
                     bosdata.cnti2bd     = 0 ;
@@ -628,6 +644,7 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.cntkey2     = bosdata.cnt2idx ;
                     bosdata.sbd         = bosdata.reg2key;
                     bosdata.sbd_t       = bosdata.reg2key_t;
+                    bosdata.sbd_ted     = bosdata.regclose3_t; 
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
                     bosdata.cntbosd     = bosdata.cntkey2;
@@ -639,6 +656,7 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                 if(bosdata.regclose3>bosdata.sbu){
                     bosdata.sbu         = -2;
                     bosdata.sbu_t       = 0 ;
+                    bosdata.sbu_ted     = 0 ;
                     bosdata.i2bsbu      = -2;
                     bosdata.i2bsbu_t    = 0 ;
                     bosdata.cnti2bu     = 0 ;
@@ -670,43 +688,46 @@ void Boscopy(const matrix& M_sbd, const matrix& M_sbu, matrix& M_sbdo, matrix& M
 }
 
 //-----filter-----//
-//RMd: P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT , //Mat OHLCT , Rmd is M_sbdordered
-//Md:  P bos H L BT ,  Md is M_sbdCP
+//RMd: P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT sbd_ted sbu_ted , //Mat OHLCT , Rmd is M_sbdorderedbynumber "Matdo Matuo" not ordered by price"Matd Matu"
+//Md:  P bos H L BT sbd_ted sbu_ted,  Md is M_sbdCP
 void CheckClosePosPeriod(matrix& Md, matrix& Mu, const matrix& RMd, const matrix& RMu, const int& Pd, const int& Pu){//R is raw
     int      period;
     double   tempp;
     datetime tempt;
     int      cnt=0 ;
-
     period   = Pd-1;
-    tempp    = RMd[period][1];
-    tempt    = RMd[period][5];
+    tempp    = RMd[period][11];
+    tempt    = RMd[period][14];
     for(int i=0; i<PERIODX4; ++i){
-        if((RMd[i][0]>Pd) && (RMd[i][1]>tempp) && (RMd[i][5]>tempt)){
+        if((RMd[i][0]>Pd) && (RMd[i][1]>tempp) && (RMd[i][14]>=tempt)){ //I change > into >= on 20241018
             Md[cnt][0] = RMd[i][0];
             Md[cnt][1] = RMd[i][1];
             Md[cnt][2] = RMd[i][2];
             Md[cnt][3] = RMd[i][3];
             Md[cnt][4] = RMd[i][5];
+            Md[cnt][5] = RMd[i][14];
+            Md[cnt][6] = RMd[i][15];
             ++cnt;
         }
         else continue;
     }
+    cnt = 0;
     period   = Pu-1;
-    tempp    = RMu[period][1];
-    tempt    = RMu[period][5];
+    tempp    = RMu[period][10];
+    tempt    = RMu[period][15];
     for(int i=0; i<PERIODX4; ++i){
-        if((RMu[i][0]>Pu) && (RMu[i][1]<tempp) && (RMu[i][5]>tempt)){
+        if((RMu[i][0]>Pu) && (RMu[i][1]<tempp) && (RMu[i][15]>=tempt)){
             Mu[cnt][0] = RMu[i][0];
-            Mu[cnt][1] = RMu[i][2];
+            Mu[cnt][1] = RMu[i][1];
             Mu[cnt][2] = RMu[i][2];
             Mu[cnt][3] = RMu[i][3];
             Mu[cnt][4] = RMu[i][5];
+            Mu[cnt][5] = RMu[i][14];
+            Mu[cnt][6] = RMu[i][15];
             ++cnt;
         }
         else continue;
     }
-
 }
 void MatBosinit(matrix& mat, const int& rows, const int& columes){
     for(int i=0; i<rows; ++i){

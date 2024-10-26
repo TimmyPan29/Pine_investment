@@ -3,7 +3,7 @@
 
 void TriWrite(string symbolname, const Triset& Tri[], string sectorname, matrix& mg){
     string filename  = StringFormat("%s"+"\\%s"+"\\Tricode"+"\\Tri_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
-    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
+    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_COMMON);
     if(filehandle!=INVALID_HANDLE){
         FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
         for(int i=0; i<PERIOD; ++i){
@@ -33,7 +33,7 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname, matrix&
     ResetLastError();
 //+------------------------------// 
     string filename2 =StringFormat("%s"+"\\%s"+"\\Tricode0F_ex"+"\\Tri0F_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
-    int filehandle2=FileOpen(filename2,FILE_WRITE|FILE_TXT);
+    int filehandle2=FileOpen(filename2,FILE_WRITE|FILE_TXT|FILE_COMMON);
     bool anycode = false;
     bool anycodereg = false;
 
@@ -142,7 +142,7 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname, matrix&
 void FvgWrite(string symbolname, const FVG& fvg[], string sectorname){
     string filename  =StringFormat("%s"+"\\%s"+"\\FVGproperty"+"\\FVG_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
 
-    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
+    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_COMMON);
     if(filehandle!=INVALID_HANDLE){
         FileWrite(filehandle, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
         string line  = "" ;
@@ -165,7 +165,7 @@ void FvgWrite(string symbolname, const FVG& fvg[], string sectorname){
 }
 void GoldWrite(string symbolname, const matrix& mg, string sectorname){//商品名稱(第一列) code 基本週期 itv 空單還是多單  FVG型態 上 下界價錢 在區間內的最低的紅色FVG價格 在區間內的最高的綠色FVG價格  
     string filename  =StringFormat("%s"+"\\%s"+"\\Gold"+"\\Gold_%s.txt", AccountInfoString(ACCOUNT_COMPANY), sectorname, symbolname);
-    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT);
+    int filehandle=FileOpen(filename,FILE_WRITE|FILE_TXT|FILE_COMMON);
     if(filehandle!=INVALID_HANDLE){
         FileWrite(filehandle, symbolname);
         string line  = "" ;
