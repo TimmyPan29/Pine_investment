@@ -179,12 +179,13 @@ void SendPendingAndStore(Golder& G, const int& i, string defsymbol){
     if((G.GD[i][0]!=0) && (G.GDticketIng[i]==0) && (Check7LevelsTime(G,i))) {
         //printf("G.GD_p%d= %.0f", i+1, G.GD[i][0]) ;
         double pendingprice ;
-        double nowprice  = SymbolInfoDouble(defsymbol, SYMBOL_BID) ;
+        double nowprice  ;
         double pip       ;
         int direction    = G.GD[i][3]==0? ORDER_TYPE_SELL_LIMIT : ORDER_TYPE_BUY_LIMIT ;
-        pip = nowprice<10? 0.00001 : nowprice<400? 0.001 : nowprice>10000? 10 : 1 ;
         switch (direction){
         case ORDER_TYPE_SELL_LIMIT:
+            nowprice  = SymbolInfoDouble(defsymbol, SYMBOL_ASK) ;
+            pip = nowprice<10? 0.00001 : nowprice<400? 0.001 : nowprice>10000? 10 : 1 ;
             pendingprice = (nowprice + (G.GDbos[i][18] - nowprice) * _profitpercent) ;
             //if(pendingprice-nowprice<0) break ;
             //if(MathAbs(nowprice-G.GDbos[i][18])<50*pip) break;
@@ -217,6 +218,8 @@ void SendPendingAndStore(Golder& G, const int& i, string defsymbol){
             }
             break ;
         case ORDER_TYPE_BUY_LIMIT:
+            nowprice  = SymbolInfoDouble(defsymbol, SYMBOL_BID) ;
+            pip = nowprice<10? 0.00001 : nowprice<400? 0.001 : nowprice>10000? 10 : 1 ;
             pendingprice = nowprice - (nowprice - G.GDbos[i][9] ) * _profitpercent ;
             if (pendingprice-nowprice>0) break ;
             if(MathAbs(nowprice-G.GDbos[i][9])<50*pip) break;
