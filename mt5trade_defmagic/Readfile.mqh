@@ -14,10 +14,19 @@
 //0 1    2 3 4 5 6 7      8 9 10 11  121314151617     181920 21       22
 string EX1 = "Eightcap Pty Ltd" ;
 string EX2 = "OANDA Corporation";
-
-void RSfileEX1(const string& symbolname, const string& sectorname, Golder& G){
+string EXC ;
+void RSfileEXGeneral(const string& symbolname, const string& sectorname, Golder& G){
 	ResetLastError();
-	string filename  = StringFormat("%s"+"\\%s"+"\\Gold"+"\\Gold_%s.txt", EX1, sectorname, symbolname);
+	string symbolnameforcheck = symbolname ;
+	if(AccountInfoString(ACCOUNT_COMPANY) == EX2){
+		EXC = EX2 ;
+		if(CheckNameForOANDAMatch(symbolname, symbolnameforcheck) ) ;//printf("name change successfully") ;
+		//else printf("not need to modify the name ") ;
+	}
+	else if(AccountInfoString(ACCOUNT_COMPANY) == EX1){
+		EXC = EX1 ;
+	}
+	string filename  = StringFormat("%s"+"\\%s"+"\\Gold"+"\\Gold_%s.txt", EXC, sectorname, symbolnameforcheck);
     int filehandle=FileOpen(filename, FILE_READ|FILE_TXT|FILE_COMMON);
     string sep=" ";                // A separator as a character 
     ushort u_sep;                  // The code of the separator character 
@@ -55,7 +64,7 @@ void RSfileEX1(const string& symbolname, const string& sectorname, Golder& G){
 	}
 	else Print("Operation FileOpen failed, error ",GetLastError());
     ResetLastError();
-	string filename2 = StringFormat("%s"+"\\%s"+"\\BosSort"+"\\TradeBOS_%s.txt", EX1, sectorname, symbolname);
+	string filename2 = StringFormat("%s"+"\\%s"+"\\BosSort"+"\\TradeBOS_%s.txt", EXC, sectorname, symbolnameforcheck);
     filehandle=FileOpen(filename2, FILE_READ|FILE_TXT|FILE_COMMON);
 	if(filehandle!=INVALID_HANDLE){
 		//PrintFormat("File path: %s\\Files\\", TerminalInfoString(TERMINAL_DATA_PATH));
@@ -84,9 +93,8 @@ void RSfileEX2(const string& symbolname, const string& sectorname, Golder& G){
 	ResetLastError();
 	string symbolnameforcheck = symbolname ;
 	//+-----check oanda's name for matching eightcap
-	if(CheckNameForMatch(symbolname, symbolnameforcheck) ) printf("name change successfully") ;
-	else printf("not need to modify the name ") ;
-	//+-----end
+	if(CheckNameForOANDAMatch(symbolname, symbolnameforcheck) ) ;//printf("name change successfully") ;
+		//else printf("not need to modify the name ") ;
 	string filename  = StringFormat("%s"+"\\%s"+"\\Gold"+"\\Gold_%s.txt", EX2, sectorname, symbolnameforcheck);
     int filehandle=FileOpen(filename, FILE_READ|FILE_TXT|FILE_COMMON);
     string sep=" ";                // A separator as a character 
@@ -150,7 +158,7 @@ void RSfileEX2(const string& symbolname, const string& sectorname, Golder& G){
 	else Print("Operation FileOpen failed, error ",GetLastError());
     ResetLastError();
 }
-bool CheckNameForMatch(const string& symbolname, string& symbolnameforcheck){
+bool CheckNameForOANDAMatch(const string& symbolname, string& symbolnameforcheck){
 	if(symbolname == "EURGBP")      symbolnameforcheck = "EURGBP.sml" ;
 	else if(symbolname == "EURUSD") symbolnameforcheck = "EURUSD.sml" ;
 	else if(symbolname == "AUDUSD") symbolnameforcheck = "AUDUSD.sml" ;

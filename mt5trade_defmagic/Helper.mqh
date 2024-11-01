@@ -166,7 +166,7 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
 
     switch(ex){
     case OANDA:
-        Exname = "OANDA Corporation" ;
+        ss.Exname = "OANDA Corporation" ;
         if (Exname != AccountInfoString(ACCOUNT_COMPANY)) return false;
         ArrayResize(ss.Bullion,2);
         ss.Bullion[0] ="XAGUSD" ;
@@ -339,7 +339,7 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         return true ;
 
     case MetaQuotes:
-        Exname = "MetaQuotes Ltd." ;
+        ss.Exname = "MetaQuotes Ltd." ;
         if (Exname != AccountInfoString(ACCOUNT_COMPANY)) return false;
         ArrayResize(ss.Bullion, 7);
         ss.Bullion[0] = "XAUEUR";
@@ -493,7 +493,7 @@ bool SymbolSet::InitSymbol(Exchange ex, SymbolSet& ss){
         return true ;
 
     case EIGHTCAP:
-        Exname = "Eightcap Pty Ltd" ;
+        ss.Exname = "Eightcap Pty Ltd" ;
         if (Exname != AccountInfoString(ACCOUNT_COMPANY)) return false;
         ArrayResize(ss.Forex, 59);
         ss.Forex[0] = "AUDCAD";

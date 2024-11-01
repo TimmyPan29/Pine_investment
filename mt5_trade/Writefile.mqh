@@ -5,6 +5,9 @@ struct DealGolder{
 	ulong    dealorder ;
 	ulong    dealposticket;
     ulong    dealposid ;
+    double   dealopen  ;
+    double   dealtp    ;
+    double   dealsl    ;
     ulong    dealticket;
 	string   dealsymbol;
 	int      dealcode  ;
@@ -15,7 +18,7 @@ struct DealGolder{
 	double   dealvolume;
 	double   dealprofit;
 
-	DealGolder():dealmagic(0), dealorder(0), dealposticket(0), dealposid(0), dealticket(0), dealsymbol(""), dealcode(0), dealprd(0), dealitv(0), dealsbd_t(0), dealsbu_t(0), dealvolume(0), dealprofit(0){}
+	DealGolder():dealmagic(0), dealorder(0), dealposticket(0), dealposid(0), dealopen(0), dealtp(0), dealsl(0), dealticket(0), dealsymbol(""), dealcode(0), dealprd(0), dealitv(0), dealsbd_t(0), dealsbu_t(0), dealvolume(0), dealprofit(0){}
 	void DealWriteOut(const string& sectorname);
 };
 void DealGolder::DealWriteOut(const string& sectorname){
@@ -44,7 +47,7 @@ void DealGolder::DealWriteOut(const string& sectorname){
     	}
     	timesbd = TimeToString(dealsbd_t, TIME_DATE|TIME_MINUTES);
     	timesbu = TimeToString(dealsbu_t, TIME_DATE|TIME_MINUTES);
-    	line = StringFormat("Magic: %ld,OrderTicket: %d,PosTicket: %d,PosID: %d,DealTicket: %d,Symbol: %s,Code: 0x%08X,Prd: %d,Itv: %d,Sbd_t: %s,Sbu_t: %s,Volume: %.2f, Profit: %.2f", dealmagic, dealorder, dealposticket, dealposid, dealticket, dealsymbol, dealcode, dealprd, dealitv, timesbd, timesbu, dealvolume, dealprofit);
+    	line = StringFormat("Exchange: %s,Magic: %ld,OrderTicket: %d,PosTicket: %d,PosID: %d,Openprice: %.5f,TP: %.5f,SL: %.5f,DealTicket: %d,Symbol: %s,Code: 0x%08X,Prd: %d,Itv: %d,Sbd_t: %s,Sbu_t: %s,Volume: %.2f, Profit: %.2f", AccountInfoString(ACCOUNT_COMPANY), dealmagic, dealorder, dealposticket, dealposid, dealopen, dealtp, dealsl, dealticket, dealsymbol, dealcode, dealprd, dealitv, timesbd, timesbu, dealvolume, dealprofit);
     	FileWrite(file_handle, line);
     	FileClose(file_handle);
         Print("Write into DealLog.csv successfully!");
