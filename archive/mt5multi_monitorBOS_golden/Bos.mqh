@@ -3,7 +3,7 @@
 #include "Plotpack.mqh"
 #include "GETDATA.mqh"
 #include "Helper.mqh"
-#define FVGarraysize 3000
+#define FVGarraysize 4000
 struct BOS{
     double          htfint      ;//=i
     string          htfname     ;//IntegerToString(i)
@@ -72,11 +72,9 @@ struct BOS{
         regclose1_t = 0;
         regclose2_t = 0;
         regclose3_t = 0;
-        cnt1idx     = -1;
-        cnt2idx     = -1;
-        cnt3idx     = -1;
-        cntkey1     = -1;
-        cntkey2     = -1;
+        cnt1idx     = 0;
+        cnt2idx     = 0;
+        cnt3idx     = 0;
     }
 
     // 带参数的构造函数
@@ -106,11 +104,9 @@ struct BOS{
         regclose1_t = 0;
         regclose2_t = 0;
         regclose3_t = 0;
-        cnt1idx     = -1;
-        cnt2idx     = -1;
-        cnt3idx     = -1;
-        cntkey1     = -1;
-        cntkey2     = -1;
+        cnt1idx     = 0;
+        cnt2idx     = 0;
+        cnt3idx     = 0;
     }
 };
 struct FVG{
@@ -220,8 +216,8 @@ struct FVG{
             }
         }     
     }
-    void bosi2b_hlt(const matrix& Mat, matrix& Matdo, matrix& Matuo, BOS& bos, const int& i){
-        if(bos.i2bsbd>0 && bos.cnti2bd>=0){
+    void bosi2b_hlt(const matrix& Mat, matrix& Matdo, matrix& Matuo, const BOS& bos, const int& i){
+        if(bos.i2bsbd>0){
             int didx   = kbar[bos.cnti2bd]             ;
             int didxm1 = bos.cnti2bd>0? kbar[bos.cnti2bd-1] : 0        ;  
             if(namei==1){//P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT sbd_ted sbu_ted} , //Mat OHLCT
@@ -257,7 +253,7 @@ struct FVG{
             Matdo[i][12] = 0;
             Matdo[i][13] = 0;
         }
-        if(bos.i2bsbu>0 && bos.cnti2bu>=0){
+        if(bos.i2bsbu>0){
             int uidx   = kbar[bos.cnti2bu]             ;
             int uidxm1 = bos.cnti2bu>0? kbar[bos.cnti2bu-1] : 0        ;
             if(namei==1){//P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT sbd_ted sbu_ted} , //Mat OHLCT
@@ -298,11 +294,10 @@ struct FVG{
         M_sbuo[i][14] = bos.sbd_ted ;//put sbd_ted and sbu_ted into Matdo, Matuo
         M_sbuo[i][15] = bos.sbu_ted ;//put sbd_ted and sbu_ted into Matdo, Matuo
     }
-    void bos_hlt(const matrix& Mat, matrix& Matd, matrix& Matu, BOS& bos, const int& i){ //cal the high low argument with bosdata and Rawdata from Mat //P bos H L O BT HT LT OT  , //Mat OHLCT is original data
+    void bos_hlt(const matrix& Mat, matrix& Matd, matrix& Matu, const BOS& bos, const int& i){ //cal the high low argument with bosdata and Rawdata from Mat //P bos H L O BT HT LT OT  , //Mat OHLCT is original data
         Matd[i][0] = namei;
         Matu[i][0] = namei;
-        //if(bos.cntbosd==0||bos.cntbosd>3999)printf("htf= %d, bos.cntbosd= %d, bos.cntbosu= %d, Lv1sbd= %.5f Lv1sbu= %.5f", i+1, bos.cntbosd, bos.cntbosu, bos.sbd, bos.sbu);
-        if(bos.sbd>0 && bos.cntbosd>=0){
+        if(bos.sbd>0){
             int didx   = kbar[bos.cntbosd]             ;
             int didxm1 = bos.cntbosd>0? kbar[bos.cntbosd-1] : 0        ;  
             // if(namei==593){
@@ -355,7 +350,7 @@ struct FVG{
             Matd[i][2] = 0;
             Matd[i][3] = 0;
         }
-        if(bos.sbu>0 && bos.cntbosu>=0){
+        if(bos.sbu>0){
             int uidx   = kbar[bos.cntbosu]             ;
             int uidxm1 = bos.cntbosu>0? kbar[bos.cntbosu-1] : 0        ;
             if(namei==1){
@@ -488,8 +483,7 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
     int htfint=i+1                ;
     k   = starti+1                ;
     cnt = 0                       ;
-    while(k < size){
-    //last one can not be considered cuz it's not closed
+    while(k < size){//last one can not be considered cuz it's not closed
         //我在這裡應該有整整兩個月錯 我20240820 21:29才發現並改正(原本是(rd.mat_rates[4][k])==0? 1439 : ...改成下面那樣) 我的媽鴨= = 解決後全都對了 我還一直以為是barsize取的不夠多 一直調整 想不到這裡才是關鍵，今天只吃午餐(光明陽春麵)而已。 好開心，這代表我的rawdata全部都對了 可以有信心做更深入的分析與輸出。今天是胖小咘剛考完微控制器 跑去看倒吊地鐵，再3個禮拜就飛德國
         if(i<PERIODX4){
             tempmin   = helper.TurnMin(rd.mat_rates[4][k])   ;
@@ -579,13 +573,11 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                 }
                 //else //Buff_key1維持原樣
                 if(bosdata.regclose3>bosdata.sbu){                    
-                    if(bosdata.sbu != -2){
-                        bosdata.i2bsbu      = bosdata.sbu;
-                        bosdata.i2bsbu_t    = bosdata.sbu_t ;
-                        bosdata.cnti2bu     = bosdata.cntbosu ;
-                    }
                     bosdata.sbu     = -2;
                     bosdata.sbu_t   = 0 ;
+                    bosdata.i2bsbu  = -2;
+                    bosdata.i2bsbu_t= 0 ;
+                    bosdata.cnti2bu = 0 ; //cnti2bu=0代表i2bu不存在這個idx的意思
                     bosdata.cnti2bd = bosdata.cntbosd; //cnti2bd代表u破之後新sbd的之前上一個sbd的idx
                     bosdata.sbd     = bosdata.reg1key;
                     bosdata.sbd_t   = bosdata.reg1key_t;
@@ -595,20 +587,26 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.cntbosu = 0 ; 
                 }
                 if(bosdata.regclose3<bosdata.sbd){
-                    if(bosdata.sbd != -1){
-                        bosdata.i2bsbd      = bosdata.sbd;
-                        bosdata.i2bsbd_t    = bosdata.sbd_t ;
-                        bosdata.cnti2bd     = bosdata.cntbosd ;
-                    }
                     bosdata.sbd     = -1 ;
                     bosdata.sbd_t   = 0  ;
+                    bosdata.i2bsbd  = -1 ;
+                    bosdata.i2bsbd_t= 0  ;
                     bosdata.cnti2bu = bosdata.cntbosu;
+                    bosdata.cnti2bd = 0  ;
                     bosdata.sbu     = bosdata.reg1key;
                     bosdata.sbu_t   = bosdata.reg1key_t;
                     bosdata.sbu_ted = bosdata.regclose3_t; 
                     bosdata.sbd_ted = 0 ;
                     bosdata.cntbosd = 0 ;
                     bosdata.cntbosu = bosdata.cntkey1;
+                }
+                if(bosdata.sbu>0 && bosdata.sbd>0){
+                    bosdata.i2bsbu  = bosdata.sbu  ;
+                    bosdata.i2bsbu_t= bosdata.sbu_t;
+                    bosdata.cnti2bu = bosdata.cntbosu;
+                    bosdata.i2bsbd  = bosdata.sbd  ;
+                    bosdata.i2bsbd_t= bosdata.sbd_t;
+                    bosdata.cnti2bd = bosdata.cntbosd;
                 }
                 bosdata.state = 1;
             }
@@ -624,24 +622,23 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg1key_t   = bosdata.reg2key_t;
                     bosdata.cntbosu     = bosdata.cntkey2;
                     bosdata.cntkey1     = bosdata.cntkey2;
-                    
+                    bosdata.i2bsbu      = bosdata.sbu  ;
+                    bosdata.i2bsbu_t    = bosdata.sbu_t;
+                    bosdata.cnti2bu     = bosdata.cntbosu;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
-                    if(bosdata.sbd != -1){
-                        bosdata.i2bsbd      = bosdata.sbd;
-                        bosdata.i2bsbd_t    = bosdata.sbd_t ;
-                        bosdata.cnti2bd     = bosdata.cntbosd ;
-                    }
                     bosdata.sbd         = -1;
                     bosdata.sbd_t       = 0 ;
                     bosdata.sbd_ted     = 0 ;
+                    bosdata.i2bsbd      = -1;
+                    bosdata.i2bsbd_t    = 0 ;
+                    bosdata.cnti2bd     = 0 ;
                     bosdata.cntbosd     = 0 ;
                 }
                 bosdata.state = 1;
             }
-            if(bosdata.state == 4){//build ground
+            if(bosdata.state == 4){
                 if(bosdata.slope1 != bosdata.slope2){
-
                     bosdata.reg2key     = bosdata.regclose2;
                     bosdata.reg2key_t   = bosdata.regclose2_t;
                     bosdata.cntkey2     = bosdata.cnt2idx ;
@@ -652,17 +649,17 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg1key_t   = bosdata.reg2key_t;
                     bosdata.cntbosd     = bosdata.cntkey2;
                     bosdata.cntkey1     = bosdata.cntkey2;
-                    
+                    bosdata.i2bsbd      = bosdata.sbd  ;
+                    bosdata.i2bsbd_t    = bosdata.sbd_t;
+                    bosdata.cnti2bd     = bosdata.cntbosd;
                 }
                 if(bosdata.regclose3>bosdata.sbu){
-                    if(bosdata.sbu != -2){
-                        bosdata.i2bsbu      = bosdata.sbu;
-                        bosdata.i2bsbu_t    = bosdata.sbu_t ;
-                        bosdata.cnti2bu     = bosdata.cntbosu ;
-                    }
                     bosdata.sbu         = -2;
                     bosdata.sbu_t       = 0 ;
                     bosdata.sbu_ted     = 0 ;
+                    bosdata.i2bsbu      = -2;
+                    bosdata.i2bsbu_t    = 0 ;
+                    bosdata.cnti2bu     = 0 ;
                     bosdata.cntbosu     = 0 ;
                 }
                 bosdata.state = 1;
@@ -676,7 +673,7 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
         }
         ++k; 
     }//while end
-    //if(cnt>3999 || k>1000000)printf("htf= %.0f cnt= %d\tk= %d", bosdata.htfint, cnt,k); //20241105 找到會讓monitor跳掉的bug 原因是cntkey1 cntkey2沒有初始化成0 一開始是NULL會讓他的值很奇怪
+    //printf("cnt= %d\tk= %d", cnt,k);
 }//func end
 
 ////P bos H L O BT HT LT OT bosi2b i2bH i2bL i2bO bosi2bT

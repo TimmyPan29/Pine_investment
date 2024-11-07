@@ -41,12 +41,12 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname, matrix&
         FileWrite(filehandle2, AccountInfoString(ACCOUNT_COMPANY)+", ", AccountInfoString(ACCOUNT_CURRENCY)+", ", AccountInfoString(ACCOUNT_NAME)+", ", AccountInfoString(ACCOUNT_SERVER)+", ", symbolname);
         for(int i=0; i<PERIOD; ++i){
             if(Tri[i].wide2itv0X==-1 && Tri[i].wide2itvXF==-1) continue ;
-            double  temp1 =-1;
-            double  temp2 = 999999;
-            int  idxd     =-1;
-            int  idxu     =-1;
-            string line2  = "";
-            string line   = "";
+            int  temp1=-1;
+            int  temp2=999999;
+            int  idxd  =-1;
+            int  idxu  =-1;
+            string line2 = "";
+            string line  = "";
             if (((i+1)/10)<1) line2= "         ";
             else if (((i+1)/10)<10) line2= "          ";
             else if (((i+1)/10)<100) line2= "           ";
@@ -72,23 +72,23 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname, matrix&
                     else line2 += StringFormat("Itv %d       ", j+1);
                     anycode   = true;
                     anycodereg= true;
-                    if((Tri[i].comparecode0F[j]&__LEVEL1SBUMASK)==__LEVEL1SBUMASK){//0xXXXXFXXX buy ticket
-                        if(Tri[i].localminu[j] > temp1){ //find maximun distance between localminu and Lv1sbd in localminu group
-                            //if(Tri[i].localminu[j]==1) printf("in sevenline.write localminu==1 wrong!");
+                    if((Tri[i].comparecode0F[j]&__LEVEL1SBUMASK)==__LEVEL1SBUMASK){
+                        if(Tri[i].localminu[j] > temp1){ //find maximun localminu in localminu group
                             temp1 = Tri[i].localminu[j] ;
                             idxu  = j ;
                         }
                         else{
+                            temp1 = -1 ;
                             idxu  = idxu;
                         }
                     }
-                    else if((Tri[i].comparecode0F[j]&__LEVEL1SBDMASK)==0){//0xXXX0XXXX sell ticket
-                        if(Tri[i].localmaxd[j] < temp2){ //find maximun distance between minimun localmaxd and Lv1sbu in localmaxd group
-                            //if(Tri[i].localmaxd[j]==0) printf("in sevenline.write localmaxd==0 wrong!");
+                    if((Tri[i].comparecode0F[j]&__LEVEL1SBDMASK)==0){
+                        if(Tri[i].localmaxd[j] < temp2){ //find minimun localmaxd in localminu group
                             temp2 = Tri[i].localmaxd[j] ;
                             idxd  = j ;
                         }
                         else{
+                            temp2 = 999999 ;
                             idxd  = idxd;
                         }
                     }
@@ -96,33 +96,32 @@ void TriWrite(string symbolname, const Triset& Tri[], string sectorname, matrix&
                     line  += StringFormat("0x%08X%01X ", Tri[i].comparecode0F[j], Tri[i].fvgtype0F[j]);
                 }
             }//j for end
-            //printf("Tri[%d]wide2itv0X= %d, Tri[%d]wide2itvXF= %d, idxu= %d temp1= %.5f, idxd= %d temp2= %.5f", i, Tri[i].wide2itv0X, i, Tri[i].wide2itvXF, idxu, temp1, idxd, temp2);
             if(anycode){//商品名稱(第一列) code 基本週期 itv 空單還是多單  FVG型態 上 下界價錢 在區間內的最低的紅色FVG價格 在區間內的最高的綠色FVG價格  [(突破sbd時最初sbu的價錢(空單停損用) 時間點)]or[(突破sbu時最初sbd的價錢(多單停損用) 時間點)]
                 line2 += "widespace";
                 line += StringFormat("%d %d", idxd+1,idxu+1);
                 FileWrite(filehandle2, line2);
                 FileWrite(filehandle2, line); 
                 anycode = false ;
-                if(idxu+1==0){ // widespace idxd=X idxu=-1 sell ticket
+                if(idxu+1==0){
                     mg[i][0]  = Tri[i].comparecode0F[idxd] ;
                     mg[i][1]  = i+1 ;
                     mg[i][2]  = idxd+1 ;
                     mg[i][3]  = 0 ;
                     mg[i][4]  = Tri[i].fvgtype0F[idxd] ;
                     mg[i][5]  = Bosarr[i].sbu ;
-                    mg[i][6]  = temp2 ;
+                    mg[i][6]  = Tri[i].localmaxd[idxd] ;
                     mg[i][7]  = Tri[i].code0FrFvgExtreme[idxd] ;
                     mg[i][8]  = Tri[i].code0FgFvgExtreme[idxd] ;
                     mg[i][9]  = Bosarr[i].i2bsbu  ;
                     mg[i][10] = Bosarr[i].i2bsbu_t;
                 }
-                else if(idxd+1==0){// widespace idxd=-1 idxu=X buy ticket 
+                else if(idxd+1==0){
                     mg[i][0]  = Tri[i].comparecode0F[idxu] ;
                     mg[i][1]  = i+1 ;
                     mg[i][2]  = idxu+1 ;
                     mg[i][3]  = 0xF ;
                     mg[i][4]  = Tri[i].fvgtype0F[idxu] ;
-                    mg[i][5]  = temp1 ;
+                    mg[i][5]  = Tri[i].localminu[idxu] ;
                     mg[i][6]  = Bosarr[i].sbd ;
                     mg[i][7]  = Tri[i].code0FrFvgExtreme[idxu];
                     mg[i][8]  = Tri[i].code0FgFvgExtreme[idxu];

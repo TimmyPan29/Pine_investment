@@ -719,8 +719,8 @@ struct Triset{
     bool    rfvgfg[]             ; //signal for lead line touch red fvg 
     int     wide2itv0X           ; //for finding global itv
     int     wide2itvXF           ; //for finding global itv
-    double  localmaxd[]          ;
-    double  localminu[]          ;
+    int     localmaxd[]          ;
+    int     localminu[]          ;
     int     fvgtype0F[]          ;
     Triset():wide2itv0X(-1),wide2itvXF(-1){}
     void   TriInit();
@@ -754,13 +754,9 @@ double Triset::TriItvCompare0X (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const
         temp1       = MathMin(temp1, bos4.sbu);
         temp1       = temp1>0? temp1 : bos4.sbu;
         temp1       = (temp1>0 && temp1<bos1.sbu)? temp1 : bos1.sbu;
-        if(temp1<0) printf("wrong delta state");
-        if(delta0X<0){
-            delta0X = 0 ; //can not be -1
-            printf("wrong delta0X state");
-        }
+        if(delta0X<0) delta0X = 0 ; //can not be -1
         localmaxd[j] = delta0X;
-        localminu[j] = temp1  ; //不是每個j都有localmax和min 必須先符合7linecode才行
+        localminu[j] = temp1  ;
         TriFVGcheck0F(fvg, fvg2, fvg3, fvg4, bos1.sbu, delta0X, j); //fix bos1.sbu from minsbu
         code0FExtreme[j] = delta0X ;
         //delta0X = temp1 - temp2 ;//其實不用差來算也可以 把0當成基準來比較就好
@@ -795,7 +791,7 @@ double Triset::TriItvCompareXF (FVG& fvg, FVG& fvg2, FVG& fvg3, FVG& fvg4, const
         localminu[j] = deltaXF  ;
         //if((fvg.namei==159) && (j==158)) printf("fvg%.0f j=%.0f,SBU= %.5f, SBD=%.5f", fvg.namei, j, deltaXF, bos1.sbd);
         TriFVGcheck0F(fvg, fvg2, fvg3, fvg4, deltaXF, bos1.sbd, j); //fix bos1.sbd from maxsbd
-        code0FExtreme[j] = deltaXF ; //上界deltaXF //下界是Lv1sbd
+        code0FExtreme[j] = deltaXF ;
         if(wide2itvXF==-1){
             wide2itvXF = j ;
             deltatemp  = deltaXF ; // I need to get min or max value, so that can deal with 0Ffile touch high level bos problem 
@@ -1063,7 +1059,6 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
     k   = starti+1                ;
     cnt = 0                       ;
     while(k < size){//last one can not be considered cuz it's not closed
-        if(k>999999) printf("k= %d", k);
         if(i<PERIODX4){
             tempmin   = helper.TurnMin(rd.mat_rates[4][k])   ;
             tempminm1 = helper.TurnMin(rd.mat_rates[4][k-1]) ;
@@ -1144,27 +1139,27 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.reg1key_t   = bosdata.regclose2_t ;
                 }
                 //else //Buff_key1維持原樣
+                if(bosdata.sbu>0 && bosdata.sbd>0){
+                    bosdata.i2bsbu  = bosdata.sbu  ;
+                    bosdata.i2bsbu_t= bosdata.sbu_t;
+                    bosdata.i2bsbd  = bosdata.sbd  ;
+                    bosdata.i2bsbd_t= bosdata.sbd_t;
+                }
                 if(bosdata.regclose3>bosdata.sbu){
-                    if(bosdata.sbu != -2){
-                        bosdata.i2bsbu      = bosdata.sbu;
-                        bosdata.i2bsbu_t    = bosdata.sbu_t ;
-                        bosdata.sbubrk_t= bosdata.regclose3_t;
-                        bosdata.sbdbrk_t= 0;  
-                    }                     
                     bosdata.sbu     = -2;
                     bosdata.sbu_t   = 0;
+                    bosdata.i2bsbu  = -2;
+                    bosdata.i2bsbu_t= 0 ;
+                    bosdata.sbubrk_t= bosdata.regclose3_t;  
                     bosdata.sbd     = bosdata.reg1key;
                     bosdata.sbd_t   = bosdata.reg1key_t;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
-                    if(bosdata.sbd != -1){
-                        bosdata.i2bsbd      = bosdata.sbd;
-                        bosdata.i2bsbd_t    = bosdata.sbd_t ;
-                        bosdata.sbubrk_t= 0;
-                        bosdata.sbdbrk_t= bosdata.regclose3_t;  
-                    }                                 
                     bosdata.sbd     = -1 ;
                     bosdata.sbd_t   = 0 ;
+                    bosdata.i2bsbd  = -1 ;
+                    bosdata.i2bsbd_t= 0  ;
+                    bosdata.sbdbrk_t= bosdata.regclose3_t;  
                     bosdata.sbu     = bosdata.reg1key;
                     bosdata.sbu_t   = bosdata.reg1key_t;
                 }
@@ -1180,21 +1175,22 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.sbdbrk_t    = 0;
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
+                    bosdata.i2bsbu      = bosdata.sbu  ;
+                    bosdata.i2bsbu_t    = bosdata.sbu_t;
+                    bosdata.i2bsbd      = bosdata.sbd  ;
+                    bosdata.i2bsbd_t    = bosdata.sbd_t;
                 }
                 if(bosdata.regclose3<bosdata.sbd){
-                    if(bosdata.sbd != -1){
-                        bosdata.i2bsbd      = bosdata.sbd;
-                        bosdata.i2bsbd_t    = bosdata.sbd_t ;
-                        bosdata.sbubrk_t    = 0;  
-                        bosdata.sbdbrk_t    = bosdata.regclose3_t;  
-                    }                     
                     bosdata.sbd         = -1;
                     bosdata.sbd_t       = 0 ;
+                    bosdata.i2bsbd      = -1;
+                    bosdata.i2bsbd_t    = 0 ;
+                    bosdata.sbdbrk_t    = bosdata.regclose3_t;  
                 }
                 bosdata.state = 1;
             }
             if(bosdata.state == 4){
-                if(bosdata.slope1 != bosdata.slope2){//build ground
+                if(bosdata.slope1 != bosdata.slope2){
                     bosdata.reg2key     = bosdata.regclose2;
                     bosdata.reg2key_t   = bosdata.regclose2_t;
                     bosdata.sbd         = bosdata.reg2key;
@@ -1203,16 +1199,17 @@ void BOSJudge(BOS& bosdata, const int size, const RawCandles& rd, const int star
                     bosdata.sbdbrk_t    = 0;
                     bosdata.reg1key     = bosdata.reg2key;
                     bosdata.reg1key_t   = bosdata.reg2key_t;
+                    bosdata.i2bsbu      = bosdata.sbu  ;
+                    bosdata.i2bsbu_t    = bosdata.sbu_t;
+                    bosdata.i2bsbd      = bosdata.sbd  ;
+                    bosdata.i2bsbd_t    = bosdata.sbd_t;
                 }
                 if(bosdata.regclose3>bosdata.sbu){
-                    if(bosdata.sbu != -2){
-                        bosdata.i2bsbu      = bosdata.sbu;
-                        bosdata.i2bsbu_t    = bosdata.sbu_t ;
-                        bosdata.sbubrk_t    = bosdata.regclose3_t;
-                        bosdata.sbdbrk_t    = 0;
-                    }                     
                     bosdata.sbu         = -2;
                     bosdata.sbu_t       = 0 ;
+                    bosdata.i2bsbu      = -2;
+                    bosdata.i2bsbu_t    = 0 ;
+                    bosdata.sbubrk_t    = bosdata.regclose3_t;  
                 }
                 bosdata.state = 1;
             }
