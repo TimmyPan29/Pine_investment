@@ -19,11 +19,12 @@ struct DealGolder{
 	int      dealInPorS;
 	datetime dealsbd_t ;
 	datetime dealsbu_t ;
+	datetime ordertime ;
 	datetime dealposopen_t;
 	double   dealvolume;
 	double   dealprofit;
 
-	DealGolder():dealmagic(0), dealorder(0), dealposticket(0), dealposid(0), dealopen(0), dealtp(0), dealsl(0),dealtpprd(0), dealnewtpt(0), dealticket(0), dealsymbol(""), dealdirection(-1), dealcode(0), dealprd(0), dealitv(0), dealInPorS(0), dealsbd_t(0), dealsbu_t(0), dealposopen_t(0), dealvolume(0), dealprofit(0){}
+	DealGolder():dealmagic(0), dealorder(0), dealposticket(0), dealposid(0), dealopen(0), dealtp(0), dealsl(0),dealtpprd(0), dealnewtpt(0), dealticket(0), dealsymbol(""), dealdirection(-1), dealcode(0), dealprd(0), dealitv(0), dealInPorS(0), dealsbd_t(0), dealsbu_t(0), ordertime(0), dealposopen_t(0), dealvolume(0), dealprofit(0){}
 	void DealWriteOut(const string& sectorname);
 };
 void DealGolder::DealWriteOut(const string& sectorname){
@@ -34,6 +35,7 @@ void DealGolder::DealWriteOut(const string& sectorname){
 	string timesbu;
 	string posopentime_s;
 	string newtpt_s;
+	string ordertime_s;
 	string line = "" ;
 	file_handle = FileOpen(filename, FILE_READ | FILE_COMMON  );
 	
@@ -56,7 +58,8 @@ void DealGolder::DealWriteOut(const string& sectorname){
     	timesbu 		= TimeToString(dealsbu_t, TIME_DATE|TIME_MINUTES);
     	posopentime_s	= TimeToString(dealposopen_t, TIME_DATE|TIME_MINUTES);
     	newtpt_s        = TimeToString(dealnewtpt, TIME_DATE|TIME_MINUTES);
-    	line = StringFormat("Exchange: %s,Magic: %ld,OrderTicket: %d,PosTicket: %d,PosID: %d,Openprice: %.5f,TP: %.5f,SL: %.5f,DealTicket: %d,Symbol: %s,Direction: %d,Code: 0x%08X,Prd: %d,Itv: %d,InPorSprd: %d,Lv1Sbd_t: %s,Lv1Sbu_t: %s,PosOpentime: %s,TPprd: %d,NewTP_BuildTime: %s,Volume: %.2f, Profit: %.2f", AccountInfoString(ACCOUNT_COMPANY), dealmagic, dealorder, dealposticket, dealposid, dealopen, dealtp, dealsl, dealticket, dealsymbol, dealdirection, dealcode, dealprd, dealitv, dealInPorS, timesbd, timesbu, posopentime_s, dealtpprd, newtpt_s, dealvolume, dealprofit);
+    	ordertime_s     = TimeToString(ordertime, TIME_DATE|TIME_MINUTES);
+    	line = StringFormat("Exchange: %s,Magic: %ld,OrderTicket: %d,PosTicket: %d,PosID: %d,Openprice: %.5f,TP: %.5f,SL: %.5f,DealTicket: %d,Symbol: %s,Direction: %d,Code: 0x%08X,Prd: %d,Itv: %d,InPorSprd: %d,Lv1Sbd_t: %s,Lv1Sbu_t: %s,Ordertime: %s,PosOpentime: %s,TPprd: %d,NewTP_BuildTime: %s,Volume: %.2f, Profit: %.2f", AccountInfoString(ACCOUNT_COMPANY), dealmagic, dealorder, dealposticket, dealposid, dealopen, dealtp, dealsl, dealticket, dealsymbol, dealdirection, dealcode, dealprd, dealitv, dealInPorS, timesbd, timesbu, ordertime_s, posopentime_s, dealtpprd, newtpt_s, dealvolume, dealprofit);
     	FileWrite(file_handle, line);
     	FileClose(file_handle);
         Print("Write into DealLog.csv successfully!");
